@@ -1,0 +1,45 @@
+import { ApiErrorCode } from '@shared/types/ApiResult';
+import type { TokenUserData } from '@shared/types/Jwt';
+import type { NextFunction, Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
+import type { AuthorizedRequest } from 'src/types/AuthorizedRequest';
+import { ApiError } from './apiHelper';
+
+const { JsonWebTokenError } = jwt;
+
+export const generateAccessToken = (tokenUserData: TokenUserData) => {
+    const accessSecret = process.env.JWT_ACCESS_SECRET;
+    if (!accessSecret) {
+        throw new Error('JWT_ACCESS_SECRET environment variable is not set');
+    }
+    return jwt.sign(tokenUserData, accessSecret, { expiresIn: '15m' });
+}
+
+export const createRefreshTokenId = () => {
+    return crypto.randomUUID();
+}
+
+export const verifyToken = (req: Request, res: Response, next: NextFunction) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) throw new ApiError('Unauthorized request', 401, ApiErrorCode.AUTH_HEADER_MISSING);
+
+    const token = authHeader.split(' ')[1];
+    if (!token) throw new ApiError('Invalid authorization', 401, ApiErrorCode.AUTH_HEADER_INVALID);
+
+    try {
+        const accessSecret = process.env.JWT_ACCESS_SECRET;
+        if (!accessSecret) throw new Error('JWT_ACCESS_SECRET environment variable is not set');
+        const decoded = jwt.verify(token, accessSecret) as TokenUserData;
+        const authReq = (req as AuthorizedRequest);
+        authReq.user = decoded;
+        if (!authReq.user.id) throw new JsonWebTokenError('Missing user ID in token user data');
+        next();
+    } catch (err) {
+        const e = err as Error;
+        if (e.name == 'TokenExpiredError') {
+            throw new ApiError('Expired token', 401, ApiErrorCode.TOKEN_EXPIRED);
+        } else if (e.name == 'JsonWebTokenError' || e.name == 'NotBeforeError') {
+            throw new ApiError(e.message, 401, ApiErrorCode.TOKEN_INVALID);
+        }
+    }
+}

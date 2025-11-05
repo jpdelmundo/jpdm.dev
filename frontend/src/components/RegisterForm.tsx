@@ -1,0 +1,112 @@
+import { getErrorMessage } from '@/utils/helper';
+import CloseIcon from '@mui/icons-material/Close';
+import { Box, Button, CircularProgress, Collapse, Stack, Typography } from '@mui/material';
+import type { UserId } from '@shared/models/generated/User';
+import type { AccessToken } from '@shared/types/AccessToken';
+import { ApiErrorCode, type ApiResult } from '@shared/types/ApiResult';
+import { validatePassword as _validatePassword } from '@shared/utils/validate';
+import { useEffect, useState } from 'react';
+import { useForm, type SubmitHandler } from 'react-hook-form';
+import { TransitionGroup } from 'react-transition-group';
+import PasswordField from './PasswordField';
+import TextField from './TextField';
+
+export type FormSubmitResult = { access_token: AccessToken, user_id: UserId }
+
+export type FormData = {
+    username: string;
+    password: string;
+    confirm_password: string;
+    email?: string;
+};
+
+export function RegisterForm({ onSubmit, onRegisterSuccess }: {
+    onSubmit: (formData: FormData) => Promise<ApiResult<FormSubmitResult>>,
+    onRegisterSuccess: (result: ApiResult<FormSubmitResult>) => void
+}) {
+    const { register, handleSubmit, setError, formState: { errors }, watch } = useForm<FormData>();
+    const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+
+    const password = watch('password', '');
+
+    useEffect(() => {
+        console.log('RegisterForm useEffect');
+        if (!password) setPasswordErrors([]);
+    }, [password]);
+
+    const validatePassword = (value: string) => {
+        const errors = _validatePassword(value);
+        setPasswordErrors(errors);
+        return errors.length == 0 || 'Password does not meet requirements';
+    }
+
+    const submitHandler: SubmitHandler<FormData> = async (data) => {
+        setErrorMessage('');
+        setIsLoading(true);
+        const result = await onSubmit(data);
+        if (result.ok) {
+            onRegisterSuccess(result);
+        } else {
+            if (result.error?.code == ApiErrorCode.USERNAME_ALREADY_USED) {
+                setError('username', { type: 'manual', message: 'Please choose a different username' });
+            }
+            setErrorMessage(getErrorMessage(result));
+        }
+        setIsLoading(false);
+    }
+
+    console.log({ passwordErrors });
+
+    return (
+        <Box>
+            <Typography variant="h5" fontWeight="bold" sx={{ mb: 2 }}>Create an account</Typography>
+            <form noValidate onSubmit={handleSubmit(submitHandler)}>
+                <Stack gap={2}>
+                    <TextField label="Username"
+                        {...register('username', {
+                            required: 'Username is required',
+                            minLength: { value: 2, message: 'Username length too short' },
+                            maxLength: { value: 100, message: 'Username length too long' }
+                        })}
+                        placeholder=""
+                        error={!!errors.username}
+                        helperText={errors.username?.message}
+                        fullWidth />
+                    <PasswordField label="Password"
+                        {...register('password', {
+                            required: 'Password is required',
+                            validate: validatePassword
+                        })}
+                        placeholder=""
+                        error={!!errors.password}
+                        helperText={errors.password?.message}
+                        fullWidth />
+                    <TransitionGroup style={{ display: passwordErrors.length > 0 ? 'block' : 'none' }}>
+                        {passwordErrors.map(error => (
+                            <Collapse key={error} timeout={300}>
+                                <Stack direction="row" color="error.main" alignItems="center" margin={'0 10px'}>
+                                    <CloseIcon fontSize="small" /> <span>{error}</span>
+                                </Stack>
+                            </Collapse>
+                        ))}
+                    </TransitionGroup>
+                    <PasswordField label="Confirm Password"
+                        {...register('confirm_password', {
+                            required: 'Please confirm password',
+                            validate: (value: string) => password == value || 'Passwords don\'t match'
+                        })}
+                        error={!!errors.confirm_password}
+                        helperText={errors.confirm_password?.message}
+                        fullWidth />
+                    <Button type="submit" variant="contained" disabled={isLoading}>
+                        {isLoading ? <Stack direction="row" alignItems="center" gap={1}><CircularProgress /> <span>Processing...</span></Stack> : 'Submit'}
+                    </Button>
+                    <Typography color="error" textAlign="center" minHeight="21px">{errorMessage}</Typography>
+                </Stack>
+            </form>
+        </Box>
+
+    );
+}

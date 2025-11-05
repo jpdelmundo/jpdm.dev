@@ -1,0 +1,89 @@
+import type RefreshToken from '@shared/models/generated/RefreshToken';
+import type { RefreshTokenInitializer, RefreshTokenMutator } from '@shared/models/generated/RefreshToken';
+import { BaseRepository } from './BaseRepository';
+
+interface FindParams {
+    id?: string;
+    deviceId?: string;
+    refreshToken?: string;
+    userId?: string;
+}
+
+export class RefreshTokenRepository extends BaseRepository<RefreshToken> {
+    async find({ id, deviceId, refreshToken, userId }: FindParams): Promise<RefreshToken[]> {
+        const filters: string[] = [];
+        const values: unknown[] = [];
+
+        id && filters.push(`id = $${filters.length + 1}`) && values.push(id);
+        deviceId && filters.push(`device_id = $${filters.length + 1}`) && values.push(deviceId);
+        userId && filters.push(`user_id = $${filters.length + 1}`) && values.push(userId);
+        // email && filters.push(`email = $${filters.length + 1}`) && values.push(email);
+
+        if (filters.length == 0) {
+            throw new Error('At least one filter must be provided');
+        }
+
+        const result = await this.query<RefreshToken>(`select *
+                                                       from refresh_tokens
+                                                       where ${filters.join(' and ')}`, values);
+        return result.rows;
+    }
+
+    async findById(id: string): Promise<RefreshToken | null> {
+        return (await this.find({ id }))[0] || null;
+    }
+
+    async create(item: RefreshTokenInitializer): Promise<RefreshToken> {
+        const entries = Object.entries(item).filter(([key, value]) => value !== undefined);
+        const columns = entries.map(([key]) => key).join(', ');
+        const placeholders = entries.map((_, i) => `$${i + 1}`).join(', ');
+        const values = entries.map(([_, value]) => value);
+
+        const sql = `insert into refresh_tokens (${columns})
+                     values (${placeholders})
+                     returning *`;
+        const result = await this.query<RefreshToken>(sql, values);
+
+        if (!result.rows[0]) {
+            throw new Error(`Record creation failed`);
+        }
+
+        return result.rows[0];
+    }
+
+    async update(id: string, item: RefreshTokenMutator): Promise<RefreshToken[]> {
+        const entries = Object.entries(item).filter(([key, value]) => value !== undefined && key != 'id');
+        const set: string[] = [];
+        const values: unknown[] = [];
+
+        entries.forEach(([key, value], index) => {
+            set.push(`${key} = $${values.length + 1}`);
+            values.push(value);
+        });
+
+        if (set.length == 0) {
+            throw new Error('Update set missing');
+        }
+        set.push(`updated_at = now()`);
+
+        const where: string[] = [];
+        id.trim() && where.push(`id = $${values.length + 1}`) && values.push(id.trim());
+
+        if (where.length == 0) {
+            throw new Error('Update condition missing');
+        }
+
+        const sql = `update refresh_tokens
+                     set ${set.join(', ')}
+                     where ${where.join(' and ')}
+                     returning *`;
+
+        const result = await this.query<RefreshToken>(sql, values);
+
+        return result.rows;
+    }
+
+    delete(item: RefreshToken): Promise<boolean> {
+        throw new Error("Method not implemented.")
+    }
+}
