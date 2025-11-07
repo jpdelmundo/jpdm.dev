@@ -3,7 +3,8 @@ import type { DeviceFingerprint } from '@shared/types/DeviceFingerprint';
 import { jsonBase64Decode } from '@shared/utils/encoding';
 import type { Request, Response } from 'express';
 import { UnexpectedError } from 'src/errors/UnexpectedError';
-import { createRefreshTokenCookie } from '../services/authService';
+import type { AuthorizedRequest } from 'src/types/AuthorizedRequest';
+import { clearRefreshTokenCookie, createRefreshTokenCookie } from '../services/authService';
 import * as userService from '../services/userService';
 import { fail, ok } from '../utils/apiHelper';
 import { generateAccessToken } from '../utils/auth';
@@ -34,11 +35,26 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
     }
 }
 
+export const logout = async (req: Request, res: Response): Promise<Response> => {
+    const authReq = req as AuthorizedRequest;
+    const { fingerprint } = req.body;
+    if (fingerprint) {
+        const fingerprintObj = jsonBase64Decode(fingerprint) as DeviceFingerprint;
+        const deviceId = fingerprintObj.device_id;
+        userService.logoutUser(authReq.user.id, deviceId);
+    }
+
+    clearRefreshTokenCookie(req, res);
+
+    return ok(res);
+}
+
 export const refreshToken = async (req: Request, res: Response): Promise<Response> => {
-    //console.log({ 'req.body': req.body, 'req.cookies': req.cookies, req });
-    //console.log('Requested refreshToken');
+    console.log({ 'req.body': req.body, 'req.cookies': req.cookies, req });
+    console.log('Requested refreshToken');
     const refreshTokenId = req.cookies?.refresh_token_id;
-    if (!refreshTokenId) throw new Error('Refresh token id missing');
+    //if (!refreshTokenId) throw new Error('Refresh token id missing');
+    if (!refreshTokenId) return fail(res, 'Missing refresh token id', 400);
 
     console.log({ refreshTokenId });
     //get use

@@ -182,3 +182,12 @@ export const confirmEmailCode = async (userId: UserId, code: string) => {
 
     return true;
 }
+
+export const logoutUser = async (userId: UserId, deviceId: string) => {
+    if (!deviceId) return
+    const repo = new RefreshTokenRepository();
+    const refreshTokens = await repo.find({ deviceId, userId });
+    refreshTokens.forEach(v => {
+        repo.delete(v.id);
+    });
+}

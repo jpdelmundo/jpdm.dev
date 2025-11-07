@@ -112,6 +112,15 @@ export const theme = createTheme({
                     color: '#ffffff'
                 }
             }
+        },
+        MuiPaper: {
+            styleOverrides: {
+                root: {
+                    '&.post-form': {
+                        color: 'red'
+                    }
+                }
+            }
         }
     }
 });

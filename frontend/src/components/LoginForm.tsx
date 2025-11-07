@@ -1,11 +1,11 @@
 import { useFormValidation, type ValidationRuleFunction } from '@/hooks/useFormValidation';
 import { fieldErrorProps, getErrorMessage } from '@/utils/helper';
 import { Box, Button, Checkbox, FormControlLabel, Typography } from '@mui/material';
-import TextField from '@mui/material/TextField';
 import type { AccessToken } from '@shared/types/AccessToken';
 import type { ApiResult } from '@shared/types/ApiResult';
 import { useRef, useState, type ChangeEvent, type FocusEvent, type FormEvent } from "react";
 import PasswordField from './PasswordField';
+import TextField from './TextField';
 
 export type FormData = { username: string, password: string };
 
@@ -76,10 +76,21 @@ export function LoginForm({ onSubmit, onLoginSuccess }: {
                     )}
                 </Box>
                 <div>
-                    <TextField name="username" label="Username" onChange={handleChange} onBlur={handleBlur} {...fieldErrorProps(errors, 'username')} fullWidth />
+                    <TextField name="username"
+                        label="Username"
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        fullWidth
+                        {...fieldErrorProps(errors, 'username')}
+                        autoFocus />
                 </div>
                 <div>
-                    <PasswordField name="password" label="Password" onChange={handleChange} onBlur={handleBlur} {...fieldErrorProps(errors, 'password')} fullWidth />
+                    <PasswordField name="password"
+                        label="Password"
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        fullWidth
+                        {...fieldErrorProps(errors, 'password')} />
                 </div>
                 <div>
                     <FormControlLabel label="Remember me on this device" control={<Checkbox name="remember" onChange={handleChange} />} />

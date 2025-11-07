@@ -34,6 +34,7 @@ export async function apiRequest<T>(input: RequestInfo | URL, init?: RequestInit
     try {
         const token = useAuthStore.getState().token;
         const setToken = useAuthStore.getState().setToken;
+        console.log('apiRequest', { token });
         const res = await fetch(input, {
             ...init,
             headers: {
@@ -92,7 +93,7 @@ export async function apiGet<T>(url: string, params?: ApiGetParams) {
 
     let requestUrl = `${baseUrl}${url}`;
     requestUrl = getParams ? `${requestUrl}?${getParams.toString()}` : requestUrl;
-    const init = { method: 'get' };
+    const init = { method: 'get', credentials: 'include' as RequestCredentials };
 
     return apiRequest<T>(requestUrl, init);
 }

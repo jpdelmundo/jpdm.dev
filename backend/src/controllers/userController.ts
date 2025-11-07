@@ -10,8 +10,9 @@ import * as userService from '../services/userService';
 import { fail, ok } from '../utils/apiHelper';
 import { generateAccessToken } from '../utils/auth';
 
-export const profile = async (req: AuthorizedRequest, res: Response): Promise<Response> => {
-    const profile = await userService.getProfile(req.user.id);
+export const profile = async (req: Request, res: Response): Promise<Response> => {
+    const authReq = req as AuthorizedRequest;
+    const profile = await userService.getProfile(authReq.user.id);
     return ok(res, profile);
 }
 
@@ -52,29 +53,31 @@ export const create = async (req: Request, res: Response): Promise<Response> => 
     return ok(res, { access_token, user_id: newUser.id });
 }
 
-export const emailCode = async (req: AuthorizedRequest, res: Response): Promise<Response> => {
+export const emailCode = async (req: Request, res: Response): Promise<Response> => {
+    const authReq = req as AuthorizedRequest;
     const { email } = req.body;
     //check if email is used
     if (await userService.isEmailAlreadyUsed(email)) return fail(res, 'The email address is already used in another account.', 409, ApiErrorCode.EMAIL_ALREADY_USED);
     //not existing, create code, send email
 
-    const checkAllowed = await userService.isAllowedToEmailConfirmCode(req.user.id);
+    const checkAllowed = await userService.isAllowedToEmailConfirmCode(authReq.user.id);
     if (!checkAllowed.allowed) {
         if (checkAllowed.reason == 'max_sent_limit') return fail(res, 'Request limit reached. Please try again after 1 hour.', 429);
         if (checkAllowed.reason == 'cooldown') return fail(res, 'Still on cooldown...', 425, null, { cooldown: checkAllowed.cooldown });
         return fail(res, 'Something went wrong');
     }
 
-    const result = await userService.sendEmailConfirmCode(req.user.id, email);
-    if (!result || result.rejected.length > 0 || !result.response) throw Error(`Problem generating/sending email confirm code for user : ${req.user!.id}`);
+    const result = await userService.sendEmailConfirmCode(authReq.user.id, email);
+    if (!result || result.rejected.length > 0 || !result.response) throw Error(`Problem generating/sending email confirm code for user : ${authReq.user!.id}`);
 
     return ok(res);
 }
 
-export const emailCodeConfirm = async (req: AuthorizedRequest, res: Response): Promise<Response> => {
+export const emailCodeConfirm = async (req: Request, res: Response): Promise<Response> => {
+    const authReq = req as AuthorizedRequest;
     const { code } = req.body;
     //get user email code
-    const result = await userService.confirmEmailCode(req.user.id, code);
+    const result = await userService.confirmEmailCode(authReq.user.id, code);
     if (!result) return fail(res, 'That code doesn\'t look right. Please check and try again.');
 
     return ok(res);

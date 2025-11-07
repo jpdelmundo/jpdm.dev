@@ -8,6 +8,8 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 interface AuthState {
     token: AccessToken;
     isAuthenticated: boolean;
+    isLoggedOut: boolean;
+    ready: boolean;
     setToken: (token: AccessToken) => void;
     clearToken: () => void;
     user: TokenUserData | null;
@@ -28,6 +30,8 @@ export const useAuthStore = create<AuthState>()(
     persist((set, get) => ({
         token: null,
         isAuthenticated: false,
+        isLoggedOut: false,
+        ready: false,
         setToken: (token: AccessToken) => {
             if (!token) {
                 get().clearToken();
@@ -37,44 +41,49 @@ export const useAuthStore = create<AuthState>()(
             try {
                 const user = jwtDecode<TokenUserData>(token);
                 if (!user.id) throw new Error('Missing id in token');
-                set({ token, isAuthenticated: true, user });
+                set({ token, isAuthenticated: true, user, isLoggedOut: false });
             } catch (error) {
                 get().clearToken();
                 console.error('Error in parsing token', error);
             }
         },
         clearToken: () => {
-            set({ token: null, isAuthenticated: false, user: null });
+            console.log('clearToken called');
+            set({ token: null, isAuthenticated: false, user: null, isLoggedOut: true });
         },
         user: null,
         refreshToken: async () => {
-            if (!SECURE_MODE) return;
+            if (!SECURE_MODE || get().isLoggedOut) return;
             try {
                 const token = await getNewToken();
-                get().setToken(token);
+                if (token && !get().isLoggedOut) get().setToken(token);
             } catch (error) {
                 console.error('Token refresh failed', error);
                 get().clearToken();
             }
+            set({ ready: true });
         }
     }),
         {
             name: 'auth',
             storage: createJSONStorage(() => SECURE_MODE ? memoryStorage() : localStorage),
             partialize: (state) => ({ token: state.token }),
-            onRehydrateStorage: (state) => {
-                if (state?.token) {
-                    //jwtDecode
-                    try {
-                        const token = state.token;
-                        const user = jwtDecode<TokenUserData>(token);
-                        if (!user.id) throw new Error('Missing id in token');
-                        useAuthStore.setState({ token, isAuthenticated: true, user });
-                    } catch (error) {
-                        useAuthStore.setState({ token: null, isAuthenticated: false, user: null });
-                        console.error('Error in parsing token', error);
-                    }
-                }
-            }
+            // onRehydrateStorage: (state) => {
+            //     console.log('onRehydrateStorage called', { state });
+            //     if (state?.token) {
+            //         console.log('state.token', state.token);
+            //         //jwtDecode
+            //         try {
+            //             const token = state.token;
+            //             const user = jwtDecode<TokenUserData>(token);
+            //             if (!user.id) throw new Error('Missing id in token');
+            //             useAuthStore.setState({ token, isAuthenticated: true, user });
+            //             console.log('rehydrated', state);
+            //         } catch (error) {
+            //             useAuthStore.setState({ token: null, isAuthenticated: false, user: null });
+            //             console.error('Error in parsing token', error);
+            //         }
+            //     }
+            // }
         })
 );

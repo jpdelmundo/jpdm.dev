@@ -1,5 +1,5 @@
 import type RefreshToken from '@shared/models/generated/RefreshToken';
-import type { RefreshTokenInitializer, RefreshTokenMutator } from '@shared/models/generated/RefreshToken';
+import type { RefreshTokenId, RefreshTokenInitializer, RefreshTokenMutator } from '@shared/models/generated/RefreshToken';
 import { BaseRepository } from './BaseRepository';
 
 interface FindParams {
@@ -83,7 +83,12 @@ export class RefreshTokenRepository extends BaseRepository<RefreshToken> {
         return result.rows;
     }
 
-    delete(item: RefreshToken): Promise<boolean> {
-        throw new Error("Method not implemented.")
+    async delete(id: RefreshTokenId): Promise<RefreshToken[]> {
+        if (!id) throw new Error('Id missing');
+        const sql = `delete from refresh_tokens
+                     where id = $1
+                     returning *`;
+        const result = await this.query<RefreshToken>(sql, [id]);
+        return result.rows;
     }
 }

@@ -4,6 +4,7 @@ import { jsonBase64Encode } from '@shared/utils/encoding';
 import { getFingerprint } from '../utils/device';
 
 export const getNewToken = async (): Promise<AccessToken> => {
+    console.log('__getNewToken__ called');
     const baseUrl = import.meta.env.VITE_API_BASE_URL;
     const fingerprint = jsonBase64Encode(getFingerprint());
 

@@ -25,5 +25,5 @@ export abstract class BaseRepository<T extends QueryResultRow> {
     abstract findById(id: string): Promise<T | null>;
     abstract create(item: T): Promise<T>;
     abstract update(id: string, item: Partial<T>): Promise<T[]>;
-    abstract delete(item: T): Promise<boolean>;
+    abstract delete(id: string): Promise<T[]>;
 }
