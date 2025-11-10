@@ -84,6 +84,7 @@ export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed 
                             placeholder=""
                             error={!!errors.code}
                             helperText={errors.code?.message}
+                            inputTextAlign="center"
                             slotProps={{
                                 htmlInput: {
                                     inputMode: 'numeric',

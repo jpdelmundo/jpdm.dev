@@ -34,11 +34,10 @@ export async function apiRequest<T>(input: RequestInfo | URL, init?: RequestInit
     try {
         const token = useAuthStore.getState().token;
         const setToken = useAuthStore.getState().setToken;
-        console.log('apiRequest', { token });
         const res = await fetch(input, {
             ...init,
             headers: {
-                ...(token ? { 'authorization': `Bearer ${token}` } : {}),
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
                 ...(init?.headers ?? {}),
             }
         });
@@ -65,6 +64,8 @@ export async function apiRequest<T>(input: RequestInfo | URL, init?: RequestInit
             } else {
                 console.error('API_ERROR', { error });
                 //throw new ClientApiError(res, error);
+                //changed from throwing an error to returning as a an api "fail" result (with possible return data. ex. email update code request cooldown)
+                //throwing error is reserved for real errors
                 return { error, ok: res.ok, status: res.status } as ClientApiResult<T>;
             }
         }
@@ -109,7 +110,7 @@ export async function apiPost<T>(url: string, body?: ApiPostBody, onProgress?: (
             const setToken = useAuthStore.getState().setToken;
             const xhr = new XMLHttpRequest();
             xhr.open('post', requestUrl);
-            token && xhr.setRequestHeader('authorization', `Bearer ${token}`);
+            token && xhr.setRequestHeader('Authorization', `Bearer ${token}`);
 
             xhr.onload = async () => {
                 try {
@@ -138,8 +139,10 @@ export async function apiPost<T>(url: string, body?: ApiPostBody, onProgress?: (
                         }
                     } else {
                         //isRetry = true, ayaw talaga
-                        resolve({ error, ok: false, status: xhr.status } as ClientApiResult<T>);
                         //reject(new ClientApiError({ status: xhr.status } as Response, error));
+                        //changed from throwing an error to returning as a an api "fail" result (with possible return data. ex. email update code request cooldown)
+                        //throwing error is reserved for real errors
+                        resolve({ error, ok: false, status: xhr.status } as ClientApiResult<T>);
                     }
                 } catch (error) {
                     console.error('API_ERROR', 'Request error:', error);

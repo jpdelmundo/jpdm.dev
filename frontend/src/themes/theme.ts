@@ -117,7 +117,20 @@ export const theme = createTheme({
             styleOverrides: {
                 root: {
                     '&.post-form': {
-                        color: 'red'
+                        boxShadow: 'none',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                            border: 'none'
+                        },
+                        '& .Mui-focused': {
+                            transition: 'none',
+                            boxShadow: 'none'
+                        },
+                        '& .MuiInputBase-input': {
+                            padding: '4px 12px'
+                        },
+                        '& .MuiInputBase-root': {
+                            padding: 0
+                        }
                     }
                 }
             }

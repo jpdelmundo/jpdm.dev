@@ -1,21 +1,23 @@
 import { ApiErrorCode } from '@shared/types/ApiResult';
 import { Router, type NextFunction, type Request, type Response } from 'express';
-import { router as authRoutes } from './routes/authRoute';
-import { router as userRoutes } from './routes/userRoute';
+import { router as authRouter } from './routes/authRouter';
+import { router as fileRouter } from './routes/fileRouter';
+import { router as userRouter } from './routes/userRouter';
 import { ApiError, error } from './utils/apiHelper';
 import { verifyToken } from './utils/auth';
 
-const route = Router();
+const router = Router();
 
-route.use((req: Request, res: Response, next: NextFunction) => {
+router.use((req: Request, res: Response, next: NextFunction) => {
     if (req.path.startsWith('/auth') || req.path.startsWith('/user/create')) return next();
     verifyToken(req, res, next);
 });
 
-route.use('/auth', authRoutes);
-route.use('/user', userRoutes);
+router.use('/auth', authRouter);
+router.use('/user', userRouter);
+router.use('/file', fileRouter);
 
-route.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+router.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     console.error('Server Error:', err);
 
     const isApiError = err instanceof ApiError;
@@ -23,4 +25,4 @@ route.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     error(res, message, isApiError ? err.code : ApiErrorCode.SERVER_ERROR, isApiError ? err.status : 500);
 });
 
-export default route;
+export default router;

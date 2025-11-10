@@ -1,5 +1,6 @@
-import type UserProfile from '@shared/models/generated/UserProfile'
-import { BaseRepository } from './BaseRepository'
+import type UserProfile from '@shared/models/generated/UserProfile';
+import type { UserProfileId, UserProfileMutator } from '@shared/models/generated/UserProfile';
+import { BaseRepository } from './BaseRepository';
 
 interface FindParams {
     id?: string;
@@ -7,9 +8,9 @@ interface FindParams {
 }
 
 export class UserProfileRepository extends BaseRepository<UserProfile> {
-    async find({id, userId}: FindParams): Promise<UserProfile[]> {
+    async find({ id, userId }: FindParams): Promise<UserProfile[]> {
         const filters: string[] = [];
-        const values: any[] = [];
+        const values: unknown[] = [];
 
         id && filters.push(`id = $${filters.length + 1}`) && values.push(id);
         userId && filters.push(`user_id = $${filters.length + 1}`) && values.push(userId);
@@ -26,7 +27,7 @@ export class UserProfileRepository extends BaseRepository<UserProfile> {
     }
 
     async findById(id: string): Promise<UserProfile | null> {
-        const result = await this.find({id});
+        const result = await this.find({ id });
         return result[0] || null;
     }
 
@@ -34,11 +35,11 @@ export class UserProfileRepository extends BaseRepository<UserProfile> {
         throw new Error("Method not implemented.")
     }
 
-    update(id: string, item: Partial<UserProfile>): Promise<UserProfile | null> {
+    update(id: string, item: UserProfileMutator): Promise<UserProfile[]> {
         throw new Error("Method not implemented.")
     }
 
-    delete(item: UserProfile): Promise<boolean> {
+    delete(id: UserProfileId): Promise<UserProfile[]> {
         throw new Error("Method not implemented.")
     }
 }

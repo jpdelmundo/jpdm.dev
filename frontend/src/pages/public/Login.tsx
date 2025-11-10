@@ -6,12 +6,12 @@ import { Container, Paper } from '@mui/material';
 import type { AccessToken } from '@shared/types/AccessToken';
 import type { ApiResult } from '@shared/types/ApiResult';
 import { jsonBase64Encode } from '@shared/utils/encoding';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export const Login = () => {
     const setToken = useAuthStore(s => s.setToken);
     // const isAuthenticated = useAuthStore(s => s.isAuthenticated);
-    // const location = useLocation();
+    const location = useLocation();
     const navigate = useNavigate();
 
     //const from = location.state?.from?.pathname || '/';
@@ -26,9 +26,10 @@ export const Login = () => {
 
     const loginSuccess = (result: ApiResult<AccessToken>) => {
         if (!result.data) throw new Error('Something went wrong. Login was successful but returned an empty token.');
+        const from = location.state?.from?.pathname || '/';
 
         setToken(result.data);
-        navigate('/', { replace: true });
+        navigate(from, { replace: true });
     };
 
     return (

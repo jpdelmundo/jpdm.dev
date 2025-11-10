@@ -1,6 +1,6 @@
 import { UserPanel } from '@/components/UserPanel'
 import { Container, Link } from "@mui/material"
-import { Outlet } from "react-router-dom"
+import { Outlet, Link as RLink } from "react-router-dom"
 
 export const Layout = () => {
     return (<Container>
@@ -8,7 +8,7 @@ export const Layout = () => {
             Pic here
         </header>
         <nav>
-            <Link href="/">Home</Link>
+            <Link component={RLink} to="/">Home</Link>
             <UserPanel />
         </nav>
         <main>

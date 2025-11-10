@@ -70,11 +70,6 @@ export function LoginForm({ onSubmit, onLoginSuccess }: {
     return (
         <form onSubmit={handleSubmit} noValidate>
             <Box display="flex" flexDirection="column" gap={1}>
-                <Box minHeight="1.5em">
-                    {errorMessage && (
-                        <Typography color="error" variant="body2" >{errorMessage}</Typography>
-                    )}
-                </Box>
                 <div>
                     <TextField name="username"
                         label="Username"
@@ -96,6 +91,7 @@ export function LoginForm({ onSubmit, onLoginSuccess }: {
                     <FormControlLabel label="Remember me on this device" control={<Checkbox name="remember" onChange={handleChange} />} />
                 </div>
                 <Button type="submit" disabled={isLoading} variant="contained">Sign In</Button>
+                <Typography color="error" textAlign="center" minHeight="21px">{errorMessage}</Typography>
             </Box>
         </form>
     );

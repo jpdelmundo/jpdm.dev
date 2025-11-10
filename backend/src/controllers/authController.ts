@@ -50,7 +50,6 @@ export const logout = async (req: Request, res: Response): Promise<Response> => 
 }
 
 export const refreshToken = async (req: Request, res: Response): Promise<Response> => {
-    console.log({ 'req.body': req.body, 'req.cookies': req.cookies, req });
     console.log('Requested refreshToken');
     const refreshTokenId = req.cookies?.refresh_token_id;
     //if (!refreshTokenId) throw new Error('Refresh token id missing');
@@ -66,6 +65,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<Respons
     if (refreshToken.is_used || refreshToken.is_revoked) {
         //TODO log reuse or used/revoked refresh token
         console.log('Refresh token used/revoked', { refreshToken });
+        clearRefreshTokenCookie(req, res);
         throw new Error('Refresh token used/revoked');
     }
 
@@ -104,13 +104,12 @@ export const refreshToken = async (req: Request, res: Response): Promise<Respons
         //create new access token
         const newAccessToken = generateAccessToken(user);
         console.log({ newAccessToken });
-        console.log('is Date', refreshToken.created_at instanceof String);
         //create new refresh token only if the refresh token used is more than 1 hour old
         //if (Date.now() - refreshToken.created_at.getTime() > 3600000) {
-        const newRefreshToken = await userService.createRefreshToken({ ...fingerprintObj, user_id: user.id, request_ip: req.ip || null, previous_refresh_token_id: refreshToken.id });
+        const newRefreshToken = await userService.createRefreshToken({ ...fingerprintObj, user_id: user.id, request_ip: req.ip || null, previous_refresh_token_id: refreshToken.id, remember: refreshToken.remember });
         console.log({ newRefreshToken });
 
-        createRefreshTokenCookie(newRefreshToken, true, req, res);
+        createRefreshTokenCookie(newRefreshToken, refreshToken.remember, req, res);
         //}
 
         return ok(res, newAccessToken);

@@ -14,7 +14,7 @@ if (!fs.existsSync(logDir)) {
 
 const logStream = fs.createWriteStream(path.join(logDir, logFile), { flags: 'a' });
 
-function logToFile(...args: any[]) {
+function logToFile(...args: unknown[]) {
     const message = util.format(...args) + '\n';
     logStream.write(message);
 }

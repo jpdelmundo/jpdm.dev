@@ -7,7 +7,6 @@ import { About } from './pages/public/About';
 import { Home } from './pages/public/Home';
 import { Layout } from './pages/public/Layout';
 import { Login } from './pages/public/Login';
-import { Logout } from './pages/public/Logout';
 import { NotFound } from './pages/public/NotFound';
 import { Register } from './pages/public/Register';
 import { CreatePost } from './pages/user/CreatePost';
@@ -20,7 +19,7 @@ const routes = [
             { path: 'login', element: <Login /> },
             { path: 'about', element: <About /> },
             { path: 'register', element: <Register /> },
-            { path: 'logout', element: <Logout /> },
+            //{ path: 'logout', element: <Logout /> },
             {
                 path: 'user',
                 children: [

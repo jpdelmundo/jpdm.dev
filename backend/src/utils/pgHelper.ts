@@ -1,4 +1,4 @@
-export function escapeLiteral(val: any): string {
+export function escapeLiteral(val: unknown): string {
     if (val === null || val === undefined) return 'NULL';
     if (typeof val === 'number') return String(val);
     if (typeof val === 'boolean') return val ? 'TRUE' : 'FALSE';
@@ -14,7 +14,7 @@ export function escapeLiteral(val: any): string {
     return `'${String(val).replace(/\\/g, '\\\\').replace(/'/g, "''")}'`;
 }
 
-export function getFullQuery(text: string, values: any[] = []) {
+export function getFullQuery(text: string, values: unknown[] = []) {
     return text.replace(/\$(\d+)/g, (_, n) => {
         const val = values[Number(n) - 1];
         return escapeLiteral(val);

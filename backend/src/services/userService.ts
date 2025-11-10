@@ -188,6 +188,10 @@ export const logoutUser = async (userId: UserId, deviceId: string) => {
     const repo = new RefreshTokenRepository();
     const refreshTokens = await repo.find({ deviceId, userId });
     refreshTokens.forEach(v => {
-        repo.delete(v.id);
+        //repo.delete(v.id);
+        repo.update
+        if (!v.is_used) repo.query(`update refresh_tokens
+                                    set used_at = now()
+                                    where id = $1`, [v.id]);
     });
 }

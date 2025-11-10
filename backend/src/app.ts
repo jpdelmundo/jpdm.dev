@@ -7,7 +7,7 @@ if (!process.env.JWT_ACCESS_SECRET) throw new Error('JWT_ACCESS_SECRET environme
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
-import route from './routes';
+import route from './router';
 import './utils/logger';
 
 const app = express();

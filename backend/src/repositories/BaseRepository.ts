@@ -16,12 +16,12 @@ export abstract class BaseRepository<T extends QueryResultRow> {
         }
     }
 
-    query<R extends QueryResultRow = T>(queryText: string, values?: any[]) {
+    query<R extends QueryResultRow = T>(queryText: string, values?: unknown[]) {
         if (process.env.NODE_ENV == 'development') console.log('[SQL]', getFullQuery(queryText, values));
         return this.pool.query<R>(queryText, values);
     }
 
-    abstract find(filter: any): Promise<T[] | null>;
+    abstract find(filter: unknown): Promise<T[] | null>;
     abstract findById(id: string): Promise<T | null>;
     abstract create(item: T): Promise<T>;
     abstract update(id: string, item: Partial<T>): Promise<T[]>;

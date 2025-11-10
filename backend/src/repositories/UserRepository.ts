@@ -5,7 +5,7 @@ import { BaseRepository } from './BaseRepository';
 export class UserRepository extends BaseRepository<User> {
     async find({ id, username, email }: { id?: string, username?: string, email?: string }): Promise<User[]> {
         const filters: string[] = [];
-        const values: any[] = [];
+        const values: unknown[] = [];
 
         id && filters.push(`id = $${filters.length + 1}`) && values.push(id);
         username && filters.push(`username = $${filters.length + 1}`) && values.push(username);
@@ -73,7 +73,7 @@ export class UserRepository extends BaseRepository<User> {
         return result.rows;
     }
 
-    delete(item: User): Promise<boolean> {
+    delete(id: UserId): Promise<User[]> {
         throw new Error("Method not implemented.")
     }
 }

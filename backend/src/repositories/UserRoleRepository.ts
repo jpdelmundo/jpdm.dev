@@ -1,10 +1,11 @@
-import type UserRole from '@shared/models/generated/UserRole'
-import { BaseRepository } from './BaseRepository'
+import type UserRole from '@shared/models/generated/UserRole';
+import type { UserRoleId } from '@shared/models/generated/UserRole';
+import { BaseRepository } from './BaseRepository';
 
 export class UserRoleRepository extends BaseRepository<UserRole> {
-    async find({id, userId}:{id?: string, userId?: string}): Promise<UserRole[]> {
+    async find({ id, userId }: { id?: string, userId?: string }): Promise<UserRole[]> {
         const filters: string[] = [];
-        const values: any[] = [];
+        const values: unknown[] = [];
 
         id && filters.push(`id = $${filters.length + 1}`) && values.push(id);
         userId && filters.push(`user_id = $${filters.length + 1}`) && values.push(userId);
@@ -21,7 +22,7 @@ export class UserRoleRepository extends BaseRepository<UserRole> {
     }
 
     async findById(id: string): Promise<UserRole | null> {
-        const result = await this.find({id});
+        const result = await this.find({ id });
         return result[0] || null;
     }
 
@@ -29,11 +30,11 @@ export class UserRoleRepository extends BaseRepository<UserRole> {
         throw new Error("Method not implemented.")
     }
 
-    update(id: string, item: Partial<UserRole>): Promise<UserRole | null> {
+    update(id: string, item: Partial<UserRole>): Promise<UserRole[]> {
         throw new Error("Method not implemented.")
     }
 
-    delete(item: UserRole): Promise<boolean> {
+    delete(id: UserRoleId): Promise<UserRole[]> {
         throw new Error("Method not implemented.")
     }
 }
