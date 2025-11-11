@@ -10,6 +10,8 @@
     "be:dev": "npm run dev -w backend",
     "be:debug": "npm run debug -w backend",
     "fe:dev": "npm run dev -w frontend",
+    "fe:build": "npm run build -w frontend",
+    "fe:bv": "npm run bv -w frontend",
     "dev": "concurrently \"npm run be:dev\" \"npm run fe:dev\"",
     "lint": "eslint .",
     "lint:fe": "eslint frontend",
