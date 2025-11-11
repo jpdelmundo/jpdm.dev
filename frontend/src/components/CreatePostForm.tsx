@@ -1,12 +1,21 @@
 import { apiPost } from '@/api/apiClient';
 import { getFingerprint } from '@/utils/device';
-import { AddPhotoAlternate } from '@mui/icons-material';
-import { Box, Button, Grid, IconButton, Paper } from '@mui/material';
-import type { default as FileModel } from '@shared/models/generated/File';
+import { getErrorMessage } from '@/utils/helper';
+import type PostExtended from '@shared/models/extensions/PostExtended';
+import type { File as FileModel } from '@shared/models/generated/File';
+import type { ApiResult } from '@shared/types/ApiResult';
 import { jsonBase64Encode } from '@shared/utils/encoding';
 import { useRef, useState, type ChangeEvent, type MouseEvent } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import TextField from './TextField';
+
+import AddPhotoAlternate from '@mui/icons-material/AddPhotoAlternate';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
 
 type UploadFile = {
     file: File;
@@ -16,20 +25,23 @@ type UploadFile = {
     uploadStatus: 'pending' | 'uploading' | 'completed' | 'error'
 }
 
-export type FormData = {
+export type FormInput = {
     title: string | null;
     content: string;
 };
 
-export function CreatePostForm() {
-    const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
+export function CreatePostForm({ onSuccess }: {
+    onSuccess: (result: ApiResult<PostExtended>) => void
+}) {
+    const { register, handleSubmit, reset, formState: { errors } } = useForm<FormInput>();
     const [imageFiles, setImageFiles] = useState<UploadFile[]>([]);
-    const [submitting, setSubmitting] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const inputFileRef = useRef<HTMLInputElement>(null);
     const [errorMessage, setErrorMessage] = useState('');
 
-    const onSubmit: SubmitHandler<FormData> = async (data) => {
-        setSubmitting(true);
+    const onSubmit: SubmitHandler<FormInput> = async (data) => {
+        setIsSubmitting(true);
+        setErrorMessage('');
 
         try {
             const uploadedImages = [];
@@ -56,6 +68,11 @@ export function CreatePostForm() {
                             updated[i] = { ...updated[i], uploadStatus: 'completed', fileId };
                             return updated;
                         });
+
+                        uploadedImages.push({
+                            fileId,
+                            sort: i
+                        });
                     } catch (error) {
                         setImageFiles(prev => {
                             const updated = [...prev];
@@ -66,14 +83,28 @@ export function CreatePostForm() {
                     }
 
                 } else if (imageFile.uploadStatus == 'completed') {
-                    uploadedImages.push(imageFile);
+                    uploadedImages.push({
+                        fileId: imageFile.fileId,
+                        sort: i
+                    });
                 }
             }
 
+            //create the post with image ids
+            const result = await apiPost<PostExtended>('/post/create', { ...data, files: uploadedImages });
+            if (result.ok) {
+                reset();
+                setImageFiles([]);
+                setErrorMessage('');
+                uploadedImages.length = 0;
+                onSuccess && onSuccess(result);
+            } else {
+                setErrorMessage(getErrorMessage(result));
+            }
         } catch (error) {
             setErrorMessage((error as Error).message);
         } finally {
-            setSubmitting(false);
+            setIsSubmitting(false);
         }
     };
 
@@ -83,10 +114,10 @@ export function CreatePostForm() {
             file,
             preview: URL.createObjectURL(file),
             clientId: Math.random().toString(36).slice(2),
-            serverId: null,
+            fileId: null,
             uploadStatus: 'pending'
         }));
-        console.log({ newFiles });
+
         setImageFiles(prev => {
             return ([
                 ...prev,
@@ -142,14 +173,15 @@ export function CreatePostForm() {
 
                     <IconButton
                         color="primary"
-                        onClick={(e: MouseEvent<HTMLButtonElement>) => inputFileRef.current?.click()}
+                        onClick={(_: MouseEvent<HTMLButtonElement>) => inputFileRef.current?.click()}
                         disableRipple
                         sx={{ py: 0 }}>
                         <AddPhotoAlternate fontSize="large" />
                     </IconButton>
                 </Box>
-                <Box textAlign="right">
-                    <Button type="submit" variant="contained">Post</Button>
+                <Box>
+                    <Button type="submit" variant="contained" disabled={isSubmitting} loading={isSubmitting}>Post</Button>
+                    <Typography color="error" textAlign="center" minHeight="21px">{errorMessage}</Typography>
                 </Box>
             </form>
         </Paper>

@@ -1,12 +1,14 @@
 import { apiPost } from '@/api/apiClient';
-import { LoginForm, type FormData } from "@/components/LoginForm";
+import { LoginForm, type FormInput } from "@/components/LoginForm";
 import { useAuthStore } from '@/store/useAuthStore';
 import { getFingerprint } from '@/utils/device';
-import { Container, Paper } from '@mui/material';
 import type { AccessToken } from '@shared/types/AccessToken';
 import type { ApiResult } from '@shared/types/ApiResult';
 import { jsonBase64Encode } from '@shared/utils/encoding';
 import { useLocation, useNavigate } from 'react-router-dom';
+
+import Container from '@mui/material/Container';
+import Paper from '@mui/material/Paper';
 
 export const Login = () => {
     const setToken = useAuthStore(s => s.setToken);
@@ -19,8 +21,8 @@ export const Login = () => {
     //     return <Navigate to={from} replace />;
     // }
 
-    const submit = async (formData: FormData): Promise<ApiResult<AccessToken>> => {
-        const res = await apiPost<AccessToken>('/auth/login', { ...formData, fingerprint: jsonBase64Encode(getFingerprint()) });
+    const submit = async (formInput: FormInput): Promise<ApiResult<AccessToken>> => {
+        const res = await apiPost<AccessToken>('/auth/login', { ...formInput, fingerprint: jsonBase64Encode(getFingerprint()) });
         return res;
     };
 

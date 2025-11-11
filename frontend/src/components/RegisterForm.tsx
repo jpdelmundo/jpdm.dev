@@ -1,6 +1,5 @@
 import { getErrorMessage } from '@/utils/helper';
 import CloseIcon from '@mui/icons-material/Close';
-import { Box, Button, CircularProgress, Collapse, Stack, Typography } from '@mui/material';
 import type { UserId } from '@shared/models/generated/User';
 import type { AccessToken } from '@shared/types/AccessToken';
 import { ApiErrorCode, type ApiResult } from '@shared/types/ApiResult';
@@ -11,9 +10,16 @@ import { TransitionGroup } from 'react-transition-group';
 import PasswordField from './PasswordField';
 import TextField from './TextField';
 
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+import Collapse from '@mui/material/Collapse';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+
 export type FormSubmitResult = { access_token: AccessToken, user_id: UserId }
 
-export type FormData = {
+export type FormInput = {
     username: string;
     password: string;
     confirm_password: string;
@@ -21,12 +27,12 @@ export type FormData = {
 };
 
 export function RegisterForm({ onSubmit, onRegisterSuccess }: {
-    onSubmit: (formData: FormData) => Promise<ApiResult<FormSubmitResult>>,
+    onSubmit: (formInput: FormInput) => Promise<ApiResult<FormSubmitResult>>,
     onRegisterSuccess: (result: ApiResult<FormSubmitResult>) => void
 }) {
-    const { register, handleSubmit, setError, formState: { errors }, watch } = useForm<FormData>();
+    const { register, handleSubmit, setError, formState: { errors }, watch } = useForm<FormInput>();
     const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
     const password = watch('password', '');
@@ -42,9 +48,9 @@ export function RegisterForm({ onSubmit, onRegisterSuccess }: {
         return errors.length == 0 || 'Password does not meet requirements';
     }
 
-    const submitHandler: SubmitHandler<FormData> = async (data) => {
+    const submitHandler: SubmitHandler<FormInput> = async (data) => {
         setErrorMessage('');
-        setIsLoading(true);
+        setIsSubmitting(true);
         const result = await onSubmit(data);
         if (result.ok) {
             onRegisterSuccess(result);
@@ -54,7 +60,7 @@ export function RegisterForm({ onSubmit, onRegisterSuccess }: {
             }
             setErrorMessage(getErrorMessage(result));
         }
-        setIsLoading(false);
+        setIsSubmitting(false);
     }
 
     console.log({ passwordErrors });
@@ -100,8 +106,8 @@ export function RegisterForm({ onSubmit, onRegisterSuccess }: {
                         error={!!errors.confirm_password}
                         helperText={errors.confirm_password?.message}
                         fullWidth />
-                    <Button type="submit" variant="contained" disabled={isLoading}>
-                        {isLoading ? <Stack direction="row" alignItems="center" gap={1}><CircularProgress /> <span>Processing...</span></Stack> : 'Submit'}
+                    <Button type="submit" variant="contained" disabled={isSubmitting}>
+                        {isSubmitting ? <Stack direction="row" alignItems="center" gap={1}><CircularProgress /> <span>Processing...</span></Stack> : 'Submit'}
                     </Button>
                     <Typography color="error" textAlign="center" minHeight="21px">{errorMessage}</Typography>
                 </Stack>

@@ -1,16 +1,15 @@
-import { Dialog } from '@mui/material';
-import { LoginForm } from './LoginForm';
+import Dialog from '@mui/material/Dialog';
 
 interface Props {
     open: boolean;
 }
 
-export const LoginDialog = (props: Props)=>{
-    const {open} = props;
+export const LoginDialog = (props: Props) => {
+    const { open } = props;
 
     return (
         <Dialog open={open}>
-            <LoginForm />
+            {/* <LoginForm /> */}
         </Dialog>
     );
 }

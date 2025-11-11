@@ -1,9 +1,9 @@
 import js from '@eslint/js';
-import globals from 'globals';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
+import globals from 'globals';
+import path from 'path';
 import tseslint from 'typescript-eslint';
-import { globalIgnores } from 'eslint/config';
 
 export default tseslint.config([
   //globalIgnores(['frontend/dist']),
@@ -23,7 +23,10 @@ export default tseslint.config([
       ecmaVersion: 2020,
       globals: globals.browser,
       parserOptions: {
-        project: ['./frontend/tsconfig.json'],
+        project: [
+          './frontend/tsconfig.app.json',
+          './frontend/tsconfig.node.json'
+        ],
         tsconfigRootDir: path.resolve('./'),
       }
     },
@@ -31,6 +34,21 @@ export default tseslint.config([
       '@typescript-eslint/no-unused-expressions': [
         'error',
         { allowShortCircuit: true }
+      ],
+      "no-restricted-imports": [
+        "error",
+        {
+          "paths": [
+            {
+              "name": "@mui/material",
+              "message": "Importing from the root of @mui/material is disallowed. Use deep imports like '@mui/material/Button' instead."
+            },
+            {
+              "name": "@mui/icons-material",
+              "message": "Importing from the root of @mui/icons-material is disallowed. Use deep imports like '@mui/icons-material/Star' instead."
+            }
+          ]
+        }
       ]
     }
   },

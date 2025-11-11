@@ -1,4 +1,3 @@
-import { CssBaseline } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthInitializer } from './auth/AuthInitializer';
@@ -7,6 +6,7 @@ import { GlobalErrorHandler } from './components/GlobalErrorHandler';
 import { GlobalSnackbar } from './components/GlobalSnackbar';
 import { AppRoutes } from './routes';
 import { theme } from './themes/theme';
+import CssBaseline from '@mui/material/CssBaseline';
 
 function App() {
   return (

@@ -11,7 +11,7 @@ interface SnackbarState {
 }
 
 export const useSnackbarStore = create<SnackbarState>()(
-    (set, get) => ({
+    (set) => ({
         message: '',
         severity: 'info',
         open: false,

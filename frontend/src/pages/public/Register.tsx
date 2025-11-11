@@ -1,9 +1,11 @@
 import { apiPost } from '@/api/apiClient';
-import { RegisterForm, type FormData, type FormSubmitResult as RegisterFormSubmitResult } from '@/components/RegisterForm';
-import { UpdateEmailForm, type FormData as EmailFormData } from '@/components/UpdateEmailForm';
+import { RegisterForm, type FormInput, type FormSubmitResult as RegisterFormSubmitResult } from '@/components/RegisterForm';
+import { UpdateEmailForm, type FormInput as EmailFormInput } from '@/components/UpdateEmailForm';
 import { useAuthStore } from '@/store/useAuthStore';
 import { getFingerprint } from '@/utils/device';
-import { Box, Paper, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
 import type { ApiResult } from '@shared/types/ApiResult';
 import { jsonBase64Encode } from '@shared/utils/encoding';
 import { useState } from 'react';
@@ -15,8 +17,8 @@ function RegisterContent() {
     const { executeRecaptcha } = useGoogleReCaptcha();
     const navigate = useNavigate();
 
-    const submit = async (formData: FormData): Promise<ApiResult<RegisterFormSubmitResult>> => {
-        console.log({ formData });
+    const submit = async (formInput: FormInput): Promise<ApiResult<RegisterFormSubmitResult>> => {
+        console.log({ formInput });
 
         if (!executeRecaptcha) {
             console.log('Execute recaptcha not yet available');
@@ -25,7 +27,7 @@ function RegisterContent() {
         const token = await executeRecaptcha('submit_form');
         console.log({ token });
 
-        const res = await apiPost<RegisterFormSubmitResult>('/user/create', { ...formData, fingerprint: jsonBase64Encode(getFingerprint()), token });
+        const res = await apiPost<RegisterFormSubmitResult>('/user/create', { ...formInput, fingerprint: jsonBase64Encode(getFingerprint()), token });
         return res; //return to show error message on form
     };
 
@@ -40,13 +42,13 @@ function RegisterContent() {
         }
     };
 
-    const emailSubmit = async (formData: EmailFormData): Promise<ApiResult<never>> => {
-        const res = await apiPost<never>('/user/email-code', formData);
+    const emailSubmit = async (formInput: EmailFormInput): Promise<ApiResult<never>> => {
+        const res = await apiPost<never>('/user/email-code', formInput);
         return res; //return to show error message on form
     }
 
-    const codeSubmit = async (formData: EmailFormData): Promise<ApiResult<never>> => {
-        const res = await apiPost<never>('/user/email-code-confirm', formData);
+    const codeSubmit = async (formInput: EmailFormInput): Promise<ApiResult<never>> => {
+        const res = await apiPost<never>('/user/email-code-confirm', formInput);
         return res; //return to show error message on form
     }
 

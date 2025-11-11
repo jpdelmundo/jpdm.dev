@@ -1,5 +1,6 @@
 import { useSnackbarStore } from '@/store/useSnackbarStore';
-import { Alert, Snackbar } from '@mui/material';
+import Alert from '@mui/material/Alert';
+import Snackbar from '@mui/material/Snackbar';
 
 export function GlobalSnackbar() {
     const { message, open, closeMessage, severity } = useSnackbarStore();

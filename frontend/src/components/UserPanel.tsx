@@ -1,10 +1,13 @@
 import { apiPost } from '@/api/apiClient';
 import { useAuthStore } from '@/store/useAuthStore';
 import { getFingerprint } from '@/utils/device';
-import { CircularProgress, Grid, Link } from '@mui/material';
 import { jsonBase64Encode } from '@shared/utils/encoding';
 import { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
+
+import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
+import Link from '@mui/material/Link';
 
 export const UserPanel = () => {
     const user = useAuthStore(s => s.user);

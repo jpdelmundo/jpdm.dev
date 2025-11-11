@@ -26,7 +26,7 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "rootDir": "../",
+    "rootDir": "..",
     "baseUrl": ".",
     "paths": {
       "@/*": [
@@ -40,5 +40,9 @@
   "include": [
     "src",
     "../shared/src"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
   ]
 }

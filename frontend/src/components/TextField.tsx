@@ -1,4 +1,9 @@
-import { Collapse, TextField as MuiTextField, Stack, Typography, type TextFieldProps } from '@mui/material';
+import { type TextFieldProps } from '@mui/material';
+
+import Collapse from '@mui/material/Collapse';
+import Stack from '@mui/material/Stack';
+import MuiTextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 
 type TextFieldPropsCustom = TextFieldProps & {
     inputTextAlign?: 'left' | 'center' | 'right';

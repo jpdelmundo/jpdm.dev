@@ -2,6 +2,7 @@ import { ApiErrorCode } from '@shared/types/ApiResult';
 import { Router, type NextFunction, type Request, type Response } from 'express';
 import { router as authRouter } from './routes/authRouter';
 import { router as fileRouter } from './routes/fileRouter';
+import { router as postRouter } from './routes/postRouter';
 import { router as userRouter } from './routes/userRouter';
 import { ApiError, error } from './utils/apiHelper';
 import { verifyToken } from './utils/auth';
@@ -16,6 +17,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 router.use('/auth', authRouter);
 router.use('/user', userRouter);
 router.use('/file', fileRouter);
+router.use('/post', postRouter);
 
 router.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     console.error('Server Error:', err);

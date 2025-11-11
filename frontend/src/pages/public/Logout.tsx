@@ -2,7 +2,6 @@ import { apiPost } from '@/api/apiClient';
 import { useAuthStore } from '@/store/useAuthStore';
 import { getFingerprint } from '@/utils/device';
 import { jsonBase64Encode } from '@shared/utils/encoding';
-import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export function Logout() {
@@ -14,10 +13,11 @@ export function Logout() {
         clearToken();
         navigate('/login');
     }
+    logout();
 
-    useEffect(() => {
-        logout();
-    }, []);
+    // useEffect(() => {
+
+    // }, []);
 
     return null;
 }

@@ -1,27 +1,31 @@
 import { getErrorMessage, isValidEmail } from '@/utils/helper';
-import { Button, CircularProgress, Stack, Typography } from '@mui/material';
 import { ApiErrorCode, type ApiResult } from '@shared/types/ApiResult';
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import TextField from './TextField';
 
-export type FormData = {
+import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+
+export type FormInput = {
     email?: string;
     code?: string;
 };
 
 export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed }: {
-    onEmailSubmit: (formData: FormData) => Promise<ApiResult<{ code: ApiErrorCode }>>,
-    onCodeSubmit: (formData: FormData) => Promise<ApiResult<never>>,
+    onEmailSubmit: (formInput: FormInput) => Promise<ApiResult<{ code: ApiErrorCode }>>,
+    onCodeSubmit: (formInput: FormInput) => Promise<ApiResult<never>>,
     onEmailConfirmed: (result: ApiResult<never>) => void
 }) {
-    const { register, handleSubmit, setError, formState: { errors } } = useForm<FormData>();
+    const { register, handleSubmit, setError, formState: { errors } } = useForm<FormInput>();
     const [errorMessage, setErrorMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [step, setStep] = useState<'email' | 'code'>('email');
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const submitHandler: SubmitHandler<FormData> = async (data) => {
+    const submitHandler: SubmitHandler<FormInput> = async (data) => {
         setErrorMessage('');
         setIsLoading(true);
         if (step == 'email') {
@@ -115,6 +119,5 @@ export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed 
                 <Typography color="error" textAlign="center" minHeight="21px">{errorMessage}</Typography>
             </Stack>
         </form>
-
     );
 }
