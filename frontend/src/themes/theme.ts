@@ -1,13 +1,22 @@
 import { createTheme } from '@mui/material/styles';
 
 export const theme = createTheme({
+    breakpoints: {
+        values: {
+            xs: 0,
+            sm: 680,
+            md: 900,
+            lg: 1200,
+            xl: 1536,
+        },
+    },
     palette: {
         background: {
             default: '#f3f3f3'
         }
     },
     typography: {
-        fontSize: 14,
+        fontSize: 15,
         fontFamily: 'Geist, Helvetica, Arial, sans-serif',
         body2: {
             fontSize: 12
@@ -20,7 +29,7 @@ export const theme = createTheme({
         MuiCssBaseline: {
             styleOverrides: {
                 html: {
-                    fontSize: '14px',
+                    fontSize: '15px',
                 }
             }
         },
@@ -81,7 +90,7 @@ export const theme = createTheme({
             },
             styleOverrides: {
                 root: ({ theme }) => ({
-                    fontSize: 14,
+                    fontSize: 15,
                     textTransform: 'none',
                     boxShadow: 'none',
                     '&:hover': { boxShadow: 'none' },
@@ -107,7 +116,7 @@ export const theme = createTheme({
         },
         MuiCircularProgress: {
             defaultProps: {
-                size: 14,
+                size: 15,
                 sx: {
                     color: '#ffffff'
                 }
@@ -126,12 +135,40 @@ export const theme = createTheme({
                             boxShadow: 'none'
                         },
                         '& .MuiInputBase-input': {
-                            padding: '4px 12px'
+                            padding: '4px 0'
                         },
                         '& .MuiInputBase-root': {
                             padding: 0
+                        },
+                        '& .MuiInputBase-root.Mui-error': {
+                            boxShadow: 'none'
+                        },
+                        '& .helper-text-container': {
+                            marginTop: 0
+                        },
+                        '& .helper-text': {
+                            fontSize: '15px',
+                            marginTop: 0,
+                            marginLeft: '12px'
                         }
                     }
+                }
+            }
+        },
+        MuiDialog: {
+            styleOverrides: {
+                root: {
+                    '& .MuiDialog-paper': {
+                        maxWidth: '500px',
+                        boxShadow: '0 1px 2px #cccccc, 0 4px 8px #dddddd',
+                    }
+                }
+            }
+        },
+        MuiBackdrop: {
+            styleOverrides: {
+                root: {
+                    backgroundColor: '#ffffff60',
                 }
             }
         }

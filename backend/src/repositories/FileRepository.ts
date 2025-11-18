@@ -1,20 +1,22 @@
-import type File from '@shared/models/generated/File';
-import type { FileId, FileInitializer, FileMutator } from '@shared/models/generated/File';
+import type { File, FileId, FileInitializer, FileMutator } from '@shared/models/generated/File';
 import type { PostId } from '@shared/models/generated/Post';
+import type { UserId } from '@shared/models/generated/User';
 import { BaseRepository } from './BaseRepository';
 
 interface FindParams {
     id?: FileId;
     postId?: PostId;
+    userId?: UserId;
 }
 
 export class FileRepository extends BaseRepository<File> {
-    async find({ id, postId }: FindParams): Promise<File[]> {
+    async find({ id, postId, userId }: FindParams): Promise<File[]> {
         const filters: string[] = [];
         const values: unknown[] = [];
 
         id && filters.push(`id = $${filters.length + 1}`) && values.push(id);
         postId && filters.push(`post_id = $${filters.length + 1}`) && values.push(postId);
+        userId && filters.push(`user_id = $${filters.length + 1}`) && values.push(userId);
 
         if (filters.length == 0) {
             throw new Error('At least one filter must be provided');

@@ -1,15 +1,11 @@
-import { CreatePostForm } from '@/components/CreatePostForm';
-import type PostExtended from '@shared/models/extensions/PostExtended';
-import type { ApiResult } from '@shared/types/ApiResult';
-
-import Paper from '@mui/material/Paper';
+import { CreatePostDialog } from '@/components/CreatePostDialog';
+import { useState } from 'react';
 
 export function CreatePost() {
-    const success = (result: ApiResult<PostExtended>) => console.log({ result });
+    const [dialogOpen, setDialogOpen] = useState(true);
 
-    return (
-        <Paper elevation={0} sx={{ p: 6, maxWidth: 'sm', mx: 'auto' }}>
-            <CreatePostForm onSuccess={success} />
-        </Paper>
-    );
+    return <CreatePostDialog
+        open={dialogOpen}
+        closeDialog={() => setDialogOpen(false)}
+    />
 }

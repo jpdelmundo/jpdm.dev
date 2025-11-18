@@ -1,9 +1,8 @@
 import type UserWithRoles from '@shared/models/extensions/UserWithRoles';
 import type { RefreshTokenInitializer } from '@shared/models/generated/RefreshToken';
-import type User from '@shared/models/generated/User';
-import type { UserId, UserInitializer } from '@shared/models/generated/User';
-import type UserProfile from '@shared/models/generated/UserProfile';
-import type UserRole from '@shared/models/generated/UserRole';
+import type { User, UserId, UserInitializer } from '@shared/models/generated/User';
+import type { UserProfile } from '@shared/models/generated/UserProfile';
+import type { UserRole } from '@shared/models/generated/UserRole';
 import type { TokenUserData } from '@shared/types/Jwt';
 import * as bcrypt from 'bcrypt';
 import { ErrorCode } from 'src/errors/ErrorCode';
@@ -15,7 +14,7 @@ import { UserRoleRepository } from '../repositories/UserRoleRepository';
 import { ApiError } from '../utils/apiHelper';
 import { mail } from '../utils/mailer';
 
-export const isValidCredentials = async (username: string, password: string): Promise<Boolean> => {
+export const isValidCredentials = async (username: string, password: string): Promise<boolean> => {
     const user = await findByUsernameOrEmail(username);
     return bcrypt.compare(password, user?.password || '');
 }
@@ -42,13 +41,13 @@ export const getTokenData = async ({ user_id, username, email }: { user_id?: str
 
 export const findByUsername = async (username: string): Promise<User | null> => {
     const repo = new UserRepository();
-    let result = await repo.find({ username });
+    const result = await repo.find({ username });
     return result[0] || null;
 }
 
 export const findByEmail = async (email: string): Promise<User | null> => {
     const repo = new UserRepository();
-    let result = await repo.find({ email });
+    const result = await repo.find({ email });
     return result[0] || null;
 }
 
@@ -63,7 +62,7 @@ export const findByUsernameOrEmail = async (usernameOrEmail: string): Promise<Us
 
 export const getUserWithRoles = async (userId: string): Promise<UserWithRoles> => {
     const repo = new UserRepository();
-    let result = await repo.findById(userId);
+    const result = await repo.findById(userId);
     if (!result) throw new Error(`User id not found: ${userId}`);
 
     return { ...result, roles: await getRoles(result.id) };
@@ -189,9 +188,17 @@ export const logoutUser = async (userId: UserId, deviceId: string) => {
     const refreshTokens = await repo.find({ deviceId, userId });
     refreshTokens.forEach(v => {
         //repo.delete(v.id);
-        repo.update
         if (!v.is_used) repo.query(`update refresh_tokens
                                     set used_at = now()
                                     where id = $1`, [v.id]);
     });
+}
+
+export const findByIdOrVanityId = async (idOrVanityId: string): Promise<User | null> => {
+    const repo = new UserRepository();
+    let result = await repo.find({ vanity_id: idOrVanityId });
+    if (!result[0]) {
+        result = await repo.find({ id: idOrVanityId });
+    }
+    return result[0] || null;
 }

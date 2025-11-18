@@ -1,23 +1,34 @@
-import type User from '@shared/models/generated/User';
-import type { UserId, UserInitializer, UserMutator } from '@shared/models/generated/User';
+import type { User, UserId, UserInitializer, UserMutator } from '@shared/models/generated/User';
 import { BaseRepository } from './BaseRepository';
 
+type FindParams = {
+    id?: string;
+    username?: string;
+    email?: string;
+    vanity_id?: string;
+}
+
 export class UserRepository extends BaseRepository<User> {
-    async find({ id, username, email }: { id?: string, username?: string, email?: string }): Promise<User[]> {
+    async find({ id, username, email, vanity_id }: FindParams): Promise<User[]> {
         const filters: string[] = [];
         const values: unknown[] = [];
 
+        //where
         id && filters.push(`id = $${filters.length + 1}`) && values.push(id);
         username && filters.push(`username = $${filters.length + 1}`) && values.push(username);
         email && filters.push(`email = $${filters.length + 1}`) && values.push(email);
+        vanity_id && filters.push(`vanity_id = $${filters.length + 1}`) && values.push(vanity_id);
 
         if (filters.length == 0) {
             throw new Error('At least one filter must be provided');
         }
 
-        const result = await this.pool.query<User>(`select *
-                                                      from users
-                                                      where ${filters.join(' and ')}`, values);
+        let filter = filters.join(' and ');
+        filter = filter ? `where ${filter}` : '';
+
+        const result = await this.query<User>(`select *
+                                               from users
+                                               ${filter}`, values);
         return result.rows;
     }
 
@@ -27,7 +38,7 @@ export class UserRepository extends BaseRepository<User> {
     }
 
     async create(item: UserInitializer): Promise<User> {
-        const entries = Object.entries(item).filter(([key, value]) => value != undefined);
+        const entries = Object.entries(item).filter(([key, value]) => value != undefined && key != 'id');
         const columns = entries.map(([key]) => key).join(', ');
         const placeholders = entries.map((_, i) => `$${i + 1}`).join(', ');
         const values = entries.map(([_, value]) => value);

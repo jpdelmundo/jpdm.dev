@@ -14,13 +14,6 @@ export const ApiErrorCode = {
 
 export type ApiErrorCode = (typeof ApiErrorCode)[keyof typeof ApiErrorCode];
 
-export interface PaginatedData<T> {
-    items: T[];
-    page: number;
-    limit: number;
-    total: number;
-}
-
 export interface ApiErrorDetail {
     message: string;
     code?: ApiErrorCode;

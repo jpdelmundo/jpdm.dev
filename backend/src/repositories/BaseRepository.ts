@@ -1,3 +1,5 @@
+import type { FindParamsBase } from '@/types/FindParams';
+import type { InferPaginatedResult } from '@/types/InferPaginatedResult';
 import { Pool, type QueryResultRow } from 'pg';
 import { getFullQuery } from '../utils/pgHelper';
 
@@ -21,7 +23,7 @@ export abstract class BaseRepository<T extends QueryResultRow> {
         return this.pool.query<R>(queryText, values);
     }
 
-    abstract find(filter: unknown): Promise<T[] | null>;
+    abstract find<P extends FindParamsBase>(params: P): Promise<InferPaginatedResult<P, T>>;
     abstract findById(id: string): Promise<T | null>;
     abstract create(item: T): Promise<T>;
     abstract update(id: string, item: Partial<T>): Promise<T[]>;

@@ -18,16 +18,13 @@ export class ClientApiError extends Error {
 }
 
 type ClientApiResult<T> = ApiResult<T> & { status: number };
-
 type JsonPrimitive = string | number | boolean | null;
 type JsonArray = JsonValue[];
-interface JsonObject {
-    [key: string]: JsonValue;
-}
+interface JsonObject { [key: string]: JsonValue; }
 type JsonValue = JsonPrimitive | JsonObject | JsonArray;
-
 type ApiPostBody = JsonObject | FormData;
 type ApiGetParams = Record<string, string | number | boolean> | URLSearchParams;
+
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
 export async function apiRequest<T>(input: RequestInfo | URL, init?: RequestInit, isRetry = false) {

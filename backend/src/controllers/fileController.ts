@@ -5,7 +5,7 @@ import type { FileInitializer } from '@shared/models/generated/File';
 import type { Request, Response } from 'express';
 import { fileTypeFromFile } from 'file-type';
 import fs from 'fs';
-import path from 'path';
+import { imageSizeFromFile } from 'image-size/fromFile';
 
 export const upload = async (req: Request, res: Response): Promise<Response> => {
     const authReq = req as AuthorizedRequest;
@@ -20,7 +20,9 @@ export const upload = async (req: Request, res: Response): Promise<Response> => 
         return fail(res, 'File type not allowed');
     }
 
-    const filepath = file.path.replace(/\\/g, '/') + path.extname(file.originalname);
+    const filepath = file.path.replace(/\\/g, '/');
+    const dimensions = type.mime.startsWith('image/') ? await imageSizeFromFile(`/${filepath}`) : null;
+
     const newFile: FileInitializer = {
         user_id: authReq.user.id,
         filename: file.filename,
@@ -29,7 +31,8 @@ export const upload = async (req: Request, res: Response): Promise<Response> => 
         path: `/${filepath}`,
         size: file.size,
         url: `/${filepath}`,
-        expire_at: new Date(Date.now() + (60 * 60 * 1000))
+        expire_at: new Date(Date.now() + (60 * 60 * 1000)),
+        ...(dimensions ? { width: dimensions.width, height: dimensions.height } : {})
     };
     const result = await createFile(newFile);
 

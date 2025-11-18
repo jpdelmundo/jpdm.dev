@@ -22,8 +22,9 @@ export default function TextField(props: TextFieldPropsCustom) {
                 label=""
                 helperText=""
                 {...(inputTextAlign && { slotProps: { htmlInput: { sx: { textAlign: inputTextAlign } } } })} />
-            <Collapse in={!!helperText} timeout={300}>
+            <Collapse in={!!helperText} timeout={300} className="helper-text-container">
                 <Typography
+                    className="helper-text"
                     color={error ? 'error.main' : 'text.secondary'}
                     sx={{ mt: '2px', ml: '14px', ...(isHelperTextCentered && { textAlign: inputTextAlign }) }}
                 >

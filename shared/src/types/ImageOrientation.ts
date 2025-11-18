@@ -1,0 +1,1 @@
+export type ImageOrientation = 'landscape' | 'portrait' | 'square' | 'unknown';

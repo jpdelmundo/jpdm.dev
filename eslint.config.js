@@ -1,11 +1,12 @@
 import js from '@eslint/js';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
+import { defineConfig } from 'eslint/config';
 import globals from 'globals';
 import path from 'path';
 import tseslint from 'typescript-eslint';
 
-export default tseslint.config([
+export default defineConfig([
   //globalIgnores(['frontend/dist']),
   {
     ignores: ['**/dist', '**/node_modules']
@@ -67,6 +68,12 @@ export default tseslint.config([
         tsconfigRootDir: path.resolve('./'),
       }
     },
+    rules: {
+      '@typescript-eslint/no-unused-expressions': [
+        'error',
+        { allowShortCircuit: true }
+      ],
+    }
   },
   //shared
   {
@@ -79,5 +86,11 @@ export default tseslint.config([
       ecmaVersion: 2020,
       globals: globals.node
     },
+    rules: {
+      '@typescript-eslint/no-unused-expressions': [
+        'error',
+        { allowShortCircuit: true }
+      ],
+    }
   }
 ]);

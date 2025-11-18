@@ -1,3 +1,4 @@
+import { getPosts } from '@/services/postService';
 import { ApiErrorCode } from '@shared/types/ApiResult';
 import { jsonBase64Decode } from '@shared/utils/encoding';
 import { validatePassword } from '@shared/utils/validate';
@@ -17,7 +18,7 @@ export const profile = async (req: Request, res: Response): Promise<Response> =>
 }
 
 export const create = async (req: Request, res: Response): Promise<Response> => {
-    const { username, password, fingerprint, token, return_access_token } = req.body;
+    const { username, password, fingerprint, token } = req.body;
 
     const captchaVerifyResponse = await fetch('https://www.google.com/recaptcha/api/siteverify', {
         method: 'post',
@@ -81,4 +82,26 @@ export const emailCodeConfirm = async (req: Request, res: Response): Promise<Res
     if (!result) return fail(res, 'That code doesn\'t look right. Please check and try again.');
 
     return ok(res);
+}
+
+export const posts = async (req: Request, res: Response): Promise<Response> => {
+    const { page_num } = req.query;
+    const { user_or_vanity_id } = req.params;
+    if (!user_or_vanity_id) return fail(res, 'Cannot fetch posts. Missing user id.');
+
+    const user = await userService.findByIdOrVanityId(user_or_vanity_id);
+    if (!user) return fail(res, 'Cannot fetch posts. User not found.');
+    const user_id = user.id;
+
+    const posts = getPosts({
+        user_id,
+        visibility: 'public',
+        is_published: true,
+        page_num: page_num ? parseInt(String(page_num)) : 1,
+        page_size: 30,
+        order_by: 'created_at',
+        order_dir: 'desc'
+    });
+
+    return ok(res, posts);
 }

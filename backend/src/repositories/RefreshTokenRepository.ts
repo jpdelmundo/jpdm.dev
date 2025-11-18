@@ -1,5 +1,4 @@
-import type RefreshToken from '@shared/models/generated/RefreshToken';
-import type { RefreshTokenId, RefreshTokenInitializer, RefreshTokenMutator } from '@shared/models/generated/RefreshToken';
+import type { RefreshToken, RefreshTokenId, RefreshTokenInitializer, RefreshTokenMutator } from '@shared/models/generated/RefreshToken';
 import { BaseRepository } from './BaseRepository';
 
 interface FindParams {
