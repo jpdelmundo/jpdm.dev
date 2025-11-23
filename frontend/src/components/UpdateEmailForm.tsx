@@ -1,5 +1,5 @@
 import { getErrorMessage, isValidEmail } from '@/utils/helper';
-import { ApiErrorCode, type ApiResult } from '@shared/types/ApiResult';
+import { type ApiResult } from '@shared/types/ApiResult';
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import TextField from './TextField';
@@ -8,6 +8,7 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import { ErrorCode } from '@shared/types/ErrorCode';
 
 export type FormInput = {
     email?: string;
@@ -15,7 +16,7 @@ export type FormInput = {
 };
 
 export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed }: {
-    onEmailSubmit: (formInput: FormInput) => Promise<ApiResult<{ code: ApiErrorCode }>>,
+    onEmailSubmit: (formInput: FormInput) => Promise<ApiResult<{ code: ErrorCode }>>,
     onCodeSubmit: (formInput: FormInput) => Promise<ApiResult<never>>,
     onEmailConfirmed: (result: ApiResult<never>) => void
 }) {
@@ -33,7 +34,7 @@ export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed 
             if (result.ok) {
                 setStep('code');
             } else {
-                if (result.error?.code == ApiErrorCode.EMAIL_ALREADY_USED) setError('email', { type: 'manual', message: 'Please use a different email' }, { shouldFocus: true });
+                if (result.error?.code == ErrorCode.ALREADY_USED) setError('email', { type: 'manual', message: 'Please use a different email' }, { shouldFocus: true });
                 setErrorMessage(getErrorMessage(result));
             }
         } else if (step == 'code') {

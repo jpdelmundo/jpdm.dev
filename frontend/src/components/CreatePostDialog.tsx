@@ -37,9 +37,10 @@ export type FormInput = {
     content: string;
 };
 
-export function CreatePostDialog({ open, closeDialog }: {
+export function CreatePostDialog({ open, closeDialog, onPosted }: {
     open: boolean,
-    closeDialog?: () => void
+    closeDialog?: () => void,
+    onPosted: () => void
 }) {
     const { register, handleSubmit, reset, formState: { errors, isValid }, resetField, setFocus } = useForm<FormInput>({
         mode: 'onChange'
@@ -111,6 +112,9 @@ export function CreatePostDialog({ open, closeDialog }: {
                 setImageFiles([]);
                 setErrorMessage('');
                 uploadedImages.length = 0;
+                setTitleInputHidden(true);
+                resetField('title');
+                onPosted?.();
                 closeDialog?.();
             } else {
                 setErrorMessage(getErrorMessage(result));
@@ -179,7 +183,11 @@ export function CreatePostDialog({ open, closeDialog }: {
         })();
     }, [imageFiles]);
 
-    console.log({ isValid });
+    useEffect(() => {
+        open && setTimeout(() => {
+            setFocus('content');
+        }, 10);
+    }, [open]);
 
     return (
         <Dialog
@@ -189,7 +197,6 @@ export function CreatePostDialog({ open, closeDialog }: {
             transitionDuration={0} //disable transition
             fullWidth
         >
-
             <DialogTitle textAlign="center">Create post</DialogTitle>
             <DialogContent sx={{ p: '15px' }}>
                 <form
@@ -223,8 +230,9 @@ export function CreatePostDialog({ open, closeDialog }: {
                             multiline
                             {...register('content',
                                 {
-                                    required: 'Post body is required',
-                                    maxLength: { value: 2000, message: 'Post body length too long' }
+                                    required: 'Post content required',
+                                    maxLength: { value: 2000, message: 'Post body length too long' },
+                                    onChange: () => { setErrorMessage('') }
                                 }
                             )}
                             error={!!errors.content}
@@ -271,7 +279,7 @@ export function CreatePostDialog({ open, closeDialog }: {
                             loading={isSubmitting}
                             fullWidth
                         >Post</Button>
-                        <Typography color="error" textAlign="center">{errorMessage}</Typography>
+                        {errorMessage && <Typography color="error" textAlign="center">{errorMessage}</Typography>}
                     </Stack>
                 </Stack>
             </DialogActions>

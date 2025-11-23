@@ -1,5 +1,5 @@
 import { apiPost } from '@/api/apiClient';
-import { RegisterForm, type FormInput, type FormSubmitResult as RegisterFormSubmitResult } from '@/components/RegisterForm';
+import { SignUpForm, type FormInput, type FormSubmitResult as SignUpFormSubmitResult } from '@/components/SignUpForm';
 import { UpdateEmailForm, type FormInput as EmailFormInput } from '@/components/UpdateEmailForm';
 import { useAuthStore } from '@/store/useAuthStore';
 import { getFingerprint } from '@/utils/device';
@@ -12,12 +12,12 @@ import { useState } from 'react';
 import { GoogleReCaptchaProvider, useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { Link, useNavigate } from 'react-router-dom';
 
-function RegisterContent() {
-    const [step, setStep] = useState<'create_user' | 'update_email' | 'registered'>('create_user');
+function SignUpContent() {
+    const [step, setStep] = useState<'create_user' | 'update_email' | 'signed_up'>('create_user');
     const { executeRecaptcha } = useGoogleReCaptcha();
     const navigate = useNavigate();
 
-    const submit = async (formInput: FormInput): Promise<ApiResult<RegisterFormSubmitResult>> => {
+    const submit = async (formInput: FormInput): Promise<ApiResult<SignUpFormSubmitResult>> => {
         console.log({ formInput });
 
         if (!executeRecaptcha) {
@@ -27,14 +27,14 @@ function RegisterContent() {
         const token = await executeRecaptcha('submit_form');
         console.log({ token });
 
-        const res = await apiPost<RegisterFormSubmitResult>('/user/create', { ...formInput, fingerprint: jsonBase64Encode(getFingerprint()), token });
+        const res = await apiPost<SignUpFormSubmitResult>('/user/create', { ...formInput, fingerprint: jsonBase64Encode(getFingerprint()), token });
         return res; //return to show error message on form
     };
 
-    const registerSuccess = (result: ApiResult<RegisterFormSubmitResult>) => {
+    const signUpSuccess = (result: ApiResult<SignUpFormSubmitResult>) => {
         if (!result.data?.access_token) {
-            //redirect to login
-            navigate('/login', { replace: true });
+            //redirect to signin
+            navigate('/signin', { replace: true });
         } else {
             //set access token and show email update form
             useAuthStore.getState().setToken(result.data.access_token);
@@ -53,26 +53,35 @@ function RegisterContent() {
     }
 
     const emailConfirmed = async (result: ApiResult<never>) => {
-        if (result.ok) setStep('registered');
+        if (result.ok) setStep('signed_up');
         //redirect or add link to home?
     }
 
     return <Paper elevation={0} sx={{ p: 6, maxWidth: 400, mx: 'auto' }}>
-        {step == 'create_user' && <RegisterForm onSubmit={submit} onRegisterSuccess={registerSuccess} />}
+        {step == 'create_user' && <SignUpForm onSubmit={submit} onSignUpSuccess={signUpSuccess} />}
 
         {step == 'update_email' && <>
             <UpdateEmailForm onEmailSubmit={emailSubmit} onCodeSubmit={codeSubmit} onEmailConfirmed={emailConfirmed} />
             <Box textAlign="center" mt={2}><Link to="/">I'll do this later.</Link></Box>
         </>}
 
-        {step == 'registered' && <Typography variant="h5" fontWeight="bold">Registered</Typography>}
+        {step == 'signed_up' && <Typography variant="h5" fontWeight="bold">Signed Up</Typography>}
     </Paper>
 }
 
-export function Register() {
+export function SignUp() {
     return (
-        <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHAV3_SITE_KEY}>
-            <RegisterContent />
-        </GoogleReCaptchaProvider>
+        <Box
+            display={'flex'}
+            justifyContent={'center'}
+            alignItems={'center'}
+            minHeight={'100%'}
+        >
+            <Box mt={'-60px'}>
+                <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHAV3_SITE_KEY}>
+                    <SignUpContent />
+                </GoogleReCaptchaProvider>
+            </Box>
+        </Box>
     );
 }

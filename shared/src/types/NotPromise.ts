@@ -1,0 +1,1 @@
+export type NotPromise<T> = T extends Promise<infer U> ? U : T;

@@ -1,3 +1,3 @@
-import type { ApiErrorCode } from '@shared/types/ApiResult';
+import type { ErrorCode } from '@shared/types/ErrorCode';
 
-export type FormSubmitResult = { success: boolean; message?: string; code?: ApiErrorCode }
+export type FormSubmitResult = { success: boolean; message?: string; code?: ErrorCode }

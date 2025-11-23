@@ -11,7 +11,7 @@ export const upload = async (req: Request, res: Response): Promise<Response> => 
     const authReq = req as AuthorizedRequest;
     const file = req.file;
     if (!file) return fail(res, 'Missing upload file');
-
+    console.log({ file });
     const type = await fileTypeFromFile(file.path);
     if (!type) return fail(res, 'Cannot determine file type');
 
@@ -20,17 +20,20 @@ export const upload = async (req: Request, res: Response): Promise<Response> => 
         return fail(res, 'File type not allowed');
     }
 
+    //rename with extension
     const filepath = file.path.replace(/\\/g, '/');
-    const dimensions = type.mime.startsWith('image/') ? await imageSizeFromFile(`/${filepath}`) : null;
+    const dimensions = type.mime.startsWith('image/') ? await imageSizeFromFile(`${filepath}`) : null;
+    const filepathWithExt = `${filepath}.${type.ext}`;
+    const filenameWithExt = `${file.filename}.${type.ext}`;
+    fs.promises.rename(filepath, filepathWithExt);
 
     const newFile: FileInitializer = {
         user_id: authReq.user.id,
-        filename: file.filename,
+        filename: filenameWithExt,
         orig_filename: file.originalname,
         mime_type: file.mimetype,
-        path: `/${filepath}`,
+        path: filepathWithExt,
         size: file.size,
-        url: `/${filepath}`,
         expire_at: new Date(Date.now() + (60 * 60 * 1000)),
         ...(dimensions ? { width: dimensions.width, height: dimensions.height } : {})
     };

@@ -1,12 +1,12 @@
+import { ServiceError } from '@/errors/ServiceError';
 import type UserWithRoles from '@shared/models/extensions/UserWithRoles';
 import type { RefreshTokenInitializer } from '@shared/models/generated/RefreshToken';
 import type { User, UserId, UserInitializer } from '@shared/models/generated/User';
 import type { UserProfile } from '@shared/models/generated/UserProfile';
 import type { UserRole } from '@shared/models/generated/UserRole';
+import { ErrorCode } from '@shared/types/ErrorCode';
 import type { TokenUserData } from '@shared/types/Jwt';
 import * as bcrypt from 'bcrypt';
-import { ErrorCode } from 'src/errors/ErrorCode';
-import type { ServiceResult } from 'src/types/ServiceResult';
 import { RefreshTokenRepository } from '../repositories/RefreshTokenRepository';
 import { UserProfileRepository } from '../repositories/UserProfileRepository';
 import { UserRepository } from '../repositories/UserRepository';
@@ -95,14 +95,14 @@ export const createRefreshToken = async (data: RefreshTokenInitializer) => {
     return result;
 }
 
-export const createUser = async (data: UserInitializer): Promise<ServiceResult<User>> => {
+export const createUser = async (data: UserInitializer): Promise<User> => {
     const repo = new UserRepository();
 
     const checkUsername = await findByUsername(data.username);
-    if (checkUsername?.id) return { ok: false, error: { message: 'Username already used by another account', code: ErrorCode.USERNAME_ALREADY_USED } };
+    if (checkUsername?.id) throw new ServiceError('The username chosen is already in use by another account', ErrorCode.ALREADY_USED, { param: 'email' });
 
     const result = await repo.create(data);
-    return { ok: true, data: result };
+    return result;
 }
 
 export const isEmailAlreadyUsed = async (email: string) => {
@@ -139,6 +139,17 @@ export const isAllowedToEmailConfirmCode = async (userId: UserId) => {
 }
 
 export const sendEmailConfirmCode = async (userId: UserId, email: string) => {
+    //check if email is used
+    if (await isEmailAlreadyUsed(email)) throw new ServiceError('The email address is already used in another account.', ErrorCode.ALREADY_USED, { param: 'email' });
+    //not existing, create code, send email
+
+    const checkAllowed = await isAllowedToEmailConfirmCode(userId);
+    if (!checkAllowed.allowed) {
+        if (checkAllowed.reason == 'max_sent_limit') throw new ServiceError('Request limit reached. Please try again after 1 hour.', ErrorCode.MAX_SENT_LIMIT);
+        if (checkAllowed.reason == 'cooldown') throw new ServiceError('Still on cooldown...', ErrorCode.COOLDOWN, { cooldown: checkAllowed.cooldown });
+        throw new Error();
+    }
+
     //generate
     const repo = new UserRepository();
     const code = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
@@ -153,6 +164,7 @@ export const sendEmailConfirmCode = async (userId: UserId, email: string) => {
     });
 
     //TODO add logging here to monitor failed emails?
+    if (!mailResult || mailResult.rejected.length > 0 || !mailResult.response) throw new Error(`Problem generating/sending email confirm code for user : ${userId}`);
 
     return mailResult;
 }
@@ -182,7 +194,7 @@ export const confirmEmailCode = async (userId: UserId, code: string) => {
     return true;
 }
 
-export const logoutUser = async (userId: UserId, deviceId: string) => {
+export const signOutUser = async (userId: UserId, deviceId: string) => {
     if (!deviceId) return
     const repo = new RefreshTokenRepository();
     const refreshTokens = await repo.find({ deviceId, userId });
@@ -194,11 +206,14 @@ export const logoutUser = async (userId: UserId, deviceId: string) => {
     });
 }
 
-export const findByIdOrVanityId = async (idOrVanityId: string): Promise<User | null> => {
+export const findById = async (id: string): Promise<User | null> => {
     const repo = new UserRepository();
-    let result = await repo.find({ vanity_id: idOrVanityId });
-    if (!result[0]) {
-        result = await repo.find({ id: idOrVanityId });
-    }
+    const result = await repo.find({ id });
+    return result[0] || null;
+}
+
+export const findByVanityId = async (vanity_id: string): Promise<User | null> => {
+    const repo = new UserRepository();
+    const result = await repo.find({ vanity_id });
     return result[0] || null;
 }

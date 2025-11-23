@@ -1,11 +1,11 @@
 import { getPosts } from '@/services/postService';
-import { ApiErrorCode } from '@shared/types/ApiResult';
+import { ErrorCode } from '@shared/types/ErrorCode';
 import { jsonBase64Decode } from '@shared/utils/encoding';
 import { validatePassword } from '@shared/utils/validate';
 import * as bcrypt from 'bcrypt';
 import type { Request, Response } from 'express';
-import { ErrorCode } from 'src/errors/ErrorCode';
 import type { AuthorizedRequest } from 'src/types/AuthorizedRequest';
+import { validate } from 'uuid';
 import { createRefreshTokenCookie } from '../services/authService';
 import * as userService from '../services/userService';
 import { fail, ok } from '../utils/apiHelper';
@@ -30,19 +30,14 @@ export const create = async (req: Request, res: Response): Promise<Response> => 
     });
 
     const captchaVerifyResult = await captchaVerifyResponse.json();
-    if (captchaVerifyResult.score <= 0.5) return fail(res, 'Low captcha score', 406, ApiErrorCode.BOT_DETECTED);
+    if (captchaVerifyResult.score <= 0.5) return fail(res, 'Low captcha score', 406, ErrorCode.BOT_DETECTED);
     if (!password) return fail(res, 'Password required');
     if (validatePassword(password).length > 0) return fail(res, 'Password invalid');
 
-    //check username
-    const createUserResult = await userService.createUser({ username, password: await bcrypt.hash(password, 12) });
-    if (!createUserResult.ok || !createUserResult.data) {
-        if (createUserResult.error?.code == ErrorCode.USERNAME_ALREADY_USED) return fail(res, 'The username you\'ve chosen is already in use by another account', 400, ApiErrorCode.USERNAME_ALREADY_USED);
-        throw new Error('Failed creating user');
-    }
+    //create user
+    const newUser = await userService.createUser({ username, password: await bcrypt.hash(password, 12) });
 
     //create jwt and refresh token
-    const newUser = createUserResult.data;
     const tokenData = await userService.getTokenData({ username: newUser.username });
     if (!tokenData) throw new Error('Cannot get token data');
 
@@ -57,19 +52,8 @@ export const create = async (req: Request, res: Response): Promise<Response> => 
 export const emailCode = async (req: Request, res: Response): Promise<Response> => {
     const authReq = req as AuthorizedRequest;
     const { email } = req.body;
-    //check if email is used
-    if (await userService.isEmailAlreadyUsed(email)) return fail(res, 'The email address is already used in another account.', 409, ApiErrorCode.EMAIL_ALREADY_USED);
-    //not existing, create code, send email
 
-    const checkAllowed = await userService.isAllowedToEmailConfirmCode(authReq.user.id);
-    if (!checkAllowed.allowed) {
-        if (checkAllowed.reason == 'max_sent_limit') return fail(res, 'Request limit reached. Please try again after 1 hour.', 429);
-        if (checkAllowed.reason == 'cooldown') return fail(res, 'Still on cooldown...', 425, null, { cooldown: checkAllowed.cooldown });
-        return fail(res, 'Something went wrong');
-    }
-
-    const result = await userService.sendEmailConfirmCode(authReq.user.id, email);
-    if (!result || result.rejected.length > 0 || !result.response) throw Error(`Problem generating/sending email confirm code for user : ${authReq.user!.id}`);
+    await userService.sendEmailConfirmCode(authReq.user.id, email);
 
     return ok(res);
 }
@@ -89,11 +73,13 @@ export const posts = async (req: Request, res: Response): Promise<Response> => {
     const { user_or_vanity_id } = req.params;
     if (!user_or_vanity_id) return fail(res, 'Cannot fetch posts. Missing user id.');
 
-    const user = await userService.findByIdOrVanityId(user_or_vanity_id);
+    const user = validate(user_or_vanity_id) //if uuid format
+        ? await userService.findById(user_or_vanity_id)
+        : await userService.findByVanityId(user_or_vanity_id);
     if (!user) return fail(res, 'Cannot fetch posts. User not found.');
     const user_id = user.id;
 
-    const posts = getPosts({
+    const posts = await getPosts({
         user_id,
         visibility: 'public',
         is_published: true,

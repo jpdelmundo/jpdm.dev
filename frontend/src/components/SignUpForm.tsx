@@ -2,7 +2,7 @@ import { getErrorMessage } from '@/utils/helper';
 import CloseIcon from '@mui/icons-material/Close';
 import type { UserId } from '@shared/models/generated/User';
 import type { AccessToken } from '@shared/types/AccessToken';
-import { ApiErrorCode, type ApiResult } from '@shared/types/ApiResult';
+import { type ApiResult } from '@shared/types/ApiResult';
 import { validatePassword as _validatePassword } from '@shared/utils/validate';
 import { useEffect, useState } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
@@ -16,6 +16,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Collapse from '@mui/material/Collapse';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import { ErrorCode } from '@shared/types/ErrorCode';
 
 export type FormSubmitResult = { access_token: AccessToken, user_id: UserId }
 
@@ -26,9 +27,9 @@ export type FormInput = {
     email?: string;
 };
 
-export function RegisterForm({ onSubmit, onRegisterSuccess }: {
+export function SignUpForm({ onSubmit, onSignUpSuccess }: {
     onSubmit: (formInput: FormInput) => Promise<ApiResult<FormSubmitResult>>,
-    onRegisterSuccess: (result: ApiResult<FormSubmitResult>) => void
+    onSignUpSuccess: (result: ApiResult<FormSubmitResult>) => void
 }) {
     const { register, handleSubmit, setError, formState: { errors }, watch } = useForm<FormInput>();
     const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
@@ -38,7 +39,6 @@ export function RegisterForm({ onSubmit, onRegisterSuccess }: {
     const password = watch('password', '');
 
     useEffect(() => {
-        console.log('RegisterForm useEffect');
         if (!password) setPasswordErrors([]);
     }, [password]);
 
@@ -53,10 +53,10 @@ export function RegisterForm({ onSubmit, onRegisterSuccess }: {
         setIsSubmitting(true);
         const result = await onSubmit(data);
         if (result.ok) {
-            onRegisterSuccess(result);
+            onSignUpSuccess(result);
         } else {
-            if (result.error?.code == ApiErrorCode.USERNAME_ALREADY_USED) {
-                setError('username', { type: 'manual', message: 'Please choose a different username' });
+            if (result.error?.code == ErrorCode.ALREADY_USED) {
+                setError('username', { type: 'manual', message: 'Please choose a different username' }, { shouldFocus: true });
             }
             setErrorMessage(getErrorMessage(result));
         }

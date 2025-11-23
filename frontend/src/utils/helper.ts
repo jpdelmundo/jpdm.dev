@@ -48,3 +48,28 @@ export const getImageFileDetail = (file: File): Promise<ImageDetail> => {
         };
     });
 }
+
+export const getRelativeTime = (dateTime: string, locale: string = navigator.language) => {
+    const date = new Date();
+    const past = new Date(dateTime);
+    const diff = (past.getTime() - date.getTime()) / 1000; //ms to s
+
+    const minutes = diff / 60;
+    const hours = diff / 3600;
+    const days = diff / 86400;
+
+    if (Math.abs(days) >= 1) {
+        return past.toLocaleString(locale);
+    }
+
+    const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+    if (Math.abs(hours) >= 1) {
+        return rtf.format(Math.round(hours), 'hour');
+    }
+
+    if (Math.abs(minutes) >= 1) {
+        return rtf.format(Math.round(minutes), 'minute');
+    }
+
+    return rtf.format(Math.round(diff), 'second');
+}

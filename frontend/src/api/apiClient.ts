@@ -1,11 +1,11 @@
 import { getNewToken } from '@/auth/tokenManager';
 import { useAuthStore } from '@/store/useAuthStore';
 import type { ApiErrorDetail, ApiResult } from '@shared/types/ApiResult';
-import { ApiErrorCode } from '@shared/types/ApiResult';
+import { ErrorCode } from '@shared/types/ErrorCode';
 
 export class ClientApiError extends Error {
     public status: number;
-    public code?: ApiErrorCode;
+    public code?: ErrorCode;
 
     constructor(res: Response, detail: ApiErrorDetail) {
         super(detail.message);
@@ -41,7 +41,7 @@ export async function apiRequest<T>(input: RequestInfo | URL, init?: RequestInit
 
         if (!res.ok) {
             const { error } = { ...(await res.json()) };
-            if (error.code == ApiErrorCode.TOKEN_EXPIRED && !isRetry) {
+            if (error.code == ErrorCode.TOKEN_EXPIRED && !isRetry) {
                 try {
                     const newToken = await getNewToken();
                     if (newToken) {
@@ -119,7 +119,7 @@ export async function apiPost<T>(url: string, body?: ApiPostBody, onProgress?: (
 
                     //handle non-2xx response
                     const { error } = { ...(JSON.parse(xhr.responseText)) };
-                    if (error.code == ApiErrorCode.TOKEN_EXPIRED && !isRetry) {
+                    if (error.code == ErrorCode.TOKEN_EXPIRED && !isRetry) {
                         try {
                             const newToken = await getNewToken();
                             if (newToken) {

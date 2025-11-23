@@ -1,5 +1,5 @@
-import { ApiErrorCode } from '@shared/types/ApiResult';
 import type { DeviceFingerprint } from '@shared/types/DeviceFingerprint';
+import { ErrorCode } from '@shared/types/ErrorCode';
 import { jsonBase64Decode } from '@shared/utils/encoding';
 import type { Request, Response } from 'express';
 import { UnexpectedError } from 'src/errors/UnexpectedError';
@@ -16,7 +16,7 @@ interface LoginParams {
     remember: boolean;
 }
 
-export const login = async (req: Request, res: Response): Promise<Response> => {
+export const signIn = async (req: Request, res: Response): Promise<Response> => {
     const { username, password, remember, fingerprint }: LoginParams = req.body;
     if (await userService.isValidCredentials(username, password)) {
         //get user
@@ -31,17 +31,17 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
 
         return ok(res, accessToken);
     } else {
-        return fail(res, 'Invalid username or password', 401, ApiErrorCode.INVALID_CREDENTIALS);
+        return fail(res, 'Invalid username or password', 401, ErrorCode.INVALID_CREDENTIALS);
     }
 }
 
-export const logout = async (req: Request, res: Response): Promise<Response> => {
+export const signOut = async (req: Request, res: Response): Promise<Response> => {
     const authReq = req as AuthorizedRequest;
     const { fingerprint } = req.body;
     if (fingerprint) {
         const fingerprintObj = jsonBase64Decode(fingerprint) as DeviceFingerprint;
         const deviceId = fingerprintObj.device_id;
-        userService.logoutUser(authReq.user.id, deviceId);
+        userService.signOutUser(authReq.user.id, deviceId);
     }
 
     clearRefreshTokenCookie(req, res);
@@ -100,14 +100,14 @@ export const refreshToken = async (req: Request, res: Response): Promise<Respons
         //valid create new access token
         //get user
         const user = await userService.getTokenData({ user_id: refreshToken.user_id });
-        console.log({ user });
+        //console.log({ user });
         //create new access token
         const newAccessToken = generateAccessToken(user);
-        console.log({ newAccessToken });
+        //console.log({ newAccessToken });
         //create new refresh token only if the refresh token used is more than 1 hour old
         //if (Date.now() - refreshToken.created_at.getTime() > 3600000) {
         const newRefreshToken = await userService.createRefreshToken({ ...fingerprintObj, user_id: user.id, request_ip: req.ip || null, previous_refresh_token_id: refreshToken.id, remember: refreshToken.remember });
-        console.log({ newRefreshToken });
+        //console.log({ newRefreshToken });
 
         createRefreshTokenCookie(newRefreshToken, refreshToken.remember, req, res);
         //}

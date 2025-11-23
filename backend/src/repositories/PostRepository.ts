@@ -1,4 +1,4 @@
-import type { FindParamsPaginated } from '@/types/FindParams';
+import type { FindParamsBase, FindParamsPaginated } from '@/types/FindParams';
 import type { InferPaginatedResult } from '@/types/InferPaginatedResult';
 import { isPaginated } from '@/utils/dataHelper';
 import type { Post, PostId, PostInitializer, PostMutator } from '@shared/models/generated/Post';
@@ -19,7 +19,7 @@ type FindParams = {
 }
 
 export class PostRepository extends BaseRepository<Post> {
-    async find<P extends FindParams, T extends Post>(params: P): Promise<InferPaginatedResult<P, T>> {
+    async find<P extends FindParamsBase, T extends Post>(params: P): Promise<InferPaginatedResult<P, T>> {
         const { id, user_id, visibility, is_published, is_admin, order_by, order_dir } = params as FindParams;
         const filters: string[] = [];
         const values: unknown[] = [];
@@ -50,17 +50,18 @@ export class PostRepository extends BaseRepository<Post> {
         //limit
         let limit: string = '';
         if (isPaginated(params)) {
+            const totalResult = await this.query<{ total: number }>(`select count(*) total
+                                                                     from posts
+                                                                     ${filter}`, values);
+
             const { page_num, page_size } = params as FindParamsPaginated;
             const pageNum = Math.min(Math.abs(Number(page_num)) || 1, 1000);
             const pageSize = Math.min(Math.abs(Number(page_size)) || 30, 30);
             limit = `limit $${values.length + 1}`;
-            values.push(`${(pageNum - 1) * pageSize}`);
-            limit += ` offset $${values.length + 1}`;
             values.push(pageSize);
+            limit = `${limit} offset $${values.length + 1}`;
+            values.push((pageNum - 1) * pageSize);
 
-            const totalResult = await this.query<{ total: number }>(`select count(*) total
-                                                                     from posts
-                                                                     ${filter}`, values);
             const paginatedResult = await this.query(`select *
                                                       from posts
                                                       ${filter}
@@ -69,7 +70,7 @@ export class PostRepository extends BaseRepository<Post> {
 
             return {
                 page_items: paginatedResult.rows,
-                total: totalResult.rows[0]?.total || 0,
+                total: Number(totalResult.rows[0]?.total) || 0,
                 page_num: pageNum,
                 page_size: pageSize
             } as InferPaginatedResult<P, T>;
@@ -81,6 +82,7 @@ export class PostRepository extends BaseRepository<Post> {
                                          ${order}`, values);
         return result.rows as InferPaginatedResult<P, T>;
     }
+
 
     async findById(id: PostId): Promise<Post | null> {
         return (await this.find({ id }) as Post[])[0] || null;

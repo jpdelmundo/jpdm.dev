@@ -1,14 +1,14 @@
-import type { ErrorCode } from 'src/errors/ErrorCode';
+import type { ErrorCode } from '@shared/types/ErrorCode';
 
-export interface ErrorDetail {
+export interface ServiceErrorDetail {
     message: string;
     code?: ErrorCode;
-    data?: Record<string, unknown>
+    data?: unknown;
 }
 
 export type ServiceResult<T> = {
     ok: boolean;
     data?: T;
-    error?: ErrorDetail;
+    error?: ServiceErrorDetail;
     message?: string;
 };

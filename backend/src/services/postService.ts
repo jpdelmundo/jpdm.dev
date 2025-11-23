@@ -1,12 +1,15 @@
+import { ServiceError } from '@/errors/ServiceError';
 import { FileRepository } from '@/repositories/FileRepository';
 import { PostImageRepository } from '@/repositories/PostImageRepository';
 import { PostRepository } from '@/repositories/PostRepository';
+import { UserRepository } from '@/repositories/UserRepository';
 import type { InferPaginatedResult } from '@/types/InferPaginatedResult';
 import type PostExtended from '@shared/models/extensions/PostExtended';
 import type PostImageDetail from '@shared/models/extensions/PostImageDetail';
 import type { PostId, PostInitializer } from '@shared/models/generated/Post';
 import type { UserId } from '@shared/models/generated/User';
 import type { VisibilityEnum } from '@shared/models/generated/VisibilityEnum';
+import { ErrorCode } from '@shared/types/ErrorCode';
 import type { OrderDirection } from '@shared/types/OrderDirection';
 
 export const getPost = async (id: PostId): Promise<PostExtended> => {
@@ -14,8 +17,16 @@ export const getPost = async (id: PostId): Promise<PostExtended> => {
     const post = await postRepo.findById(id);
     if (!post) throw new Error(`Post not found: ${id}`);
 
+    const display_name = await getDisplayName(post.user_id);
     const images = await getPostImages(post.id);
-    const result: PostExtended = { ...post, images };
+    const result: PostExtended = { ...post, images, display_name };
+    return result;
+}
+
+const getDisplayName = async (id: UserId): Promise<string> => {
+    const repo = new UserRepository();
+    const postUser = await repo.findById(id);
+    const result = !postUser ? '[not found]' : postUser.username;
     return result;
 }
 
@@ -42,7 +53,10 @@ export const getPosts = async <P extends GetParams, T extends PostExtended>({ us
     });
 
     const items = ('page_items' in findResult ? findResult.page_items : findResult) as PostExtended[];
-    for (const post of items) post.images = await getPostImages(post.id);
+    for (const post of items) {
+        post.display_name = await getDisplayName(post.user_id);
+        post.images = await getPostImages(post.id);
+    }
 
     return findResult as InferPaginatedResult<P, T>;
 }
@@ -58,7 +72,7 @@ export const getPostImages = async (post_id: PostId): Promise<PostImageDetail[]>
             if (file) {
                 images.push({
                     ...postImage,
-                    url: file.url,
+                    url: `${process.env.STATIC_SERVER}${process.env.USERCONTENT_IMAGE_PATH}/${file.filename}`,
                     width: file.width || 0,
                     height: file.height || 0
                 });
@@ -70,8 +84,12 @@ export const getPostImages = async (post_id: PostId): Promise<PostImageDetail[]>
 }
 
 export const createPost = async (post: PostInitializer, { files }: { files?: { fileId: string; sort: number }[] }): Promise<PostExtended> => {
-    const postRepo = new PostRepository();
+    const { content } = post;
+    if (!content || content.trim().length == 0) throw new ServiceError('Content cannot be empty', ErrorCode.MISSING_PARAMETER, { param: 'content' });
+    if (content.length > 2000) throw new ServiceError('Content too long', ErrorCode.LENGTH_TOO_LONG, { param: 'content' });
+
     //create post
+    const postRepo = new PostRepository();
     const newPost = await postRepo.create(post);
     if (!newPost) throw new Error('Failed creating post');
 

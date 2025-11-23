@@ -7,7 +7,6 @@ export const create = async (req: Request, res: Response): Promise<Response> => 
     const authReq = req as AuthorizedRequest;
     const user = authReq.user;
     const { title, content, files } = authReq.body;
-
     //create post
     const newPost = await createPost({ user_id: user.id, title, content }, { files });
     if (!newPost.id) return fail(res);
@@ -19,7 +18,7 @@ export const get = async (req: Request, res: Response): Promise<Response> => {
     const authReq = req as AuthorizedRequest;
     const user = authReq.user;
     const { page, rows } = req.query;
-    const posts = getPosts({
+    const posts = await getPosts({
         user_id: user.id,
         ...(page && { page_num: parseInt(String(page)) }),
         ...(rows && { rows: parseInt(String(rows)) }),

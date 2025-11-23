@@ -16,8 +16,11 @@ export const theme = createTheme({
         }
     },
     typography: {
-        fontSize: 15,
+        //fontSize: 15,
         fontFamily: 'Geist, Helvetica, Arial, sans-serif',
+        body1: {
+            fontSize: '15px'
+        },
         body2: {
             fontSize: 12
         }
@@ -26,13 +29,13 @@ export const theme = createTheme({
         borderRadius: 8
     },
     components: {
-        MuiCssBaseline: {
-            styleOverrides: {
-                html: {
-                    fontSize: '15px',
-                }
-            }
-        },
+        // MuiCssBaseline: {
+        //     styleOverrides: {
+        //         html: {
+        //             fontSize: '15px',
+        //         }
+        //     }
+        // },
         MuiOutlinedInput: {
             styleOverrides: {
                 root: ({ theme }) => ({
@@ -85,9 +88,9 @@ export const theme = createTheme({
             }
         },
         MuiButton: {
-            defaultProps: {
-                disableRipple: true
-            },
+            // defaultProps: {
+            //     disableRipple: true
+            // },
             styleOverrides: {
                 root: ({ theme }) => ({
                     fontSize: 15,
@@ -147,9 +150,45 @@ export const theme = createTheme({
                             marginTop: 0
                         },
                         '& .helper-text': {
-                            fontSize: '15px',
-                            marginTop: 0,
-                            marginLeft: '12px'
+                            fontSize: '14px',
+                            margin: 0
+                        }
+                    },
+                    '&.post': {
+                        borderRadius: '16px',
+                        padding: '25px',
+                        margin: '25px 0',
+                        '& .header': {
+                            marginBottom: '25px',
+                            gap: '10px',
+                            '& .MuiAvatar-root': {
+                                width: '32px',
+                                height: '32px'
+                            }
+                        },
+                        '& .user': {
+                            fontWeight: 'bold',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            lineHeight: 1.2
+                        },
+                        '& .title': {
+                            marginBottom: '5px',
+                            fontWeight: 'bold',
+                            wordBreak: 'break-word',
+                            wordWrap: 'break-word',
+                            lineHeight: 1
+                        },
+                        '& .content': {
+                            marginTop: '25px'
+                        },
+                        '& .date': {
+                            fontSize: '12px',
+                            color: '#888888',
+                            lineHeight: 1.2
+                        },
+                        '& .user-date-box': {
+                            maxWidth: '92%'
                         }
                     }
                 }
@@ -161,15 +200,36 @@ export const theme = createTheme({
                     '& .MuiDialog-paper': {
                         maxWidth: '500px',
                         boxShadow: '0 1px 2px #cccccc, 0 4px 8px #dddddd',
+                    },
+                    '& .MuiModal-backdrop': {
+                        backgroundColor: '#ffffffaa'
                     }
                 }
             }
         },
-        MuiBackdrop: {
+        MuiContainer: {
             styleOverrides: {
                 root: {
-                    backgroundColor: '#ffffff60',
+                    '&.header-container': {
+                        padding: '10px',
+                        backdropFilter: 'saturate(1.8) blur(20px)',
+                        maxWidth: 'unset !important',
+                        display: 'block',
+                        position: 'fixed',
+                        //borderBottom: 'solid 1px #e3e3e3'
+                    }
                 }
+            }
+        },
+        // MuiIconButton: {
+        //     defaultProps: {
+        //         disableRipple: true
+        //     }
+        // },
+        MuiButtonBase: {
+            defaultProps: {
+                disableRipple: true,
+                disableTouchRipple: true
             }
         }
     }

@@ -8,7 +8,7 @@ export function AuthInitializer() {
     const location = useLocation();
 
     useEffect(() => {
-        const pathsDontRefreshToken = ['/login', '/logout']; //do not refresh token on login and logout page load
+        const pathsDontRefreshToken = ['/signin', '/signout']; //do not refresh token on signin and signout page load
         if (!pathsDontRefreshToken.includes(location.pathname) && !ready) refreshToken();
     }, [location]);
 

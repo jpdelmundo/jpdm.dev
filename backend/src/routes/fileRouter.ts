@@ -1,23 +1,25 @@
 import * as controller from '@/controllers/fileController';
 import { Router } from 'express';
-import { fileTypeFromFile } from 'file-type';
-import multer from 'multer';
+import fs from 'fs';
+import multer, { diskStorage } from 'multer';
+
+const destination = String(process.env.UPLOAD_PATH);
+if (!fs.existsSync(destination)) {
+    fs.mkdirSync(destination, { recursive: true });
+}
 
 const upload = multer({
-    limits: {
-        fileSize: 10 * 1024 * 1024, //10MB
-    },
-    storage: multer.diskStorage({
-        destination: (req, file, callback) => {
-            callback(null, 'uploads/public');
-        },
-        filename: async (req, file, callback) => {
-            const type = await fileTypeFromFile(file.path);
-            if (!type) callback(new Error('Cannot determine file type'), '');
-
-            callback(null, `${file.filename}.${type?.ext}`);
+    limits: { fileSize: 10 * 1024 * 1024 }, //10MB
+    storage: diskStorage({
+        destination,
+    }),
+    fileFilter(req, file, callback) {
+        if (file.mimetype.startsWith('image/')) {
+            callback(null, true);
+        } else {
+            callback(new Error('Invalid file type'));
         }
-    })
+    }
 });
 
 export const router = Router();

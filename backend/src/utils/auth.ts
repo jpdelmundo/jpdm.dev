@@ -1,4 +1,4 @@
-import { ApiErrorCode } from '@shared/types/ApiResult';
+import { ErrorCode } from '@shared/types/ErrorCode';
 import type { TokenUserData } from '@shared/types/Jwt';
 import type { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
@@ -21,10 +21,10 @@ export const createRefreshTokenId = () => {
 
 export const verifyToken = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
-    if (!authHeader) throw new ApiError('Unauthorized request', 401, ApiErrorCode.AUTH_HEADER_MISSING);
+    if (!authHeader) throw new ApiError('Unauthorized request', 401, ErrorCode.AUTH_HEADER_MISSING);
 
     const token = authHeader.split(' ')[1];
-    if (!token) throw new ApiError('Invalid authorization', 401, ApiErrorCode.AUTH_HEADER_INVALID);
+    if (!token) throw new ApiError('Invalid authorization', 401, ErrorCode.AUTH_HEADER_INVALID);
 
     try {
         const accessSecret = process.env.JWT_ACCESS_SECRET;
@@ -37,9 +37,9 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
     } catch (err) {
         const e = err as Error;
         if (e.name == 'TokenExpiredError') {
-            throw new ApiError('Expired token', 401, ApiErrorCode.TOKEN_EXPIRED);
+            throw new ApiError('Expired token', 401, ErrorCode.TOKEN_EXPIRED);
         } else if (e.name == 'JsonWebTokenError' || e.name == 'NotBeforeError') {
-            throw new ApiError(e.message, 401, ApiErrorCode.TOKEN_INVALID);
+            throw new ApiError(e.message, 401, ErrorCode.TOKEN_INVALID);
         }
     }
 }

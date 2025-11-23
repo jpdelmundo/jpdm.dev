@@ -7,5 +7,5 @@ export function RequireAuth() {
     const ready = useAuthStore(s => s.ready);
     if (!ready) return null;
 
-    return isAuthenticated ? <Outlet /> : <Navigate to="/login" state={{ from: location }} replace />;
+    return isAuthenticated ? <Outlet /> : <Navigate to="/signin" state={{ from: location }} replace />;
 }

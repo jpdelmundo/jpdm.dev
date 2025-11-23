@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/store/useAuthStore';
-import { ApiErrorCode } from '@shared/types/ApiResult';
+import { ErrorCode } from '@shared/types/ErrorCode';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClientApiError } from '../api/apiClient';
@@ -13,9 +13,9 @@ export function GlobalErrorHandler() {
             const error = event.reason;
             console.error("Uncaught promise rejection:", error);
             if (error instanceof ClientApiError) {
-                if (error.code == ApiErrorCode.TOKEN_EXPIRED) {
+                if (error.code == ErrorCode.TOKEN_EXPIRED) {
                     clearToken();
-                    navigate('/login', { replace: true });
+                    navigate('/signin', { replace: true });
                 }
             }
         }

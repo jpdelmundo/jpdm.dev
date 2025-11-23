@@ -10,15 +10,16 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
+import { Link as RouterLink } from 'react-router-dom';
 
 export type FormInput = { username: string, password: string };
 
-export function LoginForm({ onSubmit, onLoginSuccess }: {
+export function SignInForm({ onSubmit, onSignInSuccess: onSignInSuccess }: {
     onSubmit: (formInput: FormInput) => Promise<ApiResult<AccessToken>>,
-    onLoginSuccess: (result: ApiResult<AccessToken>) => void
+    onSignInSuccess: (result: ApiResult<AccessToken>) => void
 }) {
-    console.log('LoginForm rendered at:', new Date().toISOString());
     //const formInputRef = useRef<FormInput>(Object.fromEntries(Object.keys({} as FormInput).map(key => [key, ''])) as FormInput);
     const formInputRef = useRef<FormInput>({ username: '', password: '' });
     const [errorMessage, setErrorMessage] = useState('');
@@ -66,7 +67,7 @@ export function LoginForm({ onSubmit, onLoginSuccess }: {
         setIsLoading(false);
 
         if (result.ok) {
-            onLoginSuccess(result);
+            onSignInSuccess(result);
         } else {
             setErrorMessage(getErrorMessage(result));
         }
@@ -96,7 +97,8 @@ export function LoginForm({ onSubmit, onLoginSuccess }: {
                     <FormControlLabel label="Remember me on this device" control={<Checkbox name="remember" onChange={handleChange} />} />
                 </div>
                 <Button type="submit" disabled={isLoading} variant="contained">Sign In</Button>
-                <Typography color="error" textAlign="center" minHeight="21px">{errorMessage}</Typography>
+                {errorMessage && <Typography color="error" textAlign="center">{errorMessage}</Typography>}
+                <Link component={RouterLink} to="/signup" textAlign={'center'} mt={1}>I want to create a new account</Link>
             </Box>
         </form>
     );

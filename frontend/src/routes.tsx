@@ -6,9 +6,9 @@ import { Users } from './pages/admin/Users';
 import { About } from './pages/public/About';
 import { Home } from './pages/public/Home';
 import { Layout } from './pages/public/Layout';
-import { Login } from './pages/public/Login';
 import { NotFound } from './pages/public/NotFound';
-import { Register } from './pages/public/Register';
+import { SignIn } from './pages/public/SignIn';
+import { SignUp } from './pages/public/SignUp';
 import { CreatePost } from './pages/user/CreatePost';
 
 const routes = [
@@ -16,10 +16,10 @@ const routes = [
         element: <Layout />,
         children: [
             { index: true, element: <Home /> },
-            { path: 'login', element: <Login /> },
+            { path: 'signin', element: <SignIn /> },
             { path: 'about', element: <About /> },
-            { path: 'register', element: <Register /> },
-            //{ path: 'logout', element: <Logout /> },
+            { path: 'signup', element: <SignUp /> },
+            //{ path: 'signout', element: <SignOut /> },
             {
                 path: 'user',
                 children: [

@@ -30,5 +30,6 @@ db/backup
 shared/**/generated
 certs/
 uploads/
+usercontent/
 *.tsbuildinfo
 *.cpuprofile

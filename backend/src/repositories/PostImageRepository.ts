@@ -1,16 +1,17 @@
+import type { InferPaginatedResult } from '@/types/InferPaginatedResult';
 import type { FileId } from '@shared/models/generated/File';
 import type { PostId } from '@shared/models/generated/Post';
 import type { PostImage, PostImageId, PostImageInitializer, PostImageMutator } from '@shared/models/generated/PostImage';
 import { BaseRepository } from './BaseRepository';
 
-interface FindParams {
+type FindParams = {
     id?: PostImageId;
     post_id?: PostId;
     file_id?: FileId;
 }
 
 export class PostImageRepository extends BaseRepository<PostImage> {
-    async find({ id, file_id, post_id }: FindParams): Promise<PostImage[]> {
+    async find<P extends FindParams, T extends PostImage>({ id, file_id, post_id }: P): Promise<InferPaginatedResult<P, T>> {
         const filters: string[] = [];
         const values: unknown[] = [];
 
@@ -23,13 +24,13 @@ export class PostImageRepository extends BaseRepository<PostImage> {
         }
 
         const result = await this.query<PostImage>(`select *
-                                               from post_files
+                                               from post_images
                                                where ${filters.join(' and ')}`, values);
-        return result.rows;
+        return result.rows as InferPaginatedResult<P, T>;
     }
 
     async findById(id: PostImageId): Promise<PostImage | null> {
-        return (await this.find({ id }))[0] || null;
+        return (await this.find({ id }) as PostImage[])[0] || null;
     }
 
     async create(item: PostImageInitializer): Promise<PostImage> {
@@ -38,7 +39,7 @@ export class PostImageRepository extends BaseRepository<PostImage> {
         const placeholders = entries.map((_, i) => `$${i + 1}`).join(', ');
         const values = entries.map(([_, value]) => value);
 
-        const sql = `insert into post_files (${columns})
+        const sql = `insert into post_images (${columns})
                      values (${placeholders})
                      returning *`;
         const result = await this.query<PostImage>(sql, values);
@@ -72,7 +73,7 @@ export class PostImageRepository extends BaseRepository<PostImage> {
             throw new Error('Update condition missing');
         }
 
-        const sql = `update post_files
+        const sql = `update post_images
                      set ${set.join(', ')}
                      where ${where.join(' and ')}
                      returning *`;
@@ -84,7 +85,7 @@ export class PostImageRepository extends BaseRepository<PostImage> {
 
     async delete(id: PostImageId): Promise<PostImage[]> {
         if (!id) throw new Error('Id missing');
-        const sql = `delete from post_files
+        const sql = `delete from post_images
                      where id = $1
                      returning *`;
         const result = await this.query<PostImage>(sql, [id]);
