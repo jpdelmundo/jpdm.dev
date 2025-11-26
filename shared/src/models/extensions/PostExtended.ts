@@ -1,7 +1,7 @@
 import type { Post } from '../generated/Post';
-import PostImageDetail from './PostImageDetail';
+import PostImageExtended from './PostImageExtended';
 
 export default interface PostExtended extends Post {
     display_name: string;
-    images: PostImageDetail[];
+    images: PostImageExtended[];
 }

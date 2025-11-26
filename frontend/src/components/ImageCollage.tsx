@@ -1,38 +1,37 @@
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import { useTheme } from '@mui/material/styles';
+import type PostImageExtended from '@shared/models/extensions/PostImageExtended';
 import type { ImageOrientation } from '@shared/types/ImageOrientation';
 import { CoverImage } from './CoverImage';
 
-type Image = {
-    url: string;
-    width: number;
-    height: number;
-}
-
-type ImageCollageParams = {
+type ImageCollageProps = {
     orientation: ImageOrientation
-    images: Image[];
+    images: PostImageExtended[];
+    onImageClick: (image: PostImageExtended) => void
 };
 
-export function ImageCollage({ orientation, images }: ImageCollageParams) {
+export function ImageCollage({ orientation, images, onImageClick }: ImageCollageProps) {
     const theme = useTheme();
+    // const showImageDialog = (image: Image) => {
+    //     navigate(`/posts/images/${image.id}`, { state: { from: location } });
+    // };
 
     return (
         <>
             {images.length == 1 && (
                 <Stack maxHeight={700} justifyContent="center" overflow="hidden">
-                    <CoverImage src={images[0].url} sx={{ maxHeight: 700, objectFit: 'contain' }} />
+                    <CoverImage onImageClick={onImageClick} image={images[0]} sx={{ maxHeight: 700, objectFit: 'contain' }} />
                 </Stack>
             )}
 
             {images.length == 2 && (
                 <Stack direction={orientation == 'landscape' ? 'column' : 'row'} gap="2px" maxHeight={orientation == 'landscape' ? 700 : 500} justifyContent="center">
                     <Box sx={{ minHeight: 0, flex: 1, overflow: 'hidden', justifyContent: 'center', alignItems: 'center', display: 'flex' }} >
-                        <CoverImage src={images[0].url} />
+                        <CoverImage onImageClick={onImageClick} image={images[0]} />
                     </Box>
                     <Box sx={{ minHeight: 0, flex: 1, overflow: 'hidden', justifyContent: 'center', alignItems: 'center', display: 'flex' }} >
-                        <CoverImage src={images[1].url} />
+                        <CoverImage onImageClick={onImageClick} image={images[1]} />
                     </Box>
                 </Stack>
             )}
@@ -40,14 +39,14 @@ export function ImageCollage({ orientation, images }: ImageCollageParams) {
             {images.length == 3 && (
                 <Stack direction={orientation == 'landscape' ? 'column' : 'row'} gap="2px" minHeight={470} maxHeight={550} justifyContent="center" overflow="hidden">
                     <Stack sx={{ flex: 1 }}>
-                        <CoverImage src={images[0].url} />
+                        <CoverImage onImageClick={onImageClick} image={images[0]} />
                     </Stack>
                     <Stack gap="2px" direction={orientation == 'landscape' ? 'row' : 'column'} sx={{ flex: 1 }}>
                         <Box sx={{ minHeight: 0, flex: 1 }}>
-                            <CoverImage src={images[1].url} />
+                            <CoverImage onImageClick={onImageClick} image={images[1]} />
                         </Box>
                         <Box sx={{ minHeight: 0, flex: 1 }}>
-                            <CoverImage src={images[2].url} />
+                            <CoverImage onImageClick={onImageClick} image={images[2]} />
                         </Box>
                     </Stack>
                 </Stack>
@@ -57,18 +56,18 @@ export function ImageCollage({ orientation, images }: ImageCollageParams) {
                 <Stack direction={orientation == 'landscape' ? 'column' : 'row'} gap="2px" minHeight={470} maxHeight={550}>
                     <Stack gap="2px" direction={orientation == 'landscape' ? 'row' : 'column'} sx={{ flex: 1 }} justifyContent="center" overflow="hidden">
                         <Box sx={{ minHeight: 0, flex: 1 }}>
-                            <CoverImage src={images[0].url} />
+                            <CoverImage onImageClick={onImageClick} image={images[0]} />
                         </Box>
                         <Box sx={{ minHeight: 0, flex: 1 }}>
-                            <CoverImage src={images[1].url} />
+                            <CoverImage onImageClick={onImageClick} image={images[1]} />
                         </Box>
                     </Stack>
                     <Stack gap="2px" direction={orientation == 'landscape' ? 'row' : 'column'} sx={{ flex: 1 }} justifyContent="center" overflow="hidden">
                         <Box sx={{ minHeight: 0, flex: 1 }}>
-                            <CoverImage src={images[2].url} />
+                            <CoverImage onImageClick={onImageClick} image={images[2]} />
                         </Box>
                         <Box sx={{ minHeight: 0, flex: 1 }}>
-                            <CoverImage src={images[3].url} />
+                            <CoverImage onImageClick={onImageClick} image={images[3]} />
                         </Box>
                     </Stack>
                 </Stack>
@@ -80,7 +79,7 @@ export function ImageCollage({ orientation, images }: ImageCollageParams) {
                     gap="2px"
                     sx={{
                         [theme.breakpoints.down('sm')]: {
-                            aspectRatio: orientation == 'landscape' ? '4 / 4.5' : '3.5 / 4'
+                            aspectRatio: orientation == 'landscape' ? '4 / 4' : '4 / 3'
                         },
                         [theme.breakpoints.up('sm')]: {
                             minHeight: 470,
@@ -90,24 +89,24 @@ export function ImageCollage({ orientation, images }: ImageCollageParams) {
                 >
                     <Stack gap="2px" direction={orientation == 'landscape' ? 'row' : 'column'} sx={{ flex: orientation == 'landscape' ? 1.6 : 1.3 }} justifyContent="center" overflow="hidden">
                         <Box sx={{ minHeight: 0, flex: 1 }}>
-                            <CoverImage src={images[0].url} />
+                            <CoverImage onImageClick={onImageClick} image={images[0]} />
                         </Box>
                         <Box sx={{ minHeight: 0, flex: 1 }}>
-                            <CoverImage src={images[1].url} />
+                            <CoverImage onImageClick={onImageClick} image={images[1]} />
                         </Box>
                     </Stack>
                     <Stack gap="2px" direction={orientation == 'landscape' ? 'row' : 'column'} sx={{ flex: 1 }} justifyContent="center" overflow="hidden">
                         <Box sx={{ minHeight: 0, flex: 1 }}>
-                            <CoverImage src={images[2].url} />
+                            <CoverImage onImageClick={onImageClick} image={images[2]} />
                         </Box>
                         <Box sx={{ minHeight: 0, flex: 1 }}>
-                            <CoverImage src={images[3].url} />
+                            <CoverImage onImageClick={onImageClick} image={images[3]} />
                         </Box>
                         <Box sx={{ minHeight: 0, flex: 1 }}>
-                            <CoverImage src={images[4].url} />
+                            <CoverImage onImageClick={onImageClick} image={images[4]} />
                         </Box>
                     </Stack>
-                </Stack>
+                </Stack >
             )}
 
             {images.length > 5 && (
@@ -116,7 +115,7 @@ export function ImageCollage({ orientation, images }: ImageCollageParams) {
                     gap="2px"
                     sx={{
                         [theme.breakpoints.down('sm')]: {
-                            aspectRatio: orientation == 'landscape' ? '4 / 4.5' : '3.5 / 4'
+                            aspectRatio: orientation == 'landscape' ? '4 / 4' : '4 / 3'
                         },
                         [theme.breakpoints.up('sm')]: {
                             minHeight: 470,
@@ -126,21 +125,21 @@ export function ImageCollage({ orientation, images }: ImageCollageParams) {
                 >
                     <Stack gap="2px" direction={orientation == 'landscape' ? 'row' : 'column'} sx={{ flex: orientation == 'landscape' ? 1.6 : 1.3 }} justifyContent="center" overflow="hidden">
                         <Box sx={{ minHeight: 0, flex: 1 }}>
-                            <CoverImage src={images[0].url} />
+                            <CoverImage onImageClick={onImageClick} image={images[0]} />
                         </Box>
                         <Box sx={{ minHeight: 0, flex: 1 }}>
-                            <CoverImage src={images[1].url} />
+                            <CoverImage onImageClick={onImageClick} image={images[1]} />
                         </Box>
                     </Stack>
                     <Stack gap="2px" direction={orientation == 'landscape' ? 'row' : 'column'} sx={{ flex: 1 }} justifyContent="center" overflow="hidden">
                         <Box sx={{ minHeight: 0, flex: 1 }}>
-                            <CoverImage src={images[2].url} />
+                            <CoverImage onImageClick={onImageClick} image={images[2]} />
                         </Box>
                         <Box sx={{ minHeight: 0, flex: 1 }}>
-                            <CoverImage src={images[3].url} />
+                            <CoverImage onImageClick={onImageClick} image={images[3]} />
                         </Box>
                         <Box sx={{ minHeight: 0, flex: 1 }} position="relative">
-                            <CoverImage src={images[4].url} />
+                            <CoverImage onImageClick={onImageClick} image={images[4]} />
                             <div style={{
                                 position: 'absolute',
                                 top: 0,

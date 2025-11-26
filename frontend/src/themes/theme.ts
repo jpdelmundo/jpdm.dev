@@ -88,9 +88,6 @@ export const theme = createTheme({
             }
         },
         MuiButton: {
-            // defaultProps: {
-            //     disableRipple: true
-            // },
             styleOverrides: {
                 root: ({ theme }) => ({
                     fontSize: 15,
@@ -127,7 +124,7 @@ export const theme = createTheme({
         },
         MuiPaper: {
             styleOverrides: {
-                root: {
+                root: () => ({
                     '&.post-form': {
                         boxShadow: 'none',
                         '& .MuiOutlinedInput-notchedOutline': {
@@ -156,7 +153,6 @@ export const theme = createTheme({
                     },
                     '&.post': {
                         borderRadius: '16px',
-                        padding: '25px',
                         margin: '25px 0',
                         '& .header': {
                             marginBottom: '25px',
@@ -189,22 +185,51 @@ export const theme = createTheme({
                         },
                         '& .user-date-box': {
                             maxWidth: '92%'
-                        }
+                        },
+                        padding: '25px', // default = md and up
+
+                        // This is the correct & only working way in theme
+                        [theme.breakpoints.down('sm')]: {
+                            padding: '15px',
+                        },
                     }
-                }
+                })
             }
         },
         MuiDialog: {
             styleOverrides: {
-                root: {
+                root: () => ({
                     '& .MuiDialog-paper': {
-                        maxWidth: '500px',
                         boxShadow: '0 1px 2px #cccccc, 0 4px 8px #dddddd',
                     },
                     '& .MuiModal-backdrop': {
                         backgroundColor: '#ffffffaa'
+                    },
+                    '&.post-image-dialog': {
+                        '& .MuiDialog-paper': {
+                            // [theme.breakpoints.up('sm')]: {
+                            //     maxWidth: '100vw',
+                            // },
+                            maxWidth: '100%',
+                            width: '100%',
+                            background: 'none',
+                            maxHeight: '100vh',
+                            boxShadow: 'none',
+                            borderRadius: 0,
+                            margin: 0,
+                            '& img': {
+                                objectFit: 'contain',
+                                width: '100%',
+                                //maxHeight: '100%'
+                                maxHeight: '90vh',
+                            }
+                        },
+                        '& .MuiModal-backdrop': {
+                            backgroundColor: '#000000e5',
+                            backdropFilter: 'saturate(1.8) blur(20px)'
+                        },
                     }
-                }
+                })
             }
         },
         MuiContainer: {

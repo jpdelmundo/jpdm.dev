@@ -4,6 +4,7 @@ import * as controller from '../controllers/authController';
 
 export const router = Router()
 
+//public
 router.post('/signin', controller.signIn);
 router.post('/refresh-token', controller.refreshToken);
 router.post('/signout', verifyToken, controller.signOut);

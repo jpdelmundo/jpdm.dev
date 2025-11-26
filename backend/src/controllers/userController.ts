@@ -1,4 +1,4 @@
-import { getPosts } from '@/services/postService';
+import { get } from '@/services/postService';
 import { ErrorCode } from '@shared/types/ErrorCode';
 import { jsonBase64Decode } from '@shared/utils/encoding';
 import { validatePassword } from '@shared/utils/validate';
@@ -70,16 +70,16 @@ export const emailCodeConfirm = async (req: Request, res: Response): Promise<Res
 
 export const posts = async (req: Request, res: Response): Promise<Response> => {
     const { page_num } = req.query;
-    const { user_or_vanity_id } = req.params;
-    if (!user_or_vanity_id) return fail(res, 'Cannot fetch posts. Missing user id.');
+    const { id } = req.params;
+    if (!id) return fail(res, 'Cannot fetch posts. Missing user id.');
 
-    const user = validate(user_or_vanity_id) //if uuid format
-        ? await userService.findById(user_or_vanity_id)
-        : await userService.findByVanityId(user_or_vanity_id);
+    const user = validate(id) //if uuid format
+        ? await userService.findById(id)
+        : await userService.findByVanityId(id);
     if (!user) return fail(res, 'Cannot fetch posts. User not found.');
     const user_id = user.id;
 
-    const posts = await getPosts({
+    const posts = await get({
         user_id,
         visibility: 'public',
         is_published: true,

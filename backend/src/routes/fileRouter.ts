@@ -1,4 +1,5 @@
 import * as controller from '@/controllers/fileController';
+import { verifyToken } from '@/utils/auth';
 import { Router } from 'express';
 import fs from 'fs';
 import multer, { diskStorage } from 'multer';
@@ -23,4 +24,7 @@ const upload = multer({
 });
 
 export const router = Router();
+
+//private
+router.use(verifyToken);
 router.post('/upload', upload.single('file'), controller.upload);

@@ -12,7 +12,7 @@ export interface ApiErrorDetail {
 
 export type ApiResult<T> = {
     ok: boolean;
-    data?: NotPromise<T>;
+    data?: NotPromise<T> | null;
     error?: ApiErrorDetail;
     message?: string;
 }

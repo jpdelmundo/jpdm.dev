@@ -27,7 +27,7 @@ function SignUpContent() {
         const token = await executeRecaptcha('submit_form');
         console.log({ token });
 
-        const res = await apiPost<SignUpFormSubmitResult>('/user/create', { ...formInput, fingerprint: jsonBase64Encode(getFingerprint()), token });
+        const res = await apiPost<SignUpFormSubmitResult>('/users/create', { ...formInput, fingerprint: jsonBase64Encode(getFingerprint()), token });
         return res; //return to show error message on form
     };
 
@@ -43,12 +43,12 @@ function SignUpContent() {
     };
 
     const emailSubmit = async (formInput: EmailFormInput): Promise<ApiResult<never>> => {
-        const res = await apiPost<never>('/user/email-code', formInput);
+        const res = await apiPost<never>('/users/email-code', formInput);
         return res; //return to show error message on form
     }
 
     const codeSubmit = async (formInput: EmailFormInput): Promise<ApiResult<never>> => {
-        const res = await apiPost<never>('/user/email-code-confirm', formInput);
+        const res = await apiPost<never>('/users/email-code-confirm', formInput);
         return res; //return to show error message on form
     }
 

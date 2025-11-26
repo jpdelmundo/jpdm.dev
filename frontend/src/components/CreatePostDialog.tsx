@@ -37,11 +37,13 @@ export type FormInput = {
     content: string;
 };
 
-export function CreatePostDialog({ open, closeDialog, onPosted }: {
+type CreatePostDialogProps = {
     open: boolean,
     closeDialog?: () => void,
     onPosted: () => void
-}) {
+};
+
+export function CreatePostDialog({ open, closeDialog, onPosted }: CreatePostDialogProps) {
     const { register, handleSubmit, reset, formState: { errors, isValid }, resetField, setFocus } = useForm<FormInput>({
         mode: 'onChange'
     });
@@ -73,7 +75,7 @@ export function CreatePostDialog({ open, closeDialog, onPosted }: {
                         const formData = new FormData();
                         formData.append('file', imageFile.file);
                         formData.append('fingerprint', jsonBase64Encode(getFingerprint()));
-                        const result = await apiPost<FileModel>('/file/upload', formData);
+                        const result = await apiPost<FileModel>('/files/upload', formData);
                         if (!result.ok || !result.data?.id) throw Error(`Upload failed: ${result.error?.message}`);
 
                         const fileId = result.data.id;
@@ -106,7 +108,7 @@ export function CreatePostDialog({ open, closeDialog, onPosted }: {
 
             //create the post with image ids
             !data.title?.trim() && delete data.title;
-            const result = await apiPost<PostExtended>('/post/create', { ...data, files: uploadedImages });
+            const result = await apiPost<PostExtended>('/posts/create', { ...data, files: uploadedImages });
             if (result.ok) {
                 reset();
                 setImageFiles([]);

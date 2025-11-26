@@ -12,7 +12,9 @@ export const ErrorCode = {
     LENGTH_TOO_LONG: 'LENGTH_TOO_LONG',
     ALREADY_USED: 'ALREADY_USED',
     MAX_SENT_LIMIT: 'MAX_SENT_LIMIT',
-    COOLDOWN: 'COOLDOWN'
+    COOLDOWN: 'COOLDOWN',
+    NOT_FOUND: 'NOT_FOUND',
+    NOT_AVAILABLE: 'NOT_AVAILABLE',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

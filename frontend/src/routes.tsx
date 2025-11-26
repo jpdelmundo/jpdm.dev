@@ -36,6 +36,7 @@ const routes = [
                     }
                 ]
             },
+            //{ path: 'posts/images/:id', element: <PostImage /> },
             { path: '*', element: <NotFound /> }
         ],
     },
