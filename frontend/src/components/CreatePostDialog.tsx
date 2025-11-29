@@ -193,6 +193,7 @@ export function CreatePostDialog({ open, closeDialog, onPosted }: CreatePostDial
 
     return (
         <Dialog
+            className={'create-post-dialog'}
             open={open}
             onClose={closeDialog}
             scroll="paper"

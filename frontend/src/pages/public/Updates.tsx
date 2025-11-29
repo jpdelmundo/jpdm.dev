@@ -15,7 +15,7 @@ export const Updates = () => {
     const user = useAuthStore(s => s.user);
 
     const getData = async () => {
-        const result = await apiGet<Paginated<PostExtended>>('/users/jp/posts', { page: 1, rows: 30 });
+        const result = await apiGet<Paginated<PostExtended>>('/users/jp/posts', { page_num: 1 });
         if (result.ok && result.data) {
             setPosts(result.data.page_items);
         }

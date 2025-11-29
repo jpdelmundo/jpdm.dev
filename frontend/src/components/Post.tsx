@@ -1,4 +1,8 @@
 import { getDimensionOrientation, getRelativeTime } from '@/utils/helper';
+import ChatBubbleOutlineRounded from '@mui/icons-material/ChatBubbleOutlineRounded';
+import EqualizerRounded from '@mui/icons-material/EqualizerRounded';
+import FavoriteBorderRounded from '@mui/icons-material/FavoriteBorderRounded';
+import ShareRounded from '@mui/icons-material/ShareRounded';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -7,7 +11,8 @@ import Typography from '@mui/material/Typography';
 import type PostExtended from '@shared/models/extensions/PostExtended';
 import type PostImageExtended from '@shared/models/extensions/PostImageExtended';
 import type { ImageOrientation } from '@shared/types/ImageOrientation';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { useLocation, useNavigate, type Location } from 'react-router-dom';
 import { ImageCollage } from './ImageCollage';
 import { PostImageDialog } from './PostImageDialog';
 
@@ -25,12 +30,15 @@ type PostProps = {
 export function Post({ post }: PostProps) {
     const { title, content, images, display_name, created_at } = post;
     let orientation: ImageOrientation = 'portrait';
+    const location = useLocation();
+    const navigate = useNavigate();
     const [postImageDialogOpen, setPostImageDialogOpen] = useState(false);
     const closePostImageDialog = () => {
         setPostImageDialogOpen(false);
-        window.history.back();
+        navigate(origLocation.current ? (origLocation.current.pathname + origLocation.current.search) : '/', { replace: true });
     };
     const [selectedImage, setSelectedImage] = useState<PostImageExtended | null>(null);
+    const origLocation = useRef<Location | null>(null);
 
     if (images && images.length > 0) {
         const img = images[0];
@@ -52,6 +60,7 @@ export function Post({ post }: PostProps) {
     const onImageClick = (image: PostImageExtended) => {
         setSelectedImage(image);
         setPostImageDialogOpen(true);
+        origLocation.current = location;
         window.history.pushState({}, '', `/posts/images/${image.id}`);
     }
 
@@ -74,13 +83,30 @@ export function Post({ post }: PostProps) {
                     <ImageCollage orientation={orientation} images={images} onImageClick={onImageClick} />
                 </Box>
                 <Typography className="content" {...(content.length <= 50 && { fontSize: { xs: '20px', md: '30px' } })}>{content}</Typography>
-            </Paper>
+                <Stack direction={'row'} className="controls">
+                    <Box className="stats-container">
+                        <EqualizerRounded /> <Typography>12</Typography>
+                    </Box>
+                    <Box className="likes-container">
+                        <FavoriteBorderRounded /> <Typography>34</Typography>
+                    </Box>
+                    <Box className="comments-container">
+                        <ChatBubbleOutlineRounded /> <Typography>56</Typography>
+                    </Box>
+                    <Box className="share-container">
+                        <ShareRounded />
+                    </Box>
+                </Stack>
+                <Box className="comment-container">
 
-            <PostImageDialog
+                </Box>
+            </Paper>
+            {selectedImage && <PostImageDialog
                 open={postImageDialogOpen}
                 closeDialog={closePostImageDialog}
-                postImage={selectedImage}
-            />
+                postId={selectedImage.post_id}
+                postImageId={selectedImage.id}
+            />}
         </>
     );
 }

@@ -176,7 +176,7 @@ export const theme = createTheme({
                             lineHeight: 1
                         },
                         '& .content': {
-                            marginTop: '25px'
+                            margin: '25px 0'
                         },
                         '& .date': {
                             fontSize: '12px',
@@ -192,6 +192,25 @@ export const theme = createTheme({
                         [theme.breakpoints.down('sm')]: {
                             padding: '15px',
                         },
+                        '& .controls': {
+                            color: '#595959',
+                            justifyContent: 'end'
+                        },
+                        '& .share-container, .stats-container, .likes-container, .comments-container': {
+                            display: 'flex',
+                            flexBasis: '70px',
+                            justifyContent: 'start',
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                            '&:hover': {
+                                color: 'initial',
+                                // transition: '.2s',
+                                transform: 'translateY(-10%)'
+                            }
+                        },
+                        '& .share-container': {
+                            flexBasis: 0
+                        }
                     }
                 })
             }
@@ -204,6 +223,11 @@ export const theme = createTheme({
                     },
                     '& .MuiModal-backdrop': {
                         backgroundColor: '#ffffffaa'
+                    },
+                    '&.create-post-dialog': {
+                        '& .MuiDialog-paper': {
+                            maxWidth: '500px'
+                        }
                     },
                     '&.post-image-dialog': {
                         '& .MuiDialog-paper': {
@@ -220,7 +244,6 @@ export const theme = createTheme({
                             '& img': {
                                 objectFit: 'contain',
                                 width: '100%',
-                                //maxHeight: '100%'
                                 maxHeight: '90vh',
                             }
                         },
@@ -241,7 +264,6 @@ export const theme = createTheme({
                         maxWidth: 'unset !important',
                         display: 'block',
                         position: 'fixed',
-                        //borderBottom: 'solid 1px #e3e3e3'
                     }
                 }
             }

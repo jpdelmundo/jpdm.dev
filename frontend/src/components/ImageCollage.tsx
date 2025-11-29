@@ -106,7 +106,7 @@ export function ImageCollage({ orientation, images, onImageClick }: ImageCollage
                             <CoverImage onImageClick={onImageClick} image={images[4]} />
                         </Box>
                     </Stack>
-                </Stack >
+                </Stack>
             )}
 
             {images.length > 5 && (

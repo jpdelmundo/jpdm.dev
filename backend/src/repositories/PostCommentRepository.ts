@@ -1,31 +1,26 @@
-import type { Post, PostId, PostInitializer, PostMutator } from '@shared/models/generated/Post';
-import type { VisibilityEnum } from '@shared/models/generated/VisibilityEnum';
+import type { PostId } from '@shared/models/generated/Post';
+import type { PostComment, PostCommentId, PostCommentInitializer } from '@shared/models/generated/PostComment';
 import { type OrderDirection } from '@shared/types/OrderDirection';
 import { BaseRepository } from './BaseRepository';
 
 type FindParams = {
-    id?: PostId;
-    user_id?: string;
-    visibility?: VisibilityEnum;
-    is_published?: boolean;
-    is_admin?: boolean;
+    id?: PostCommentId;
+    post_id?: PostId;
     page_num?: number;
     page_size?: number;
     order_by?: string;
     order_dir?: OrderDirection;
 }
 
-export class PostRepository extends BaseRepository<Post> {
+export class PostCommentRepository extends BaseRepository<PostComment> {
     async find(params: FindParams) {
-        const { id, user_id, visibility, is_published, is_admin, order_by, order_dir } = params;
+        const { id, post_id, order_by, order_dir } = params;
         const filters: string[] = [];
         const values: unknown[] = [];
 
         //where
         id && filters.push(`id = $${filters.length + 1}`) && values.push(id);
-        user_id && filters.push(`user_id = $${filters.length + 1}`) && values.push(user_id);
-        visibility && filters.push(`visibility = $${filters.length + 1}`) && values.push(visibility);
-        is_published && filters.push(`is_published = $${filters.length + 1}`) && values.push(is_published);
+        post_id && filters.push(`post_id = $${filters.length + 1}`) && values.push(post_id);
 
         if (filters.length == 0) {
             throw new Error('At least one filter must be provided');
@@ -42,23 +37,23 @@ export class PostRepository extends BaseRepository<Post> {
         }
 
         //get and return result
-        return this.getFindResult('posts', filter, order, values, params);
+        return this.getFindResult('post_comments', filter, order, values, params);
     }
 
-    async findById(id: PostId): Promise<Post | null> {
+    async findById(id: PostCommentId): Promise<PostComment | null> {
         return (await this.find({ id }))[0] || null;
     }
 
-    async create(item: PostInitializer): Promise<Post> {
+    async create(item: PostCommentInitializer): Promise<PostComment> {
         const entries = Object.entries(item).filter(([key, value]) => value !== undefined && key != 'id');
         const columns = entries.map(([key]) => key).join(', ');
         const placeholders = entries.map((_, i) => `$${i + 1}`).join(', ');
         const values = entries.map(([_, value]) => value);
 
-        const sql = `insert into posts (${columns})
+        const sql = `insert into post_comments (${columns})
                      values (${placeholders})
                      returning *`;
-        const result = await this.query<Post>(sql, values);
+        const result = await this.query<PostComment>(sql, values);
 
         if (!result.rows[0]) {
             throw new Error(`Record creation failed`);
@@ -67,7 +62,7 @@ export class PostRepository extends BaseRepository<Post> {
         return result.rows[0];
     }
 
-    async update(id: string, item: PostMutator): Promise<Post[]> {
+    async update(id: string, item: PostCommentMutator): Promise<PostComment[]> {
         const entries = Object.entries(item).filter(([key, value]) => value !== undefined && key != 'id');
         const set: string[] = [];
         const values: unknown[] = [];
@@ -82,32 +77,29 @@ export class PostRepository extends BaseRepository<Post> {
         }
         set.push(`updated_at = now()`);
 
-        const filters: string[] = [];
-        id.trim() && filters.push(`id = $${values.length + 1}`) && values.push(id.trim());
+        const where: string[] = [];
+        id.trim() && where.push(`id = $${values.length + 1}`) && values.push(id.trim());
 
-        if (filters.length == 0) {
+        if (where.length == 0) {
             throw new Error('Update condition missing');
         }
 
-        let filter = filters.join(' and ');
-        filter = filter ? `where ${filter}` : '';
-
-        const sql = `update posts
+        const sql = `update post_comments
                      set ${set.join(', ')}
-                     ${filter}
+                     where ${where.join(' and ')}
                      returning *`;
 
-        const result = await this.query<Post>(sql, values);
+        const result = await this.query<PostComment>(sql, values);
 
         return result.rows;
     }
 
-    async delete(id: PostId): Promise<Post[]> {
+    async delete(id: PostCommentId): Promise<PostComment[]> {
         if (!id) throw new Error('Id missing');
-        const sql = `delete from posts
+        const sql = `delete from post_comments
                      where id = $1
                      returning *`;
-        const result = await this.query<Post>(sql, [id]);
+        const result = await this.query<PostComment>(sql, [id]);
         return result.rows;
     }
 }

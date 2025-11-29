@@ -1,20 +1,26 @@
-import type { InferPaginatedResult } from '@/types/InferPaginatedResult';
 import type { FileId } from '@shared/models/generated/File';
 import type { PostId } from '@shared/models/generated/Post';
 import type { PostImage, PostImageId, PostImageInitializer, PostImageMutator } from '@shared/models/generated/PostImage';
+import { type OrderDirection } from '@shared/types/OrderDirection';
 import { BaseRepository } from './BaseRepository';
 
 type FindParams = {
     id?: PostImageId;
     post_id?: PostId;
     file_id?: FileId;
+    page_num?: number;
+    page_size?: number;
+    order_by?: string;
+    order_dir?: OrderDirection;
 }
 
 export class PostImageRepository extends BaseRepository<PostImage> {
-    async find<P extends FindParams, T extends PostImage>({ id, file_id, post_id }: P): Promise<InferPaginatedResult<P, T>> {
+    async find(params: FindParams) {
+        const { id, file_id, post_id, order_by, order_dir } = params;
         const filters: string[] = [];
         const values: unknown[] = [];
 
+        //where
         id && filters.push(`id = $${filters.length + 1}`) && values.push(id);
         post_id && filters.push(`post_id = $${filters.length + 1}`) && values.push(post_id);
         file_id && filters.push(`file_id = $${filters.length + 1}`) && values.push(file_id);
@@ -23,14 +29,22 @@ export class PostImageRepository extends BaseRepository<PostImage> {
             throw new Error('At least one filter must be provided');
         }
 
-        const result = await this.query<PostImage>(`select *
-                                               from post_images
-                                               where ${filters.join(' and ')}`, values);
-        return result.rows as InferPaginatedResult<P, T>;
+        let filter = filters.join(' and ');
+        filter = filter ? `where ${filter}` : '';
+
+        //order
+        let order = '';
+        if (order_by) {
+            const allowedOrderColumns = ['created_at'];
+            order = this.getOrderBy(allowedOrderColumns, order_by, order_dir);
+        }
+
+        //get and return result
+        return this.getFindResult('post_images', filter, order, values, params);
     }
 
     async findById(id: PostImageId): Promise<PostImage | null> {
-        return (await this.find({ id }) as PostImage[])[0] || null;
+        return (await this.find({ id }))[0] || null;
     }
 
     async create(item: PostImageInitializer): Promise<PostImage> {

@@ -7,6 +7,7 @@ import { About } from './pages/public/About';
 import { Home } from './pages/public/Home';
 import { Layout } from './pages/public/Layout';
 import { NotFound } from './pages/public/NotFound';
+import { PostImage } from './pages/public/PostImage';
 import { SignIn } from './pages/public/SignIn';
 import { SignUp } from './pages/public/SignUp';
 import { CreatePost } from './pages/user/CreatePost';
@@ -36,7 +37,7 @@ const routes = [
                     }
                 ]
             },
-            //{ path: 'posts/images/:id', element: <PostImage /> },
+            { path: 'posts/images/:id', element: <PostImage /> },
             { path: '*', element: <NotFound /> }
         ],
     },

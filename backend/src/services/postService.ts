@@ -3,7 +3,7 @@ import { FileRepository } from '@/repositories/FileRepository';
 import { PostImageRepository } from '@/repositories/PostImageRepository';
 import { PostRepository } from '@/repositories/PostRepository';
 import { UserRepository } from '@/repositories/UserRepository';
-import type { InferPaginatedResult } from '@/types/InferPaginatedResult';
+import type { InferFindResultType } from '@/types/InferFindResultType';
 import type PostExtended from '@shared/models/extensions/PostExtended';
 import type PostImageExtended from '@shared/models/extensions/PostImageExtended';
 import type { PostId, PostInitializer } from '@shared/models/generated/Post';
@@ -35,7 +35,7 @@ const getDisplayName = async (id: UserId): Promise<string> => {
     return result;
 }
 
-export const get = async <P extends GetParams, T extends PostExtended>(params: P): Promise<InferPaginatedResult<P, T>> => {
+export const get = async <P extends GetParams, T extends PostExtended>(params: P): Promise<InferFindResultType<P, T>> => {
     const { id, user_id, visibility, is_published, page_num, page_size, order_by, order_dir } = params;
     const repo = new PostRepository();
     const findResult = await repo.find({
@@ -55,7 +55,7 @@ export const get = async <P extends GetParams, T extends PostExtended>(params: P
         post.images = await getImages(post.id);
     }
 
-    return findResult as InferPaginatedResult<P, T>;
+    return findResult as InferFindResultType<P, T>;
 }
 
 export const getImage = async (id: PostImageId, user_id?: UserId): Promise<PostImageExtended> => {
@@ -91,7 +91,7 @@ export const getImage = async (id: PostImageId, user_id?: UserId): Promise<PostI
 
 export const getImages = async (post_id: PostId): Promise<PostImageExtended[]> => {
     const repo = new PostImageRepository();
-    const postImages = await repo.find({ post_id });
+    const postImages = await repo.find({ post_id, order_by: 'sort' });
     const images: PostImageExtended[] = [];
     if (postImages.length > 0) {
         for (const postImage of postImages) {

@@ -1,6 +1,7 @@
-import { create as createPost, getImage as getPostImage } from '@/services/postService';
+import { create as createPost, getImage as getPostImage, getImages as getPostImages } from '@/services/postService';
 import type { AuthorizedRequest } from '@/types/AuthorizedRequest';
 import { fail, ok } from '@/utils/apiHelper';
+import type PostImageExtended from '@shared/models/extensions/PostImageExtended';
 import type { Request, Response } from 'express';
 
 export const create = async (req: Request, res: Response): Promise<Response> => {
@@ -34,6 +35,19 @@ export const create = async (req: Request, res: Response): Promise<Response> => 
 
 export const getImage = async (req: Request, res: Response): Promise<Response> => {
     const { id } = req.params;
-    const result = await getPostImage(String(id));
+    const { include_set } = req.query;
+
+    const post_image = await getPostImage(String(id));
+    let post_image_set: PostImageExtended[] = [];
+    if (include_set && post_image.post_id) {
+        post_image_set = await getPostImages(post_image.post_id);
+    }
+
+    const result = { post_image, post_image_set };
+
     return ok(res, result);
+}
+
+export const getComments = async (req: Request, res: Response): Promise<Response> => {
+    return ok(res);
 }
