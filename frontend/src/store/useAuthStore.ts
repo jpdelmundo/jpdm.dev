@@ -60,8 +60,9 @@ export const useAuthStore = create<AuthState>()(
             } catch (error) {
                 console.error('Token refresh failed', error);
                 get().clearToken();
+            } finally {
+                set({ ready: true });
             }
-            set({ ready: true });
         }
     }),
         {

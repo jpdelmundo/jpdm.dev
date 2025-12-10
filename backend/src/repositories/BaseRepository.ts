@@ -4,6 +4,13 @@ import { OrderDirections, type OrderDirection } from '@shared/types/OrderDirecti
 import { Pool, type QueryResultRow } from 'pg';
 import { getFullQuery } from '../utils/pgHelper';
 
+export interface GetOrderByParams {
+    allowedOrderColumns: string[];
+    order_by: string;
+    order_dir: OrderDirection | undefined;
+    prioritize_user_id?: number
+}
+
 export abstract class BaseRepository<T extends QueryResultRow> {
     protected static sharedPool: Pool;
     protected pool: Pool;
@@ -20,21 +27,25 @@ export abstract class BaseRepository<T extends QueryResultRow> {
     }
 
     query<R extends QueryResultRow = T>(queryText: string, values?: unknown[]) {
-        if (process.env.NODE_ENV == 'development') console.log('[SQL]', getFullQuery(queryText, values));
+        console.debug({ queryText, values });
+        if (process.env.SQL_LOG == '1') console.log('[SQL]', getFullQuery(queryText, values));
         return this.pool.query<R>(queryText, values);
     }
 
-    protected async getFindResult<P extends FindParamsBase>(tableName: string, filter: string, order: string, values: unknown[], params: P) {
+    protected async getFindResult<P extends FindParamsBase>(tableName: string, filter: string, orderByParams: GetOrderByParams | null, values: unknown[], params: P) {
         return ('page_num' in params || 'page_size' in params)
-            ? this.getFindResultPaginated(tableName, filter, order, values, params)
-            : this.getFindResultArray(tableName, filter, order, values, params);
+            ? this.getFindResultPaginated(tableName, filter, orderByParams, values, params)
+            : this.getFindResultArray(tableName, filter, orderByParams, values, params);
     }
 
-    protected async getFindResultPaginated<P extends FindParamsBase>(tableName: string, filter: string, order: string, values: unknown[], params: P) {
+    protected async getFindResultPaginated<P extends FindParamsBase>(tableName: string, filter: string, orderByParams: GetOrderByParams | null, values: unknown[], params: P) {
         const totalResult = await this.query<{ total: number }>(`select count(*) total
                                                                 from ${tableName}
                                                                 ${filter}`, values);
+        //order
+        const order = orderByParams ? this.getOrderBy(orderByParams, values) : '';
 
+        //limit (pagination)
         const { page_num, page_size } = params as FindParamsPaginated;
         const pageNum = Math.min(Math.abs(Number(page_num)) || 1, 1000);
         const pageSize = Math.min(Math.abs(Number(page_size)) || 30, 30);
@@ -57,7 +68,8 @@ export abstract class BaseRepository<T extends QueryResultRow> {
         } as InferFindResultType<P, T>;
     }
 
-    protected async getFindResultArray<P extends FindParamsBase>(tableName: string, filter: string, order: string, values: unknown[], params?: P) { //params is needed here for TS to infer type
+    protected async getFindResultArray<P extends FindParamsBase>(tableName: string, filter: string, orderByParams: GetOrderByParams | null, values: unknown[], params?: P) { //params is needed here for TS to infer type
+        const order = orderByParams ? this.getOrderBy(orderByParams, values) : '';
         const result = await this.query(`select *
                                         from ${tableName}
                                         ${filter}
@@ -65,18 +77,24 @@ export abstract class BaseRepository<T extends QueryResultRow> {
         return result.rows as InferFindResultType<P, T>;
     }
 
-    protected getOrderBy(allowedOrderColumns: string[], order_by: string, order_dir: OrderDirection | undefined) {
+    protected getOrderBy(params: GetOrderByParams, values: unknown[]) {
+        const { allowedOrderColumns, order_by, order_dir, prioritize_user_id } = params;
         let order = '';
         if (allowedOrderColumns.includes(order_by)) {
             const dir = order_dir && OrderDirections.includes(order_dir) ? order_dir : 'asc';
-            order = `order by ${order_by} ${dir}`;
+            let priority = '';
+            if (values && prioritize_user_id) {
+                priority = `case when user_id = $${values.length + 1} then 0 else 1 end,`;
+                values.push(prioritize_user_id);
+            }
+            order = `order by ${priority} ${order_by} ${dir}`;
         }
         return order;
     }
 
-    abstract find(params: FindParamsBase): Promise<InferFindResultType<FindParamsBase, T>>;
+    abstract find<P extends FindParamsBase>(params: P): Promise<InferFindResultType<P, T> | T[]>;
     abstract findById(id: string): Promise<T | null>;
-    abstract create(item: T): Promise<T>;
-    abstract update(id: string, item: Partial<T>): Promise<T[]>;
-    abstract delete(id: string): Promise<T[]>;
+    abstract create(data: T): Promise<T>;
+    abstract update(id: string, data: Partial<T>, context?: Record<string, unknown>): Promise<T>;
+    abstract delete(id: string, context?: Record<string, unknown>): Promise<T>;
 }

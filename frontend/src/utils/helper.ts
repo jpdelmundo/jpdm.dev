@@ -73,3 +73,53 @@ export const getRelativeTime = (dateTime: string, locale: string = navigator.lan
 
     return rtf.format(Math.round(diff), 'second');
 }
+
+export function hashString(str: string) {
+    // DJB2 hash algorithm
+    let hash = 5381;
+
+    for (let i = 0; i < str.length; i++) {
+        //left shift 5 bits
+        hash = ((hash << 5) + hash) + str.charCodeAt(i);
+    }
+
+    // convert to 32-bit int
+    return (hash >>> 0);
+}
+
+export function stringToHexColor(str: string) {
+    return '#' + hashString(str).toString(16).padStart(6, '0');
+}
+
+export function stringToHslColor(str: string) {
+    return `hsl(${hashString(str) % 360}, 70%, 60%)`;
+}
+
+export function scrollIntoView(el: Element, offsetTop: number = 0) {
+    if (!el) return;
+    const elTop = el.getBoundingClientRect().top;
+    const top = window.scrollY + elTop - offsetTop;
+    window.scrollTo({ top, behavior: 'smooth' });
+}
+
+export function isTopInView(el: Element, offsetTop: number = 0) {
+    if (!el) return false;
+    const elTop = el.getBoundingClientRect().top;
+    return elTop > (0 + offsetTop);
+}
+
+export function formatCounters(num: number) {
+    if (!num) return '';
+    if (num >= 1000000000) return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+    if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    return String(num);
+}
+
+export async function copyToClipboard(text: string) {
+    try {
+        await navigator.clipboard.writeText(text);
+    } catch (error) {
+        console.log('Cannot copy to clipboard');
+    }
+}

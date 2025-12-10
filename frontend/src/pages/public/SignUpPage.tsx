@@ -27,7 +27,7 @@ function SignUpContent() {
         const token = await executeRecaptcha('submit_form');
         console.log({ token });
 
-        const res = await apiPost<SignUpFormSubmitResult>('/users/create', { ...formInput, fingerprint: jsonBase64Encode(getFingerprint()), token });
+        const res = await apiPost<SignUpFormSubmitResult>('/users/create', { ...formInput, fp: jsonBase64Encode(getFingerprint()), token });
         return res; //return to show error message on form
     };
 
@@ -69,7 +69,7 @@ function SignUpContent() {
     </Paper>
 }
 
-export function SignUp() {
+export function SignUpPage() {
     return (
         <Box
             display={'flex'}

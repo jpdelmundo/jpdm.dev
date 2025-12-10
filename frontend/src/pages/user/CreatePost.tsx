@@ -7,5 +7,6 @@ export function CreatePost() {
     return <CreatePostDialog
         open={dialogOpen}
         closeDialog={() => setDialogOpen(false)}
+        onPosted={() => { }}
     />
 }

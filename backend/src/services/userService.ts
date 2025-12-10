@@ -154,7 +154,7 @@ export const sendEmailConfirmCode = async (userId: UserId, email: string) => {
     const repo = new UserRepository();
     const code = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
     const result = await repo.update(userId, { unconfirmed_email: email, email_confirm_code: code });
-    if (result?.[0]?.email_confirm_code != code) return false;
+    if (result.email_confirm_code != code) return false;
 
     const mailResult = await mail({
         from: 'jpdm.dev <noreply@jpdm.dev>',
@@ -181,12 +181,12 @@ export const confirmEmailCode = async (userId: UserId, code: string) => {
 
     //code is valid, update email confirmed
     const updatedUser = await repo.update(user.id, { email: user.unconfirmed_email, email_confirm_code: null, unconfirmed_email: null, email_confirmed: true });
-    if (!updatedUser || !updatedUser[0]) throw new Error(`User email update failed: ${user.id} ${user.unconfirmed_email}`);
+    if (!updatedUser) throw new Error(`User email update failed: ${user.id} ${user.unconfirmed_email}`);
 
     //send confirmation email
     mail({
         from: 'jpdm.dev <noreply@jpdm.dev>',
-        to: updatedUser[0].email!,
+        to: updatedUser.email!,
         subject: 'Email Confirmation',
         text: 'Your email address is now confirmed'
     });

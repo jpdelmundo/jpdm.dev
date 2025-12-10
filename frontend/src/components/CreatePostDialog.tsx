@@ -1,13 +1,14 @@
 import { apiPost } from '@/api/apiClient';
 import { getFingerprint } from '@/utils/device';
 import { getDimensionOrientation, getErrorMessage, getImageFileDetail } from '@/utils/helper';
-import type PostExtended from '@shared/models/extensions/PostExtended';
+import type PostDTO from '@shared/models/extensions/PostExtended';
 import type { File as FileModel } from '@shared/models/generated/File';
 import { jsonBase64Encode } from '@shared/utils/encoding';
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import TextField from './TextField';
 
+import type { CollageImage } from '@/types/CollageImage';
 import AddPhotoAlternate from '@mui/icons-material/AddPhotoAlternate';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -74,7 +75,7 @@ export function CreatePostDialog({ open, closeDialog, onPosted }: CreatePostDial
                     try {
                         const formData = new FormData();
                         formData.append('file', imageFile.file);
-                        formData.append('fingerprint', jsonBase64Encode(getFingerprint()));
+                        formData.append('fp', jsonBase64Encode(getFingerprint()));
                         const result = await apiPost<FileModel>('/files/upload', formData);
                         if (!result.ok || !result.data?.id) throw Error(`Upload failed: ${result.error?.message}`);
 
@@ -108,7 +109,7 @@ export function CreatePostDialog({ open, closeDialog, onPosted }: CreatePostDial
 
             //create the post with image ids
             !data.title?.trim() && delete data.title;
-            const result = await apiPost<PostExtended>('/posts/create', { ...data, files: uploadedImages });
+            const result = await apiPost<PostDTO>('/posts/create', { ...data, files: uploadedImages });
             if (result.ok) {
                 reset();
                 setImageFiles([]);
@@ -191,6 +192,13 @@ export function CreatePostDialog({ open, closeDialog, onPosted }: CreatePostDial
         }, 10);
     }, [open]);
 
+    const collageImages = imageFiles.map(v => ({
+        width: v.width,
+        height: v.height,
+        url: v.url,
+        id: v.clientId
+    } as CollageImage));
+
     return (
         <Dialog
             className={'create-post-dialog'}
@@ -248,7 +256,7 @@ export function CreatePostDialog({ open, closeDialog, onPosted }: CreatePostDial
                             overflow="hidden"
                             mt={1}
                         >
-                            <ImageCollage orientation={orientation} images={imageFiles} />
+                            <ImageCollage orientation={orientation} images={collageImages} />
                         </Box>
                     </Paper>
                 </form>

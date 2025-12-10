@@ -6,13 +6,13 @@ import { getFingerprint } from '../utils/device';
 export const getNewToken = async (): Promise<AccessToken> => {
     console.log('__getNewToken__ called');
     const baseUrl = import.meta.env.VITE_API_BASE_URL;
-    const fingerprint = jsonBase64Encode(getFingerprint());
+    const fp = jsonBase64Encode(getFingerprint());
 
     const res = await fetch(`${baseUrl}/auth/refresh-token`, {
         method: 'post',
         credentials: 'include',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ fingerprint })
+        body: JSON.stringify({ fp })
     });
 
     if (res.ok) {

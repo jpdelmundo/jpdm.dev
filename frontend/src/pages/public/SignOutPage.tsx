@@ -4,12 +4,12 @@ import { getFingerprint } from '@/utils/device';
 import { jsonBase64Encode } from '@shared/utils/encoding';
 import { useNavigate } from 'react-router-dom';
 
-export function SignOut() {
+export function SignOutPage() {
     const navigate = useNavigate();
     const clearToken = useAuthStore(s => s.clearToken);
 
     const signOut = async () => {
-        await apiPost('/auth/signout', { fingerprint: jsonBase64Encode(getFingerprint()) });
+        await apiPost('/auth/signout', { fp: jsonBase64Encode(getFingerprint()) });
         clearToken();
         navigate('/signin');
     }

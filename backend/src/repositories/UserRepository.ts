@@ -55,7 +55,7 @@ export class UserRepository extends BaseRepository<User> {
         return result.rows[0];
     }
 
-    async update(id: UserId, item: UserMutator): Promise<User[]> {
+    async update(id: UserId, item: UserMutator): Promise<User> {
         const entries = Object.entries(item).filter(([key, value]) => value !== undefined && key != 'id');
         const set: string[] = [];
         const values: unknown[] = [];
@@ -80,11 +80,12 @@ export class UserRepository extends BaseRepository<User> {
                      returning *`;
 
         const result = await this.query(sql, values);
+        if (!result.rows[0]) throw new Error('Update failed');
 
-        return result.rows;
+        return result.rows[0];
     }
 
-    delete(id: UserId): Promise<User[]> {
+    delete(id: UserId): Promise<User> {
         throw new Error("Method not implemented.")
     }
 }

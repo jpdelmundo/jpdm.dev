@@ -1,7 +1,7 @@
-import { Updates } from "./Updates";
+import { UpdatesPage } from "./UpdatesPage";
 
 export const Home = () => {
     return (<>
-        <Updates />
+        <UpdatesPage />
     </>);
 }

@@ -1,3 +1,4 @@
+import type { FindParamsBase } from '@/types/FindParams';
 import type { Post, PostId, PostInitializer, PostMutator } from '@shared/models/generated/Post';
 import type { VisibilityEnum } from '@shared/models/generated/VisibilityEnum';
 import { type OrderDirection } from '@shared/types/OrderDirection';
@@ -16,8 +17,8 @@ type FindParams = {
 }
 
 export class PostRepository extends BaseRepository<Post> {
-    async find(params: FindParams) {
-        const { id, user_id, visibility, is_published, is_admin, order_by, order_dir } = params;
+    async find<P extends FindParamsBase>(params: P) {
+        const { id, user_id, visibility, is_published, is_admin, order_by, order_dir } = params as FindParams;
         const filters: string[] = [];
         const values: unknown[] = [];
 
@@ -34,15 +35,11 @@ export class PostRepository extends BaseRepository<Post> {
         let filter = filters.join(' and ');
         filter = filter ? `where ${filter}` : '';
 
-        //order
-        let order = '';
-        if (order_by) {
-            const allowedOrderColumns = ['created_at'];
-            order = this.getOrderBy(allowedOrderColumns, order_by, order_dir);
-        }
+        //order by params
+        const orderByParams = order_by ? { allowedOrderColumns: ['created_at'], order_by, order_dir } : null;
 
         //get and return result
-        return this.getFindResult('posts', filter, order, values, params);
+        return this.getFindResult('posts', filter, orderByParams, values, params);
     }
 
     async findById(id: PostId): Promise<Post | null> {
@@ -67,7 +64,7 @@ export class PostRepository extends BaseRepository<Post> {
         return result.rows[0];
     }
 
-    async update(id: string, item: PostMutator): Promise<Post[]> {
+    async update(id: string, item: PostMutator): Promise<Post> {
         const entries = Object.entries(item).filter(([key, value]) => value !== undefined && key != 'id');
         const set: string[] = [];
         const values: unknown[] = [];
@@ -98,16 +95,45 @@ export class PostRepository extends BaseRepository<Post> {
                      returning *`;
 
         const result = await this.query<Post>(sql, values);
+        if (!result.rows[0]) throw new Error('Update failed');
 
-        return result.rows;
+        return result.rows[0];
     }
 
-    async delete(id: PostId): Promise<Post[]> {
-        if (!id) throw new Error('Id missing');
+    async delete(id: PostId): Promise<Post> {
+        if (!id) throw new Error('Missing parameter: id');
         const sql = `delete from posts
                      where id = $1
                      returning *`;
         const result = await this.query<Post>(sql, [id]);
-        return result.rows;
+        if (!result.rows[0]) throw new Error('Delete failed');
+
+        return result.rows[0];
+    }
+
+    async updateLikes(id: PostId, amount: number = 1): Promise<Post> {
+        if (!id) throw new Error('Missing parameter: id');
+        const sql = `update posts
+                     set likes = greatest(likes + $2, 0),
+                        updated_at = now()
+                     where id = $1
+                     returning *`;
+        const result = await this.query<Post>(sql, [id, amount]);
+        if (!result.rows[0]) throw new Error('Update failed');
+
+        return result.rows[0];
+    }
+
+    async updateViews(id: PostId, amount: number = 1): Promise<Post> {
+        if (!id) throw new Error('Missing parameter: id');
+        const sql = `update posts
+                     set views = greatest(views + $2, 0),
+                        updated_at = now()
+                     where id = $1
+                     returning *`;
+        const result = await this.query<Post>(sql, [id, amount]);
+        if (!result.rows[0]) throw new Error('Update failed');
+
+        return result.rows[0];
     }
 }

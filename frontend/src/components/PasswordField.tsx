@@ -1,11 +1,10 @@
-import { type TextFieldProps } from '@mui/material';
-import { useState } from 'react';
-import TextField from './TextField';
-
-import IconButton from '@mui/material/IconButton';
-import InputAdornment from '@mui/material/InputAdornment';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import type { TextFieldProps } from '@mui/material/TextField';
+import { useState } from 'react';
+import TextField from './TextField';
 
 export default function PasswordField(props: TextFieldProps) {
     const [showPassword, setShowPassword] = useState(false);

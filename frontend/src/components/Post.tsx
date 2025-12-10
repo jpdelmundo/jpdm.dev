@@ -1,44 +1,62 @@
-import { getDimensionOrientation, getRelativeTime } from '@/utils/helper';
+import { apiPost } from '@/api/apiClient';
+import { usePostViewLogger } from '@/hooks/usePostViewCounter';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useSnackbarStore } from '@/store/useSnackbarStore';
+import type { CollageImage } from '@/types/CollageImage';
+import type { CommentsUpdatedParams } from '@/types/CommentsUpdatedParams';
+import { copyToClipboard, formatCounters, getDimensionOrientation, getRelativeTime, stringToHslColor } from '@/utils/helper';
 import ChatBubbleOutlineRounded from '@mui/icons-material/ChatBubbleOutlineRounded';
+import CheckCircleRounded from '@mui/icons-material/CheckCircleRounded';
 import EqualizerRounded from '@mui/icons-material/EqualizerRounded';
 import FavoriteBorderRounded from '@mui/icons-material/FavoriteBorderRounded';
+import FavoriteRounded from '@mui/icons-material/FavoriteRounded';
 import ShareRounded from '@mui/icons-material/ShareRounded';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import type PostExtended from '@shared/models/extensions/PostExtended';
-import type PostImageExtended from '@shared/models/extensions/PostImageExtended';
+import type PostDTO from '@shared/models/extensions/PostExtended';
 import type { ImageOrientation } from '@shared/types/ImageOrientation';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, type Location } from 'react-router-dom';
+import { Comments } from './Comments';
 import { ImageCollage } from './ImageCollage';
-import { PostImageDialog } from './PostImageDialog';
+import { ImageDialog } from './ImageDialog';
+import { Tooltip } from './Tooltip';
 
 type PostProps = {
-    post: PostExtended;
+    post: PostDTO;
 };
 
 // type Image = {
 //     url: string;
 //     width: number;
 //     height: number;
-//     id?: PostImageId;
+//     id?: ImageId;
 // }
 
 export function Post({ post }: PostProps) {
-    const { title, content, images, display_name, created_at } = post;
+    const { id, title, content, images, display_name, created_at, comments_count, views, likes, is_liked } = post;
     let orientation: ImageOrientation = 'portrait';
     const location = useLocation();
     const navigate = useNavigate();
-    const [postImageDialogOpen, setPostImageDialogOpen] = useState(false);
-    const closePostImageDialog = () => {
-        setPostImageDialogOpen(false);
+    const [postImageDialogOpen, setImageDialogOpen] = useState(false);
+    const closeImageDialog = () => {
+        setImageDialogOpen(false);
         navigate(origLocation.current ? (origLocation.current.pathname + origLocation.current.search) : '/', { replace: true });
     };
-    const [selectedImage, setSelectedImage] = useState<PostImageExtended | null>(null);
+    const [selectedImage, setSelectedImage] = useState<CollageImage | null>(null);
     const origLocation = useRef<Location | null>(null);
+    const [commentsOpen, setCommentsOpen] = useState(false);
+    const [commentsCount, setCommentsCount] = useState(comments_count);
+    const [viewsCount, setViewsCount] = useState(views);
+    const [likesCount, setLikesCount] = useState(likes);
+    const [postLiked, setPostLiked] = useState(is_liked);
+    const ref = useRef<HTMLDivElement | null>(null);
+    const viewLogger = usePostViewLogger();
+    const isAuthenticated = useAuthStore(s => s.isAuthenticated);
+    const showMessage = useSnackbarStore(s => s.showMessage);
 
     if (images && images.length > 0) {
         const img = images[0];
@@ -57,19 +75,64 @@ export function Post({ post }: PostProps) {
         }
     }
 
-    const onImageClick = (image: PostImageExtended) => {
+    const onImageClick = (image: CollageImage) => {
+        console.log({ image });
         setSelectedImage(image);
-        setPostImageDialogOpen(true);
+        setImageDialogOpen(true);
         origLocation.current = location;
-        window.history.pushState({}, '', `/posts/images/${image.id}`);
+        window.history.pushState({}, '', `/images/${image.id}`);
     }
+
+    const statsButtonOnClick = () => {
+        showMessage('Test');
+    }
+
+    const likesButtonOnClick = () => {
+        if (!isAuthenticated) {
+            return alert('show login');
+        };
+        setPostLiked(prev => !prev);
+        setLikesCount(prev => postLiked ? prev - 1 : prev + 1);
+        apiPost(`/posts/${post.id}/${postLiked ? 'unlike' : 'like'}`);
+    }
+
+    const commentsButtonOnClick = () => {
+        setCommentsOpen(prev => !prev);
+    }
+
+    const shareButtonOnClick = async () => {
+        await copyToClipboard(`${window.location.origin}/posts/${post.id}`);
+        showMessage(<Box display={'flex'} alignItems={'center'} gap={1}><CheckCircleRounded fontSize="small" /> Copied URL to clipboard</Box>);
+    }
+
+    const onCommentsUpdated = (params: CommentsUpdatedParams) => {
+        const { type } = params;
+        type == 'comment_added' && setCommentsCount(prev => prev + 1);
+        type == 'comment_deleted' && setCommentsCount(prev => prev != 0 ? prev - 1 : 0);
+    }
+
+    useEffect(() => {
+        const element = ref.current;
+        if (!element) return;
+        const observer = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting) {
+                viewLogger.log(post.id);
+            }
+        }, { threshold: 0.5 });
+
+        observer.observe(element);
+        return () => {
+            observer.unobserve(element);
+            observer.disconnect();
+        };
+    }, [post]);
 
     return (
         <>
-            <Paper className="post" elevation={0}>
-                {title && <Typography className="title"  {...(title.length <= 150 && { fontSize: { xs: '30px', md: '40px' } })}>{title}</Typography>}
+            <Paper className="post" elevation={0} ref={ref}>
+                {title && <Typography className="title"  {...(title.length <= 150 && { fontSize: { xs: '30px', sm: '40px' } })}>{title}</Typography>}
                 <Stack direction={'row'} className="header">
-                    <Avatar>{display_name.charAt(0).toUpperCase()}</Avatar>
+                    <Avatar sx={{ bgcolor: `${stringToHslColor(display_name)}` }}>{display_name.charAt(0).toUpperCase()}</Avatar>
                     <Box className="user-date-box">
                         <Typography className="user">{display_name}</Typography>
                         <Typography className="date">{getRelativeTime(String(created_at))}</Typography>
@@ -82,30 +145,36 @@ export function Post({ post }: PostProps) {
                 >
                     <ImageCollage orientation={orientation} images={images} onImageClick={onImageClick} />
                 </Box>
-                <Typography className="content" {...(content.length <= 50 && { fontSize: { xs: '20px', md: '30px' } })}>{content}</Typography>
+                <Typography className="content" {...(content.length <= 50 && { fontSize: { xs: '20px', sm: '30px' } })}>{content}</Typography>
                 <Stack direction={'row'} className="controls">
-                    <Box className="stats-container">
-                        <EqualizerRounded /> <Typography>12</Typography>
+                    <Box className="stats-button-container">
+                        <Tooltip title="Views">
+                            <Stack direction={'row'} className="icon-stats" onClick={statsButtonOnClick}><EqualizerRounded sx={{ color: '#77d2ffff' }} /> <Typography>{formatCounters(viewsCount) || ''}</Typography></Stack>
+                        </Tooltip>
                     </Box>
-                    <Box className="likes-container">
-                        <FavoriteBorderRounded /> <Typography>34</Typography>
+                    <Box className="likes-button-container">
+                        <Tooltip title="Like">
+                            <Stack direction={'row'} className="icon-stats" onClick={likesButtonOnClick}>{postLiked ? <FavoriteRounded sx={{ color: '#bd004fff' }} /> : <FavoriteBorderRounded sx={{ color: '#bd004fff' }} />} <Typography>{formatCounters(likesCount) || ''}</Typography></Stack>
+                        </Tooltip>
                     </Box>
-                    <Box className="comments-container">
-                        <ChatBubbleOutlineRounded /> <Typography>56</Typography>
+                    <Box className="comments-button-container">
+                        <Tooltip title="Comments">
+                            <Stack direction={'row'} className="icon-stats" onClick={commentsButtonOnClick}><ChatBubbleOutlineRounded /> <Typography>{formatCounters(commentsCount) || ''}</Typography></Stack>
+                        </Tooltip>
                     </Box>
-                    <Box className="share-container">
-                        <ShareRounded />
+                    <Box className="share-button-container">
+                        <Tooltip title="Share">
+                            <Stack direction={'row'} className="icon-stats" onClick={shareButtonOnClick}><ShareRounded /></Stack>
+                        </Tooltip>
                     </Box>
                 </Stack>
-                <Box className="comment-container">
-
-                </Box>
+                <Comments open={commentsOpen} postId={id} onCommentsUpdated={onCommentsUpdated} />
             </Paper>
-            {selectedImage && <PostImageDialog
+            {selectedImage && <ImageDialog
                 open={postImageDialogOpen}
-                closeDialog={closePostImageDialog}
-                postId={selectedImage.post_id}
-                postImageId={selectedImage.id}
+                closeDialog={closeImageDialog}
+                postId={id}
+                imageId={selectedImage.id}
             />}
         </>
     );

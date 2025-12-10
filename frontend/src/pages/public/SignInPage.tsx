@@ -10,7 +10,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 
-export const SignIn = () => {
+export const SignInPage = () => {
     const setToken = useAuthStore(s => s.setToken);
     // const isAuthenticated = useAuthStore(s => s.isAuthenticated);
     const location = useLocation();
@@ -22,7 +22,7 @@ export const SignIn = () => {
     // }
 
     const submit = async (formInput: FormInput): Promise<ApiResult<AccessToken>> => {
-        const res = await apiPost<AccessToken>('/auth/signin', { ...formInput, fingerprint: jsonBase64Encode(getFingerprint()) });
+        const res = await apiPost<AccessToken>('/auth/signin', { ...formInput, fp: jsonBase64Encode(getFingerprint()) });
         return res;
     };
 

@@ -1,26 +1,31 @@
+import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthInitializer } from './auth/AuthInitializer';
+import { ConfirmDialog } from './components/ConfirmDialog';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { GlobalErrorHandler } from './components/GlobalErrorHandler';
-import { GlobalSnackbar } from './components/GlobalSnackbar';
+import { GradientBg } from './components/GradientBg';
+import { Snackbar } from './components/Snackbar';
 import { AppRoutes } from './routes';
 import { theme } from './themes/theme';
-import CssBaseline from '@mui/material/CssBaseline';
 
 function App() {
-  return (
+  return (<>
+    <GradientBg />
     <ThemeProvider theme={theme}>
       <BrowserRouter>
-        <GlobalSnackbar />
+        <Snackbar />
         <CssBaseline />
         <ErrorBoundary>
+          <ConfirmDialog />
           <AuthInitializer />
           <AppRoutes />
         </ErrorBoundary>
         <GlobalErrorHandler />
       </BrowserRouter>
     </ThemeProvider>
+  </>
   )
 }
 

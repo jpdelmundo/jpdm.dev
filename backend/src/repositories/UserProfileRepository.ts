@@ -1,5 +1,4 @@
-import type UserProfile from '@shared/models/generated/UserProfile';
-import type { UserProfileId, UserProfileMutator } from '@shared/models/generated/UserProfile';
+import type { UserProfile, UserProfileId, UserProfileMutator } from '@shared/models/generated/UserProfile';
 import { BaseRepository } from './BaseRepository';
 
 interface FindParams {
@@ -35,11 +34,11 @@ export class UserProfileRepository extends BaseRepository<UserProfile> {
         throw new Error("Method not implemented.")
     }
 
-    update(id: string, item: UserProfileMutator): Promise<UserProfile[]> {
+    update(id: string, item: UserProfileMutator): Promise<UserProfile> {
         throw new Error("Method not implemented.")
     }
 
-    delete(id: UserProfileId): Promise<UserProfile[]> {
+    delete(id: UserProfileId): Promise<UserProfile> {
         throw new Error("Method not implemented.")
     }
 }

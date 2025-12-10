@@ -12,6 +12,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@maxmind/geoip2-node": "^6.3.4",
     "@project/shared": "^1.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

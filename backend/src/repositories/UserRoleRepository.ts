@@ -1,5 +1,4 @@
-import type UserRole from '@shared/models/generated/UserRole';
-import type { UserRoleId } from '@shared/models/generated/UserRole';
+import type { UserRole, UserRoleId } from '@shared/models/generated/UserRole';
 import { BaseRepository } from './BaseRepository';
 
 export class UserRoleRepository extends BaseRepository<UserRole> {
@@ -30,11 +29,11 @@ export class UserRoleRepository extends BaseRepository<UserRole> {
         throw new Error("Method not implemented.")
     }
 
-    update(id: string, item: Partial<UserRole>): Promise<UserRole[]> {
+    update(id: string, item: Partial<UserRole>): Promise<UserRole> {
         throw new Error("Method not implemented.")
     }
 
-    delete(id: UserRoleId): Promise<UserRole[]> {
+    delete(id: UserRoleId): Promise<UserRole> {
         throw new Error("Method not implemented.")
     }
 }

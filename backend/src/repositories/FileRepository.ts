@@ -1,3 +1,4 @@
+import type { FindParamsBase } from '@/types/FindParams';
 import type { File, FileId, FileInitializer, FileMutator } from '@shared/models/generated/File';
 import type { PostId } from '@shared/models/generated/Post';
 import type { UserId } from '@shared/models/generated/User';
@@ -10,7 +11,8 @@ interface FindParams {
 }
 
 export class FileRepository extends BaseRepository<File> {
-    async find({ id, postId, userId }: FindParams): Promise<File[]> {
+    async find<P extends FindParamsBase>(params: P) {
+        const { id, postId, userId } = params;
         const filters: string[] = [];
         const values: unknown[] = [];
 
@@ -42,15 +44,12 @@ export class FileRepository extends BaseRepository<File> {
                      values (${placeholders})
                      returning *`;
         const result = await this.query<File>(sql, values);
-
-        if (!result.rows[0]) {
-            throw new Error(`Record creation failed`);
-        }
+        if (!result.rows[0]) throw new Error(`Record creation failed`);
 
         return result.rows[0];
     }
 
-    async update(id: string, item: FileMutator): Promise<File[]> {
+    async update(id: string, item: FileMutator): Promise<File> {
         const entries = Object.entries(item).filter(([key, value]) => value !== undefined && key != 'id');
         const set: string[] = [];
         const values: unknown[] = [];
@@ -78,16 +77,19 @@ export class FileRepository extends BaseRepository<File> {
                      returning *`;
 
         const result = await this.query<File>(sql, values);
+        if (!result.rows[0]) throw new Error('Update failed');
 
-        return result.rows;
+        return result.rows[0];
     }
 
-    async delete(id: FileId): Promise<File[]> {
-        if (!id) throw new Error('Id missing');
+    async delete(id: FileId): Promise<File> {
+        if (!id) throw new Error('Missing parameter: id');
         const sql = `delete from files
                      where id = $1
                      returning *`;
         const result = await this.query<File>(sql, [id]);
-        return result.rows;
+        if (!result.rows[0]) throw new Error('Delete failed');
+
+        return result.rows[0] ?? null;
     }
 }

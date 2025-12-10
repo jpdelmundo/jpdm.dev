@@ -5,8 +5,10 @@ import { jsonBase64Encode } from '@shared/utils/encoding';
 import { useState, type MouseEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import { stringToHslColor } from '@/utils/helper';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import Avatar from '@mui/material/Avatar';
+import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
@@ -24,8 +26,9 @@ export const UserPanel = () => {
 
     const signOut = async () => {
         setLoading(true);
-        await apiPost('/auth/signout', { fingerprint: jsonBase64Encode(getFingerprint()) });
+        await apiPost('/auth/signout', { fp: jsonBase64Encode(getFingerprint()) });
         setLoading(false);
+        userMenuOnClose();
         clearToken();
         navigate('/');
     }
@@ -49,9 +52,11 @@ export const UserPanel = () => {
             <Grid container gap={1}>
                 <Grid>
                     <IconButton onClick={avatarOnClick} sx={{ padding: 0 }}>
-                        {isAuthenticated
-                            ? <Avatar sx={{ bgcolor: '#008cff', height: 32, width: 32 }}>{user?.username.charAt(0).toUpperCase()}</Avatar>
-                            : <AccountCircle fontSize={'large'} color={isAuthenticated ? 'disabled' : 'disabled'} />}
+                        {loading
+                            ? <CircularProgress />
+                            : isAuthenticated
+                                ? <Avatar sx={{ bgcolor: `${stringToHslColor(user?.username || '')}`, height: 40, width: 40 }}>{user?.username.charAt(0).toUpperCase()}</Avatar>
+                                : <AccountCircle fontSize={'large'} color={isAuthenticated ? 'disabled' : 'disabled'} />}
                     </IconButton>
                 </Grid>
                 {/* <Grid><Link component={RouterLink} to="/signin"></Link> {user?.username}</Grid> */}
@@ -77,7 +82,7 @@ export const UserPanel = () => {
                                     display: 'block',
                                     position: 'absolute',
                                     top: 0,
-                                    right: '10px',
+                                    right: '14px',
                                     width: 10,
                                     height: 10,
                                     bgcolor: 'background.paper',

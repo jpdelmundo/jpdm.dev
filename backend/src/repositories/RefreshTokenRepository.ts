@@ -50,7 +50,7 @@ export class RefreshTokenRepository extends BaseRepository<RefreshToken> {
         return result.rows[0];
     }
 
-    async update(id: string, item: RefreshTokenMutator): Promise<RefreshToken[]> {
+    async update(id: string, item: RefreshTokenMutator): Promise<RefreshToken> {
         const entries = Object.entries(item).filter(([key, value]) => value !== undefined && key != 'id');
         const set: string[] = [];
         const values: unknown[] = [];
@@ -78,16 +78,19 @@ export class RefreshTokenRepository extends BaseRepository<RefreshToken> {
                      returning *`;
 
         const result = await this.query<RefreshToken>(sql, values);
+        if (!result.rows[0]) throw new Error('Update failed');
 
-        return result.rows;
+        return result.rows[0];
     }
 
-    async delete(id: RefreshTokenId): Promise<RefreshToken[]> {
-        if (!id) throw new Error('Id missing');
+    async delete(id: RefreshTokenId): Promise<RefreshToken> {
+        if (!id) throw new Error('Missing parameter: id');
         const sql = `delete from refresh_tokens
                      where id = $1
                      returning *`;
         const result = await this.query<RefreshToken>(sql, [id]);
-        return result.rows;
+        if (!result.rows[0]) throw new Error('Delete failed');
+
+        return result.rows[0];
     }
 }

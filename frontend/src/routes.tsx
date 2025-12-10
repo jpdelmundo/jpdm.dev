@@ -5,11 +5,12 @@ import { AdminLayout } from './pages/admin/AdminLayout';
 import { Users } from './pages/admin/Users';
 import { About } from './pages/public/About';
 import { Home } from './pages/public/Home';
+import { ImagePage } from './pages/public/ImagePage';
 import { Layout } from './pages/public/Layout';
-import { NotFound } from './pages/public/NotFound';
-import { PostImage } from './pages/public/PostImage';
-import { SignIn } from './pages/public/SignIn';
-import { SignUp } from './pages/public/SignUp';
+import { NotFoundPage } from './pages/public/NotFoundPage';
+import { PostPage } from './pages/public/PostPage';
+import { SignInPage } from './pages/public/SignInPage';
+import { SignUpPage } from './pages/public/SignUpPage';
 import { CreatePost } from './pages/user/CreatePost';
 
 const routes = [
@@ -17,9 +18,9 @@ const routes = [
         element: <Layout />,
         children: [
             { index: true, element: <Home /> },
-            { path: 'signin', element: <SignIn /> },
+            { path: 'signin', element: <SignInPage /> },
             { path: 'about', element: <About /> },
-            { path: 'signup', element: <SignUp /> },
+            { path: 'signup', element: <SignUpPage /> },
             //{ path: 'signout', element: <SignOut /> },
             {
                 path: 'user',
@@ -37,8 +38,9 @@ const routes = [
                     }
                 ]
             },
-            { path: 'posts/images/:id', element: <PostImage /> },
-            { path: '*', element: <NotFound /> }
+            { path: 'posts/:id', element: <PostPage /> },
+            { path: 'images/:id', element: <ImagePage /> },
+            { path: '*', element: <NotFoundPage /> }
         ],
     },
     {

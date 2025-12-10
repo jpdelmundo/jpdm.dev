@@ -1,11 +1,12 @@
+import type { ReactNode } from 'react';
 import { create } from 'zustand';
 
 type Severity = 'success' | 'error' | 'info' | 'warning';
 
 interface SnackbarState {
-    message: string;
+    message: ReactNode | string;
     severity: Severity;
-    showMessage: (message: string) => void;
+    showMessage: (message: ReactNode | string) => void;
     open: boolean;
     closeMessage: () => void;
 }
@@ -15,7 +16,7 @@ export const useSnackbarStore = create<SnackbarState>()(
         message: '',
         severity: 'info',
         open: false,
-        showMessage: (message: string) => set({ message, open: true }),
+        showMessage: (message: ReactNode | string) => set({ message, open: true }),
         closeMessage: () => set({ open: false })
     })
 );

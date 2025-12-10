@@ -33,3 +33,4 @@ uploads/
 usercontent/
 *.tsbuildinfo
 *.cpuprofile
+backend/db

@@ -1,21 +1,18 @@
+import type { CollageImage } from '@/types/CollageImage';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import { useTheme } from '@mui/material/styles';
-import type PostImageExtended from '@shared/models/extensions/PostImageExtended';
 import type { ImageOrientation } from '@shared/types/ImageOrientation';
 import { CoverImage } from './CoverImage';
 
 type ImageCollageProps = {
     orientation: ImageOrientation
-    images: PostImageExtended[];
-    onImageClick: (image: PostImageExtended) => void
+    images: CollageImage[];
+    onImageClick?: (image: CollageImage) => void
 };
 
 export function ImageCollage({ orientation, images, onImageClick }: ImageCollageProps) {
     const theme = useTheme();
-    // const showImageDialog = (image: Image) => {
-    //     navigate(`/posts/images/${image.id}`, { state: { from: location } });
-    // };
 
     return (
         <>

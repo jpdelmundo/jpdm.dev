@@ -11,6 +11,9 @@ export const theme = createTheme({
         },
     },
     palette: {
+        primary: {
+            main: '#006effff'
+        },
         background: {
             default: '#f3f3f3'
         }
@@ -28,14 +31,25 @@ export const theme = createTheme({
     shape: {
         borderRadius: 8
     },
-    components: {
-        // MuiCssBaseline: {
-        //     styleOverrides: {
-        //         html: {
-        //             fontSize: '15px',
-        //         }
-        //     }
-        // },
+    components: { //no MuiBox under createTheme components (for MuiBox classes add it here)
+        MuiCssBaseline: {
+            styleOverrides: {
+                html: {
+                    '&.confirm-dialog-open': {
+                        overflowY: 'scroll',
+                        '& body': {
+                            overflow: 'hidden'
+                        }
+                    }
+                },
+                main: {
+                    '&.MuiContainer-root': {
+                        paddingLeft: 10,
+                        paddingRight: 10
+                    }
+                }
+            }
+        },
         MuiOutlinedInput: {
             styleOverrides: {
                 root: ({ theme }) => ({
@@ -115,11 +129,13 @@ export const theme = createTheme({
             }
         },
         MuiCircularProgress: {
+            styleOverrides: {
+                root: {
+                    color: '#88888888'
+                }
+            },
             defaultProps: {
                 size: 15,
-                sx: {
-                    color: '#ffffff'
-                }
             }
         },
         MuiPaper: {
@@ -152,14 +168,36 @@ export const theme = createTheme({
                         }
                     },
                     '&.post': {
+                        '&:first-child': {
+                            marginTop: 0
+                        },
+                        boxShadow: '0 1px 5px -4px #00000066',
+                        position: 'relative',
+                        background: 'none',
+                        '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            //backdropFilter: 'saturate(1.8) blur(20px)',
+                            backgroundColor: '#ffffffcc',
+
+                            // backgroundColor: '#ffffff',
+                            zIndex: -1,
+                            borderRadius: '16px',
+                            overflow: 'hidden'
+                        },
                         borderRadius: '16px',
                         margin: '25px 0',
                         '& .header': {
                             marginBottom: '25px',
                             gap: '10px',
+                            alignItems: 'center',
                             '& .MuiAvatar-root': {
-                                width: '32px',
-                                height: '32px'
+                                width: '40px',
+                                height: '40px'
                             }
                         },
                         '& .user': {
@@ -179,7 +217,7 @@ export const theme = createTheme({
                             margin: '25px 0'
                         },
                         '& .date': {
-                            fontSize: '12px',
+                            fontSize: '11px',
                             color: '#888888',
                             lineHeight: 1.2
                         },
@@ -196,20 +234,126 @@ export const theme = createTheme({
                             color: '#595959',
                             justifyContent: 'end'
                         },
-                        '& .share-container, .stats-container, .likes-container, .comments-container': {
+                        '& .share-button-container, .stats-button-container, .likes-button-container, .comments-button-container': {
                             display: 'flex',
                             flexBasis: '70px',
                             justifyContent: 'start',
                             alignItems: 'center',
-                            cursor: 'pointer',
-                            '&:hover': {
-                                color: 'initial',
-                                // transition: '.2s',
-                                transform: 'translateY(-10%)'
+                            '& .icon-stats': {
+                                padding: '2px 8px',
+                                borderRadius: '16px',
+                                cursor: 'pointer',
+                                '&:hover': {
+                                    color: 'initial',
+                                    // transition: '.2s',
+                                    //transform: 'translateY(-10%)'
+                                    backgroundColor: '#e8e8e888'
+                                }
                             }
                         },
-                        '& .share-container': {
+                        '& .share-button-container': {
                             flexBasis: 0
+                        },
+                        '& .new-comment, .edit-comment': {
+                            '& .MuiInputBase-root': {
+                                fontSize: '14px',
+                                borderRadius: '16px',
+                                backgroundColor: '#eeeeeeff',
+                                paddingRight: 0,
+                                marginTop: '10px',
+                                '&.Mui-focused': {
+                                    transition: 'none',
+                                    boxShadow: 'none',
+                                },
+                                '&.MuiInputBase-multiline': {
+                                    padding: 0,
+                                    '& .MuiInputBase-input': {
+                                        padding: '8px 12px'
+                                    }
+                                },
+                                // '& .MuiInputBase-input, .MuiInputBase-inputMultiline': {
+                                //     padding: '4px 12px',
+                                //     lineHeight: '20px',
+                                //     height: '36px'
+                                // },
+                                '& .MuiInputBase-input::placeholder': {
+                                    color: '#555555',
+                                    opacity: 1
+                                },
+                                '& .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: '#ededed'
+                                }
+                            }
+                        },
+                        '& .edit-comment': {
+                            '& .MuiFormControl-root': { marginTop: 0 },
+                            '& .MuiInputBase-root': { marginTop: 0, marginBottom: '6px', }
+                        },
+                        '& .comments': {
+                            display: 'block',
+                            '& .list': {
+                                '& .show-more': {
+                                    '&:hover': {
+                                        backgroundColor: '#aaaaaa88',
+                                    },
+                                    fontSize: '12px',
+                                    margin: '0 auto',
+                                    backgroundColor: '#dddddd88',
+                                    color: theme.palette.getContrastText('#dddddd88')
+                                }
+                            }
+                        },
+                        '& .comment': {
+                            marginBottom: '5px',
+                            '&.first': {
+                                marginTop: '25px'
+                            },
+                            '& .content': {
+                                margin: 0,
+                                fontSize: '14px',
+                                //whiteSpace: 'pre-line',
+                                lineHeight: '20px',
+                                '& .double-break': {
+                                    display: 'block',
+                                    height: '5px'
+                                }
+                            },
+                            '& .detail': {
+                                justifySelf: 'flex-start',
+                                backgroundColor: '#eeeeeeff',
+                                borderRadius: '16px',
+                                padding: '6px 12px',
+                                //maxWidth: '85%',
+                                '& .user': {
+                                    fontSize: '12px'
+                                },
+                                maxWidth: '80%'
+                            },
+                            '& .date': {
+                                padding: '6px 12px'
+                            },
+                            '& .comment-options': {
+                                display: 'none'
+                            },
+                            '&:hover .comment-options': {
+                                display: 'flex',
+                                '& .edit': {
+                                    padding: '0px 4px',
+                                    fontSize: '12px',
+                                    minWidth: 'unset',
+                                    backgroundColor: '#eeeeeeff',
+                                    color: theme.palette.getContrastText('#eeeeeeff'),
+                                    '&:hover': { backgroundColor: '#ffffffff' }
+                                },
+                                '& .delete': {
+                                    padding: '0',
+                                    margin: 'auto 0',
+                                    color: 'white',
+                                    backgroundColor: '#8d2800ff',
+                                    borderRadius: '50%',
+                                    '&:hover': { backgroundColor: '#b32f00' }
+                                }
+                            }
                         }
                     }
                 })
@@ -222,7 +366,7 @@ export const theme = createTheme({
                         boxShadow: '0 1px 2px #cccccc, 0 4px 8px #dddddd',
                     },
                     '& .MuiModal-backdrop': {
-                        backgroundColor: '#ffffffaa'
+                        backgroundColor: '#ffffff88'
                     },
                     '&.create-post-dialog': {
                         '& .MuiDialog-paper': {
@@ -248,8 +392,8 @@ export const theme = createTheme({
                             }
                         },
                         '& .MuiModal-backdrop': {
-                            backgroundColor: '#000000e5',
-                            backdropFilter: 'saturate(1.8) blur(20px)'
+                            backgroundColor: '#000000',
+                            //backdropFilter: 'saturate(1.8) blur(20px)'
                         },
                     }
                 })
@@ -257,15 +401,21 @@ export const theme = createTheme({
         },
         MuiContainer: {
             styleOverrides: {
-                root: {
+                root: ({ theme }) => ({
                     '&.header-container': {
                         padding: '10px',
-                        backdropFilter: 'saturate(1.8) blur(20px)',
+                        backgroundColor: '#f3f3f3',
+                        //boxShadow: '0 1px 10px -8px #00000055',
                         maxWidth: 'unset !important',
                         display: 'block',
                         position: 'fixed',
+                        [theme.breakpoints.up('md')]: {
+                            //boxShadow: 'none',
+                            backgroundColor: 'transparent',
+                            backdropFilter: 'saturate(1.8) blur(20px)'
+                        }
                     }
-                }
+                })
             }
         },
         // MuiIconButton: {

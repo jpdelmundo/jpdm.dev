@@ -20,6 +20,7 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_CONFIG_MAX_LOGIN_ATTEMPTS: ${PGADMIN_CONFIG_MAX_LOGIN_ATTEMPTS}
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:

@@ -22,7 +22,7 @@ type JsonPrimitive = string | number | boolean | null;
 type JsonArray = JsonValue[];
 interface JsonObject { [key: string]: JsonValue; }
 type JsonValue = JsonPrimitive | JsonObject | JsonArray;
-type ApiPostBody = JsonObject | FormData;
+type ApiRequestBody = JsonObject | FormData;
 type ApiGetParams = Record<string, string | number | boolean> | URLSearchParams;
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -41,6 +41,7 @@ export async function apiRequest<T>(input: RequestInfo | URL, init?: RequestInit
 
         if (!res.ok) {
             const { error } = { ...(await res.json()) };
+            console.log({ error });
             if (error.code == ErrorCode.TOKEN_EXPIRED && !isRetry) {
                 try {
                     const newToken = await getNewToken();
@@ -96,7 +97,7 @@ export async function apiGet<T>(url: string, params?: ApiGetParams) {
     return apiRequest<T>(requestUrl, init);
 }
 
-export async function apiPost<T>(url: string, body?: ApiPostBody, onProgress?: (progress: number) => void, isRetry = false) {
+export async function apiPost<T>(url: string, body?: ApiRequestBody, onProgress?: (progress: number) => void, isRetry = false) {
     const isFormData = body instanceof FormData;
     const requestUrl = `${baseUrl}${url}`;
 
@@ -170,4 +171,28 @@ export async function apiPost<T>(url: string, body?: ApiPostBody, onProgress?: (
 
         return apiRequest<T>(requestUrl, init);
     }
+}
+
+export async function apiPut<T>(url: string, body?: ApiRequestBody) {
+    const requestUrl = `${baseUrl}${url}`;
+    const init = {
+        method: 'put',
+        credentials: 'include' as RequestCredentials,
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body)
+    };
+
+    return apiRequest<T>(requestUrl, init);
+}
+
+export async function apiDelete<T>(url: string, body?: ApiRequestBody) {
+    const requestUrl = `${baseUrl}${url}`;
+    const init = {
+        method: 'delete',
+        credentials: 'include' as RequestCredentials,
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body)
+    };
+
+    return apiRequest<T>(requestUrl, init);
 }

@@ -1,7 +1,9 @@
 import type { Post } from '../generated/Post';
-import PostImageExtended from './PostImageExtended';
+import type ImageExtended from './ImageExtended';
 
-export default interface PostExtended extends Post {
+export default interface PostDTO extends Post {
     display_name: string;
-    images: PostImageExtended[];
+    images: ImageExtended[];
+    comments_count: number;
+    is_liked: boolean;
 }

@@ -4,7 +4,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import { ServiceError } from './errors/ServiceError';
-import route from './router';
+import router from './router';
 import { ApiError, error } from './utils/apiHelper';
 import './utils/logger';
 
@@ -12,11 +12,18 @@ const app = express();
 const port = process.env.API_PORT;
 const apiBasePath = String(process.env.API_BASE_PATH); // /api/<version> ex. /api/v1
 
-app.use(cors({ origin: ['http://localhost:5173'], credentials: true }));
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://jp-pc.home.arpa:5173',
+    'http://localhost:4173',
+    'http://jp-pc.home.arpa:4173'
+  ], credentials: true
+}));
 app.use(express.json());
 app.use(cookieParser());
 app.use('/usercontent/images', express.static(String(process.env.UPLOAD_PATH)));
-app.use(apiBasePath, route);
+app.use(apiBasePath, router);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error('Server Error:', err);

@@ -1,19 +1,24 @@
 import { ServiceError } from '@/errors/ServiceError';
 import { FileRepository } from '@/repositories/FileRepository';
-import { PostImageRepository } from '@/repositories/PostImageRepository';
+import { ImageRepository } from '@/repositories/ImageRepository';
 import { PostRepository } from '@/repositories/PostRepository';
 import { UserRepository } from '@/repositories/UserRepository';
-import type { InferFindResultType } from '@/types/InferFindResultType';
-import type PostExtended from '@shared/models/extensions/PostExtended';
-import type PostImageExtended from '@shared/models/extensions/PostImageExtended';
+import type { FindParamsBase } from '@/types/FindParams';
+import type ImageExtended from '@shared/models/extensions/ImageExtended';
+import type PostDTO from '@shared/models/extensions/PostExtended';
+import type { ImageId } from '@shared/models/generated/Image';
 import type { PostId, PostInitializer } from '@shared/models/generated/Post';
-import type { PostImageId } from '@shared/models/generated/PostImage';
 import type { UserId } from '@shared/models/generated/User';
 import type { VisibilityEnum } from '@shared/models/generated/VisibilityEnum';
 import { ErrorCode } from '@shared/types/ErrorCode';
 import type { OrderDirection } from '@shared/types/OrderDirection';
+import { validate } from 'uuid';
+import * as commentService from './commentService';
+import * as imageService from './imageService';
+import * as postLikeService from './postLikeService';
 
 type GetParams = {
+    current_user_id?: UserId;
     id?: PostId;
     user_id?: UserId;
     visibility?: VisibilityEnum;
@@ -22,6 +27,19 @@ type GetParams = {
     page_size?: number;
     order_by?: string;
     order_dir?: OrderDirection;
+    include?: string[];
+}
+
+type GetImageParams = {
+    current_user_id?: UserId;
+    id?: ImageId;
+    is_published?: boolean;
+    skip_access_check?: boolean;
+}
+
+type GetImagesParams = {
+    current_user_id?: UserId;
+    post_id?: PostId;
 }
 
 type CreateParams = PostInitializer & {
@@ -35,10 +53,11 @@ const getDisplayName = async (id: UserId): Promise<string> => {
     return result;
 }
 
-export const get = async <P extends GetParams, T extends PostExtended>(params: P): Promise<InferFindResultType<P, T>> => {
-    const { id, user_id, visibility, is_published, page_num, page_size, order_by, order_dir } = params;
+export const get = async <P extends FindParamsBase>(params: P) => {
+    const { current_user_id, id, user_id, visibility, is_published, page_num, page_size, order_by, order_dir, include } = params as GetParams;
     const repo = new PostRepository();
-    const findResult = await repo.find({
+
+    const findParams = {
         ...(id && { id }),
         ...(user_id && { user_id }),
         ...(visibility && { visibility }),
@@ -47,66 +66,36 @@ export const get = async <P extends GetParams, T extends PostExtended>(params: P
         ...(page_size && { page_size }),
         ...(order_by && { order_by }),
         ...(order_dir && { order_dir }),
-    });
+    } as P;
 
-    const items = ('page_items' in findResult ? findResult.page_items : findResult) as PostExtended[];
+    const findResult = await repo.find(findParams);
+
+    const items = ('page_items' in findResult ? findResult.page_items : findResult) as PostDTO[];
     for (const post of items) {
-        post.display_name = await getDisplayName(post.user_id);
-        post.images = await getImages(post.id);
+        const { id: post_id, user_id } = post;
+        if (!post.is_published && !current_user_id) throw new ServiceError(`Post not available`, ErrorCode.NOT_AVAILABLE);
+        if (!post.is_published && (current_user_id && current_user_id !== user_id)) throw new ServiceError(`Post not available`, ErrorCode.NOT_AVAILABLE);
+        if (post.visibility == 'private' && current_user_id !== user_id) throw new ServiceError(`Post not available`, ErrorCode.NOT_AVAILABLE);
+
+        post.display_name = await getDisplayName(user_id);
+        post.is_liked = await postLikeService.isLiked(post.id, current_user_id);
+        include?.includes('stats') && (post.comments_count = await getCommentsCount(post_id));
+        include?.includes('images') && (post.images = (await imageService.get({ post_id })) as ImageExtended[]);
     }
 
-    return findResult as InferFindResultType<P, T>;
+    return findResult;
 }
 
-export const getImage = async (id: PostImageId, user_id?: UserId): Promise<PostImageExtended> => {
-    if (!id) throw new Error('Missing parameter: id');
-
-    const repo = new PostImageRepository();
-    const postImage = await repo.findById(id);
-    if (!postImage || !postImage.id) throw new ServiceError(`Image not found: ${id}`, ErrorCode.NOT_FOUND);
-
-    //check if post public (otherwise throw error)
-    const postRepo = new PostRepository();
-    const post = await postRepo.findById(postImage.post_id);
-    if (!post || !post.id) throw new Error(`Post not found: ${postImage.post_id}`);
-    if (!post.is_published) throw new ServiceError(`Image not available`, ErrorCode.NOT_AVAILABLE);
-    if (post.visibility == 'private') {
-        if (user_id != post.user_id) throw new ServiceError(`Image not available`, ErrorCode.NOT_AVAILABLE);
-    }
-
-    let result = postImage as PostImageExtended;
-    if (postImage) {
-        const fileRepo = new FileRepository();
-        const file = await fileRepo.findById(postImage.file_id);
-        if (!file) throw new Error(`File not found: ${postImage.file_id}`);
-        result = {
-            ...result,
-            url: `${process.env.STATIC_SERVER}${process.env.USERCONTENT_IMAGE_PATH}/${file.filename}`,
-            width: file.width || 0,
-            height: file.height || 0
-        };
-    }
-    return result;
+export const getById = async (id: PostId, params: { include?: string[], current_user_id?: UserId }) => {
+    if (!id) throw new ServiceError('Missing parameter: id');
+    if (!validate(id)) throw new ServiceError('Invalid post id', ErrorCode.INVALID_ID);
+    const { current_user_id, include } = params;
+    const result = await get({ id, current_user_id, include });
+    if (!result[0]) throw new ServiceError('Post not found', ErrorCode.NOT_FOUND);
+    return result[0];
 }
 
-export const getImages = async (post_id: PostId): Promise<PostImageExtended[]> => {
-    const repo = new PostImageRepository();
-    const postImages = await repo.find({ post_id, order_by: 'sort' });
-    const images: PostImageExtended[] = [];
-    if (postImages.length > 0) {
-        for (const postImage of postImages) {
-            try {
-                images.push(await getImage(postImage.id));
-            } catch (err) {
-                console.error((err as Error).message);
-            }
-        }
-    }
-
-    return images;
-}
-
-export const create = async (params: CreateParams): Promise<PostExtended> => {
+export const create = async (params: CreateParams): Promise<PostDTO> => {
     const { content, files } = params;
     if (!content || content.trim().length == 0) throw new ServiceError('Content cannot be empty', ErrorCode.MISSING_PARAMETER, { param: 'content' });
     if (content.length > 2000) throw new ServiceError('Content too long', ErrorCode.LENGTH_TOO_LONG, { param: 'content' });
@@ -119,23 +108,43 @@ export const create = async (params: CreateParams): Promise<PostExtended> => {
     //get id
     //create post files
     if (files && files.length > 0) {
-        const postImageRepo = new PostImageRepository();
+        const postImageRepo = new ImageRepository();
         const fileRepo = new FileRepository();
         for (const file of files) {
             //check if file owned by user
             const userFile = await fileRepo.findById(file.fileId);
             if (!userFile || userFile.user_id != newPost.user_id) continue;
 
-            const newPostImage = await postImageRepo.create({ file_id: userFile.id, post_id: newPost.id, sort: file.sort });
-            if (!newPostImage) throw new Error('Failed creating post image');
+            const newImage = await postImageRepo.create({ file_id: userFile.id, post_id: newPost.id, sort: file.sort });
+            if (!newImage) throw new Error('Failed creating post image');
 
             fileRepo.update(userFile.id, { expire_at: null });
         }
     }
 
-    const result: PostExtended[] = await get({ id: newPost.id });
+    const result = await get({ id: newPost.id }) as PostDTO[];
     if (!result[0]) throw new Error(`Post created but not found: ${newPost.id}`);
 
     return result[0];
 }
 
+export const hasAccess = async (current_user_id: UserId | undefined, id: PostId) => {
+    try {
+        const post = (await get({ current_user_id, id }))[0];
+        if (!post?.id) return false;
+        if (!post.is_published && !current_user_id) return false;
+        if (!post.is_published && (current_user_id && post.user_id != current_user_id)) return false;
+    } catch (error) {
+        if (error instanceof ServiceError && error.code == ErrorCode.NOT_AVAILABLE) {
+            return false;
+        }
+        throw error;
+    }
+}
+
+export const getCommentsCount = async (post_id: PostId) => {
+    let count = 0;
+    const result = await commentService.get({ post_id, page_num: 1, page_size: 1 });
+    count = result.total;
+    return count;
+}

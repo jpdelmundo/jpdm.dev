@@ -12,20 +12,31 @@ import { generateAccessToken } from '../utils/auth';
 interface LoginParams {
     username: string;
     password: string;
-    fingerprint: string;
+    fp: string;
     remember: boolean;
 }
 
 export const signIn = async (req: Request, res: Response): Promise<Response> => {
-    const { username, password, remember, fingerprint }: LoginParams = req.body;
+    const { username, password, remember, fp }: LoginParams = req.body;
+
     if (await userService.isValidCredentials(username, password)) {
         //get user
         const tokenUserData = await userService.getTokenData({ username });
         if (!tokenUserData) throw new UnexpectedError();
 
         //create refresh token and jwt
+        const { device_id, client_tz, screen_width, screen_height, cpu_count } = jsonBase64Decode(fp) as DeviceFingerprint;
         const accessToken = generateAccessToken(tokenUserData);
-        const refreshToken = await userService.createRefreshToken({ ...jsonBase64Decode(fingerprint), user_id: tokenUserData.id, request_ip: req.ip });
+        const refreshToken = await userService.createRefreshToken({
+            device_id,
+            client_tz,
+            screen_width,
+            screen_height,
+            cpu_count,
+            user_id: tokenUserData.id,
+            ...(req.ip && { request_ip: req.ip }),
+            remember
+        });
 
         createRefreshTokenCookie(refreshToken, remember, req, res);
 
@@ -37,9 +48,9 @@ export const signIn = async (req: Request, res: Response): Promise<Response> => 
 
 export const signOut = async (req: Request, res: Response): Promise<Response> => {
     const authReq = req as AuthorizedRequest;
-    const { fingerprint } = req.body;
-    if (fingerprint) {
-        const fingerprintObj = jsonBase64Decode(fingerprint) as DeviceFingerprint;
+    const { fp } = req.body;
+    if (fp) {
+        const fingerprintObj = jsonBase64Decode(fp) as DeviceFingerprint;
         const deviceId = fingerprintObj.device_id;
         userService.signOutUser(authReq.user.id, deviceId);
     }
@@ -70,14 +81,16 @@ export const refreshToken = async (req: Request, res: Response): Promise<Respons
     }
 
     //check if refresh token fingerprint matches stored
-    const { fingerprint } = req.body;
+    const { fp } = req.body;
     let fingerprintObj;
     try {
-        fingerprintObj = jsonBase64Decode(fingerprint) as DeviceFingerprint;
+        fingerprintObj = jsonBase64Decode(fp) as DeviceFingerprint;
     } catch (error) {
-        console.log('Cannot parse fingerprint', { fingerprint });
+        console.error('Cannot parse fingerprint', { fp });
         throw new Error('Error parsing refresh token request');
     }
+
+    const { device_id, client_tz, screen_width, screen_height, cpu_count } = fingerprintObj;
 
     //check if IP address change
     if (req.ip != refreshToken.request_ip) {
@@ -86,13 +99,13 @@ export const refreshToken = async (req: Request, res: Response): Promise<Respons
     }
 
     //check if client request fingerprint matches stored fingerprint
-    if (!(fingerprintObj.client_tz == refreshToken.client_tz
-        && fingerprintObj.device_id == refreshToken.device_id
-        && fingerprintObj.cpu_count == refreshToken.cpu_count
-        && fingerprintObj.screen_height == refreshToken.screen_height
-        && fingerprintObj.screen_width == refreshToken.screen_width)) {
+    if (!(client_tz == refreshToken.client_tz
+        && device_id == refreshToken.device_id
+        && cpu_count == refreshToken.cpu_count
+        && screen_height == refreshToken.screen_height
+        && screen_width == refreshToken.screen_width)) {
         //TODO log fingerprint mismatch
-        console.log('Request identity mismatch', { fingerprintObj, refreshToken });
+        console.error('Request identity mismatch', { fingerprintObj, refreshToken });
         throw new Error('Request identity mismatch');
     }
 
@@ -106,7 +119,18 @@ export const refreshToken = async (req: Request, res: Response): Promise<Respons
         //console.log({ newAccessToken });
         //create new refresh token only if the refresh token used is more than 1 hour old
         //if (Date.now() - refreshToken.created_at.getTime() > 3600000) {
-        const newRefreshToken = await userService.createRefreshToken({ ...fingerprintObj, user_id: user.id, request_ip: req.ip || null, previous_refresh_token_id: refreshToken.id, remember: refreshToken.remember });
+
+        const newRefreshToken = await userService.createRefreshToken({
+            device_id,
+            client_tz,
+            screen_width,
+            screen_height,
+            cpu_count,
+            user_id: user.id,
+            request_ip: req.ip || null,
+            previous_refresh_token_id: refreshToken.id,
+            remember: refreshToken.remember
+        });
         //console.log({ newRefreshToken });
 
         createRefreshTokenCookie(newRefreshToken, refreshToken.remember, req, res);
@@ -114,6 +138,8 @@ export const refreshToken = async (req: Request, res: Response): Promise<Respons
 
         return ok(res, newAccessToken);
     } catch (error) {
+        const e = error as Error;
+        console.error(`${e.message} (${e.name})`);
         throw new Error('Error in creating new access token');
     }
 }

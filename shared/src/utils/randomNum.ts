@@ -1,0 +1,2 @@
+export const randonNum = (min: number = 0, max: number = 100) => `${Math.floor((Math.random() * (max - min + 1)) + min)}`;
+export const randomPercentage = (min: number = 0, max: number = 100) => `${randonNum(min, max)}%`;

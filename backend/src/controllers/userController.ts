@@ -9,7 +9,7 @@ import { validate } from 'uuid';
 import { createRefreshTokenCookie } from '../services/authService';
 import * as userService from '../services/userService';
 import { fail, ok } from '../utils/apiHelper';
-import { generateAccessToken } from '../utils/auth';
+import { generateAccessToken, getCurrentUser } from '../utils/auth';
 
 export const profile = async (req: Request, res: Response): Promise<Response> => {
     const authReq = req as AuthorizedRequest;
@@ -18,7 +18,7 @@ export const profile = async (req: Request, res: Response): Promise<Response> =>
 }
 
 export const create = async (req: Request, res: Response): Promise<Response> => {
-    const { username, password, fingerprint, token } = req.body;
+    const { username, password, fp, token } = req.body;
 
     const captchaVerifyResponse = await fetch('https://www.google.com/recaptcha/api/siteverify', {
         method: 'post',
@@ -42,7 +42,7 @@ export const create = async (req: Request, res: Response): Promise<Response> => 
     if (!tokenData) throw new Error('Cannot get token data');
 
     const access_token = generateAccessToken(tokenData);
-    const refreshToken = await userService.createRefreshToken({ ...jsonBase64Decode(fingerprint), user_id: tokenData.id, request_ip: req.ip });
+    const refreshToken = await userService.createRefreshToken({ ...jsonBase64Decode(fp), user_id: tokenData.id, request_ip: req.ip });
 
     createRefreshTokenCookie(refreshToken, false, req, res);
 
@@ -79,6 +79,8 @@ export const posts = async (req: Request, res: Response): Promise<Response> => {
     if (!user) return fail(res, 'Cannot fetch posts. User not found.');
     const user_id = user.id;
 
+    const current_user_id = getCurrentUser(req)?.id;
+    console.log({ current_user_id });
     const posts = await get({
         user_id,
         visibility: 'public',
@@ -86,7 +88,9 @@ export const posts = async (req: Request, res: Response): Promise<Response> => {
         page_num: page_num ? parseInt(String(page_num)) : 1,
         page_size: 30,
         order_by: 'created_at',
-        order_dir: 'desc'
+        order_dir: 'desc',
+        include: ['stats', 'images'],
+        current_user_id
     });
 
     return ok(res, posts);

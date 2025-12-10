@@ -1,5 +1,5 @@
+import type { CollageImage } from '@/types/CollageImage';
 import { styled } from '@mui/material/styles';
-import type PostImageExtended from '@shared/models/extensions/PostImageExtended';
 import type { ComponentProps } from 'react';
 
 const StyledImg = styled('img')({
@@ -12,14 +12,14 @@ const StyledImg = styled('img')({
 });
 
 type CoverImageProps = {
-    image: PostImageExtended;
-    onImageClick: (image: PostImageExtended) => void
+    image: CollageImage;
+    onImageClick?: (image: CollageImage) => void
 } & ComponentProps<typeof StyledImg>
 
 export function CoverImage({ image, onImageClick, sx, ...rest }: CoverImageProps) {
     return <StyledImg
-        onClick={() => onImageClick(image)}
-        src={image.url}
+        onClick={() => onImageClick?.(image)}
+        src={(image as { url: string }).url}
         sx={sx}
         {...rest}
     />
