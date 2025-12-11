@@ -35,18 +35,26 @@ export const theme = createTheme({
         MuiCssBaseline: {
             styleOverrides: {
                 html: {
-                    '&.confirm-dialog-open': {
-                        overflowY: 'scroll',
+                    '&.modal-dialog-open': {
+                        overflow: 'hidden',
                         '& body': {
-                            overflow: 'hidden'
+                            overflowY: 'scroll'
                         }
-                    }
+                        // marginRight: 'var(--scrollbar-width, 0px)',
+                        // '& .scrollbar-width-aware': {
+                        //     marginRight: 'var(--scrollbar-width, 0px)'
+                        // }
+                    },
+                    paddingBottom: '50px'
                 },
                 main: {
                     '&.MuiContainer-root': {
                         paddingLeft: 10,
                         paddingRight: 10
                     }
+                },
+                '.grecaptcha-badge': {
+                    display: 'none'
                 }
             }
         },

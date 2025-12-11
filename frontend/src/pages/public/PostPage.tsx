@@ -1,19 +1,20 @@
 import { apiGet } from '@/api/apiClient';
+import { Error } from '@/components/Error';
 import { Post } from '@/components/Post';
 import { PostSkeleton } from '@/components/skeleton/PostSkeleton';
 import { useAuthStore } from '@/store/useAuthStore';
 import Box from '@mui/material/Box';
 import type PostDTO from '@shared/models/extensions/PostExtended';
-import { ErrorCode } from '@shared/types/ErrorCode';
+import type { ApiErrorDetail } from '@shared/types/ApiResult';
 import { useEffect, useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 
 export function PostPage() {
     const ready = useAuthStore(s => s.ready);
     const [isLoading, setIsLoading] = useState(true);
     const [post, setPost] = useState<PostDTO | null>(null);
+    const [error, setError] = useState<ApiErrorDetail | null>(null);
     const { id } = useParams();
-    const navigate = useNavigate();
 
     const getData = async () => {
         // try {
@@ -35,11 +36,7 @@ export function PostPage() {
         if (result.ok && result.data) {
             setPost(result.data);
         } else {
-            if (result.error?.code == ErrorCode.NOT_FOUND) {
-                navigate('/not-found');
-            } else {
-                navigate('/error', { state: result });
-            }
+            if (result.error) setError(result.error);
         }
     };
 
@@ -48,12 +45,8 @@ export function PostPage() {
     }, [ready]);
 
     if (!id) return <Navigate to="/" replace />;
-
+    if (error) return <Error error={error} />;
     return (<Box mt={1}>
-        {
-            !post || isLoading
-                ? <PostSkeleton />
-                : <Post post={post} />
-        }
+        {!post || isLoading ? <PostSkeleton /> : <Post post={post} />}
     </Box>)
 }

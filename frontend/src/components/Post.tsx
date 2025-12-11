@@ -18,7 +18,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import type PostDTO from '@shared/models/extensions/PostExtended';
 import type { ImageOrientation } from '@shared/types/ImageOrientation';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, type Location } from 'react-router-dom';
 import { Comments } from './Comments';
 import { ImageCollage } from './ImageCollage';
@@ -29,14 +29,7 @@ type PostProps = {
     post: PostDTO;
 };
 
-// type Image = {
-//     url: string;
-//     width: number;
-//     height: number;
-//     id?: ImageId;
-// }
-
-export function Post({ post }: PostProps) {
+export const Post = memo(({ post }: PostProps) => {
     const { id, title, content, images, display_name, created_at, comments_count, views, likes, is_liked } = post;
     let orientation: ImageOrientation = 'portrait';
     const location = useLocation();
@@ -84,7 +77,7 @@ export function Post({ post }: PostProps) {
     }
 
     const statsButtonOnClick = () => {
-        showMessage('Test');
+        //showMessage('Test');
     }
 
     const likesButtonOnClick = () => {
@@ -178,4 +171,4 @@ export function Post({ post }: PostProps) {
             />}
         </>
     );
-}
+});

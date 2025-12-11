@@ -1,6 +1,6 @@
 import { apiPost } from '@/api/apiClient';
 import { getFingerprint } from '@/utils/device';
-import { getDimensionOrientation, getErrorMessage, getImageFileDetail } from '@/utils/helper';
+import { getDimensionOrientation, getErrorMessage, getImageFileDetail, scrollbarWidthAware } from '@/utils/helper';
 import type PostDTO from '@shared/models/extensions/PostExtended';
 import type { File as FileModel } from '@shared/models/generated/File';
 import { jsonBase64Encode } from '@shared/utils/encoding';
@@ -109,7 +109,7 @@ export function CreatePostDialog({ open, closeDialog, onPosted }: CreatePostDial
 
             //create the post with image ids
             !data.title?.trim() && delete data.title;
-            const result = await apiPost<PostDTO>('/posts/create', { ...data, files: uploadedImages });
+            const result = await apiPost<PostDTO>('/posts', { ...data, files: uploadedImages });
             if (result.ok) {
                 reset();
                 setImageFiles([]);
@@ -187,9 +187,14 @@ export function CreatePostDialog({ open, closeDialog, onPosted }: CreatePostDial
     }, [imageFiles]);
 
     useEffect(() => {
-        open && setTimeout(() => {
-            setFocus('content');
-        }, 10);
+        if (!open) return;
+        const timer = setTimeout(() => { setFocus('content'); }, 10);
+        scrollbarWidthAware(open);
+
+        return () => {
+            clearTimeout(timer);
+            scrollbarWidthAware(false);
+        }
     }, [open]);
 
     const collageImages = imageFiles.map(v => ({
@@ -201,12 +206,13 @@ export function CreatePostDialog({ open, closeDialog, onPosted }: CreatePostDial
 
     return (
         <Dialog
-            className={'create-post-dialog'}
+            className={'create-post-dialog scrollbar-width-aware'}
             open={open}
             onClose={closeDialog}
             scroll="paper"
-            transitionDuration={0} //disable transition
+            transitionDuration={0}
             fullWidth
+            disableScrollLock
         >
             <DialogTitle textAlign="center">Create post</DialogTitle>
             <DialogContent sx={{ p: '15px' }}>
@@ -295,6 +301,5 @@ export function CreatePostDialog({ open, closeDialog, onPosted }: CreatePostDial
                 </Stack>
             </DialogActions>
         </Dialog>
-
     );
 }

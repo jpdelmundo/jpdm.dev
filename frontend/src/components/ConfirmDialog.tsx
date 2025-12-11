@@ -1,4 +1,5 @@
 import { useConfirmStore } from "@/store/useConfirmStore";
+import { scrollbarWidthAware } from "@/utils/helper";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -18,8 +19,7 @@ export function ConfirmDialog() {
     } = useConfirmStore();
 
     useEffect(() => {
-        const hasScrollbar = document.documentElement.scrollHeight > window.innerHeight;
-        hasScrollbar && document.documentElement.classList.toggle('confirm-dialog-open', open);
+        scrollbarWidthAware(open);
     }, [open]);
 
     return <Dialog
@@ -29,6 +29,7 @@ export function ConfirmDialog() {
         fullWidth
         disableScrollLock
         maxWidth="xs"
+        className="scrollbar-width-aware"
     >
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>{message}</DialogContent>

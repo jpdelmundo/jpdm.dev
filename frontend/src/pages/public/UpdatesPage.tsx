@@ -30,6 +30,10 @@ export const UpdatesPage = () => {
         getData();
     }
 
+    // const renderedPosts = useMemo(() => posts && posts.map(post => (
+    //     <Post key={post.id} post={post} />
+    // )), [posts]);
+
     useEffect(() => {
         ready && getData();
     }, [ready]);

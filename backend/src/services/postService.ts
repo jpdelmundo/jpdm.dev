@@ -96,13 +96,18 @@ export const getById = async (id: PostId, params: { include?: string[], current_
 }
 
 export const create = async (params: CreateParams): Promise<PostDTO> => {
-    const { content, files } = params;
+    const { user_id, title, content, files } = params;
+    if (!user_id) throw new ServiceError('Missing parameter: user_id');
     if (!content || content.trim().length == 0) throw new ServiceError('Content cannot be empty', ErrorCode.MISSING_PARAMETER, { param: 'content' });
     if (content.length > 2000) throw new ServiceError('Content too long', ErrorCode.LENGTH_TOO_LONG, { param: 'content' });
 
     //create post
     const postRepo = new PostRepository();
-    const newPost = await postRepo.create(params);
+    const newPost = await postRepo.create({
+        user_id,
+        content,
+        ...(title && { title })
+    });
     if (!newPost) throw new Error('Failed creating post');
 
     //get id

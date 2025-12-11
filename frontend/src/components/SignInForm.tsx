@@ -1,18 +1,18 @@
 import { useFormValidation, type ValidationRuleFunction } from '@/hooks/useFormValidation';
 import { fieldErrorProps, getErrorMessage } from '@/utils/helper';
-import type { AccessToken } from '@shared/types/AccessToken';
-import type { ApiResult } from '@shared/types/ApiResult';
-import { useRef, useState, type ChangeEvent, type FocusEvent, type FormEvent } from "react";
-import PasswordField from './PasswordField';
-import TextField from './TextField';
-
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Link from '@mui/material/Link';
+import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import type { AccessToken } from '@shared/types/AccessToken';
+import type { ApiResult } from '@shared/types/ApiResult';
+import { useRef, useState, type ChangeEvent, type FocusEvent, type FormEvent } from "react";
 import { Link as RouterLink } from 'react-router-dom';
+import PasswordField from './PasswordField';
+import TextField from './TextField';
 
 export type FormInput = { username: string, password: string };
 
@@ -76,7 +76,7 @@ export function SignInForm({ onSubmit, onSignInSuccess: onSignInSuccess }: {
     return (
         <form onSubmit={handleSubmit} noValidate>
             <Box display="flex" flexDirection="column" gap={1}>
-                <div>
+                <Stack gap={2}>
                     <TextField name="username"
                         label="Username"
                         onChange={handleChange}
@@ -84,21 +84,17 @@ export function SignInForm({ onSubmit, onSignInSuccess: onSignInSuccess }: {
                         fullWidth
                         {...fieldErrorProps(errors, 'username')}
                         autoFocus />
-                </div>
-                <div>
                     <PasswordField name="password"
                         label="Password"
                         onChange={handleChange}
                         onBlur={handleBlur}
                         fullWidth
                         {...fieldErrorProps(errors, 'password')} />
-                </div>
-                <div>
                     <FormControlLabel label="Remember me on this device" control={<Checkbox name="remember" onChange={handleChange} />} />
-                </div>
-                <Button type="submit" disabled={isLoading} variant="contained">Sign In</Button>
-                {errorMessage && <Typography color="error" textAlign="center">{errorMessage}</Typography>}
-                <Link component={RouterLink} to="/signup" textAlign={'center'} mt={1}>I want to create a new account</Link>
+                    <Button type="submit" disabled={isLoading} variant="contained">Sign In</Button>
+                    {errorMessage && <Typography color="error" textAlign="center">{errorMessage}</Typography>}
+                    <Link component={RouterLink} to="/signup" textAlign={'center'} mt={1}>I want to create a new account</Link>
+                </Stack>
             </Box>
         </form>
     );

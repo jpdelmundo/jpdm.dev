@@ -76,8 +76,10 @@ export function SignUpPage() {
             justifyContent={'center'}
             alignItems={'center'}
             minHeight={'100%'}
+            height={'70vh'}
+            mt={'60px'}
         >
-            <Box mt={'-60px'}>
+            <Box>
                 <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHAV3_SITE_KEY}>
                     <SignUpContent />
                 </GoogleReCaptchaProvider>

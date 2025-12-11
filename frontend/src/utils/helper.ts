@@ -123,3 +123,23 @@ export async function copyToClipboard(text: string) {
         console.log('Cannot copy to clipboard');
     }
 }
+
+export function scrollbarWidthAware(apply: boolean) {
+    if (apply) {
+        const hasScrollbar = document.body.scrollHeight > window.innerHeight;
+        if (hasScrollbar) {
+            const scrollbarWidth = window.innerWidth - document.body.clientWidth;
+            //document.body.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
+            //document.body.classList.add('modal-dialog-open');
+            const el = document.querySelector('.header-container') as HTMLElement;
+            el.style.width = `calc(100% - ${scrollbarWidth}px)`;
+            document.documentElement.classList.add('modal-dialog-open');
+        }
+    } else {
+        const el = document.querySelector('.header-container') as HTMLElement;
+        el.style.width = '';
+        document.documentElement.classList.remove('modal-dialog-open');
+        //document.body.classList.remove('modal-dialog-open');
+        //document.documentElement.style.removeProperty('--scrollbar-width');
+    }
+}

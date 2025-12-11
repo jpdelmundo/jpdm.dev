@@ -33,7 +33,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   } else if (err instanceof ServiceError) {
     return error(res, err.message, err.code, err.data, 400);
   } else {
-    return error(res, err.message, ErrorCode.SERVER_ERROR, null, 500);
+    return error(res, 'Something went wrong', ErrorCode.SERVER_ERROR, null, 500);
   }
 });
 

@@ -1,22 +1,23 @@
 import { getErrorMessage } from '@/utils/helper';
 import CloseIcon from '@mui/icons-material/Close';
-import type { UserId } from '@shared/models/generated/User';
-import type { AccessToken } from '@shared/types/AccessToken';
-import { type ApiResult } from '@shared/types/ApiResult';
-import { validatePassword as _validatePassword } from '@shared/utils/validate';
-import { useEffect, useState } from 'react';
-import { useForm, type SubmitHandler } from 'react-hook-form';
-import { TransitionGroup } from 'react-transition-group';
-import PasswordField from './PasswordField';
-import TextField from './TextField';
-
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Collapse from '@mui/material/Collapse';
+import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import type { UserId } from '@shared/models/generated/User';
+import type { AccessToken } from '@shared/types/AccessToken';
+import { type ApiResult } from '@shared/types/ApiResult';
 import { ErrorCode } from '@shared/types/ErrorCode';
+import { validatePassword as _validatePassword } from '@shared/utils/validate';
+import { useEffect, useState } from 'react';
+import { useForm, type SubmitHandler } from 'react-hook-form';
+import { Link as RouterLink } from 'react-router-dom';
+import { TransitionGroup } from 'react-transition-group';
+import PasswordField from './PasswordField';
+import TextField from './TextField';
 
 export type FormSubmitResult = { access_token: AccessToken, user_id: UserId }
 
@@ -79,7 +80,8 @@ export function SignUpForm({ onSubmit, onSignUpSuccess }: {
                         placeholder=""
                         error={!!errors.username}
                         helperText={errors.username?.message}
-                        fullWidth />
+                        fullWidth
+                        autoFocus />
                     <PasswordField label="Password"
                         {...register('password', {
                             required: 'Password is required',
@@ -109,7 +111,8 @@ export function SignUpForm({ onSubmit, onSignUpSuccess }: {
                     <Button type="submit" variant="contained" disabled={isSubmitting}>
                         {isSubmitting ? <Stack direction="row" alignItems="center" gap={1}><CircularProgress /> <span>Processing...</span></Stack> : 'Submit'}
                     </Button>
-                    <Typography color="error" textAlign="center" minHeight="21px">{errorMessage}</Typography>
+                    {errorMessage && <Typography color="error" textAlign="center">{errorMessage}</Typography>}
+                    <Link component={RouterLink} to="/signin" textAlign={'center'} mt={1}>I want to sign in. I already have an account</Link>
                 </Stack>
             </form>
         </Box>

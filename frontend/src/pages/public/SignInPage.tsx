@@ -40,8 +40,10 @@ export const SignInPage = () => {
             justifyContent={'center'}
             alignItems={'center'}
             minHeight={'100%'}
+            height={'70vh'}
+            mt={'60px'}
         >
-            <Paper elevation={0} sx={{ p: 6, maxWidth: 400, mx: 'auto', mt: '-60px' }}>
+            <Paper elevation={0} sx={{ p: 6, maxWidth: 400, mx: 'auto' }}>
                 <SignInForm onSubmit={submit} onSignInSuccess={signInSuccess} />
             </Paper>
         </Box>
