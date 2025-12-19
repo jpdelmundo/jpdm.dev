@@ -16,6 +16,7 @@ export const ErrorCode = {
     NOT_FOUND: 'NOT_FOUND',
     NOT_AVAILABLE: 'NOT_AVAILABLE',
     INVALID_ID: 'INVALID_ID',
+    FORBIDDEN: 'FORBIDDEN'
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

@@ -5,7 +5,7 @@ export function GradientBg() {
     const colors = ["#ff0080", "#40e0d0", "#8000ff", "#ff8c00", "#0051ffff", "#f3f3f3"];
     const randomColorOrder = Array.from({ length: 6 }, (_, i) => i).sort(() => Math.random() - 0.5);
     const radialGradients = randomColorOrder.map(
-        idx => `radial-gradient(circle at ${randomPercentage(30, 70)} ${randomPercentage()}, ${colors[idx]} 0%, transparent ${randomPercentage(0, 80)})`
+        idx => `radial-gradient(circle at ${randomPercentage(30, 70)} ${randomPercentage()}, ${colors[idx]} 0%, transparent ${randomPercentage(20, 80)})`
     );
 
     return (

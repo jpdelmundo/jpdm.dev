@@ -19,12 +19,11 @@ export const create = async (req: Request, res: Response): Promise<Response> => 
 
 export const get = async (req: Request, res: Response): Promise<Response> => {
     const { page_num, post_id } = req.query;
-    const { id } = req.params;
     const current_user_id = getCurrentUser(req)?.id;
     const result = await commentService.get({
         ...(current_user_id && { current_user_id }),
-        ...(id && { id }),
-        ...(post_id && { post_id }),
+        // ...(id && { id }),
+        post_id,
         page_num: page_num ? parseInt(String(page_num)) : 1,
         page_size: 10,
         order_by: 'created_at',

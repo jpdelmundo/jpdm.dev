@@ -104,4 +104,15 @@ export class ImageRepository extends BaseRepository<Image> {
 
         return result.rows[0];
     }
+
+    async deleteByPostId(id: PostId) {
+        if (!id) throw new Error('Missing parameter: id');
+
+        const sql = `delete
+                    from images
+                    where post_id = $1
+                    returning *`;
+        const result = await this.query(sql, [id]);
+        return result.rows;
+    }
 }

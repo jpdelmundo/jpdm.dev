@@ -1,12 +1,12 @@
-import { CreatePostDialog } from '@/components/CreatePostDialog';
+import { PostDialog } from '@/components/PostDialog';
 import { useState } from 'react';
 
 export function CreatePost() {
     const [dialogOpen, setDialogOpen] = useState(true);
 
-    return <CreatePostDialog
+    return <PostDialog
         open={dialogOpen}
         closeDialog={() => setDialogOpen(false)}
-        onPosted={() => { }}
+        onCreated={() => { }}
     />
 }

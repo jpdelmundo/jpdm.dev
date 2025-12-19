@@ -15,10 +15,6 @@ export const generateAccessToken = (tokenUserData: TokenUserData) => {
     return jwt.sign(tokenUserData, accessSecret, { expiresIn: '15m' });
 }
 
-export const createRefreshTokenId = () => {
-    return crypto.randomUUID();
-}
-
 export const verifyToken = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) throw new ApiError('Unauthorized request', 401, ErrorCode.AUTH_HEADER_MISSING);

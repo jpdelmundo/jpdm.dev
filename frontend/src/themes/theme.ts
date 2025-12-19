@@ -176,9 +176,9 @@ export const theme = createTheme({
                         }
                     },
                     '&.post': {
-                        '&:first-child': {
-                            marginTop: 0
-                        },
+                        // '&:first-of-type': {
+                        //     marginTop: 0
+                        // },
                         boxShadow: '0 1px 5px -4px #00000066',
                         position: 'relative',
                         background: 'none',
@@ -200,7 +200,7 @@ export const theme = createTheme({
                         borderRadius: '16px',
                         margin: '25px 0',
                         '& .header': {
-                            marginBottom: '25px',
+                            marginBottom: '10px',
                             gap: '10px',
                             alignItems: 'center',
                             '& .MuiAvatar-root': {
@@ -222,7 +222,8 @@ export const theme = createTheme({
                             lineHeight: 1
                         },
                         '& .content': {
-                            margin: '25px 0'
+                            marginTop: '10px',
+                            marginBottom: '10px'
                         },
                         '& .date': {
                             fontSize: '11px',
@@ -240,7 +241,8 @@ export const theme = createTheme({
                         },
                         '& .controls': {
                             color: '#595959',
-                            justifyContent: 'end'
+                            justifyContent: 'end',
+                            marginTop: '10px'
                         },
                         '& .share-button-container, .stats-button-container, .likes-button-container, .comments-button-container': {
                             display: 'flex',
@@ -371,10 +373,10 @@ export const theme = createTheme({
             styleOverrides: {
                 root: () => ({
                     '& .MuiDialog-paper': {
-                        boxShadow: '0 1px 2px #cccccc, 0 4px 8px #dddddd',
+                        boxShadow: '0 1px 2px #00000021, 0 4px 8px #00000010',
                     },
                     '& .MuiModal-backdrop': {
-                        backgroundColor: '#ffffff88'
+                        backgroundColor: '#f3f3f3dd'
                     },
                     '&.create-post-dialog': {
                         '& .MuiDialog-paper': {
@@ -435,6 +437,17 @@ export const theme = createTheme({
             defaultProps: {
                 disableRipple: true,
                 disableTouchRipple: true
+            }
+        },
+        MuiPopover: {
+            styleOverrides: {
+                root: {
+                    '&.context-menu': {
+                        '& .MuiPaper-root': {
+                            backgroundColor: '#f8f8f8'
+                        }
+                    }
+                }
             }
         }
     }

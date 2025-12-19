@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import { useTheme } from '@mui/material/styles';
 import type { ImageOrientation } from '@shared/types/ImageOrientation';
+import { memo } from 'react';
 import { CoverImage } from './CoverImage';
 
 type ImageCollageProps = {
@@ -11,7 +12,7 @@ type ImageCollageProps = {
     onImageClick?: (image: CollageImage) => void
 };
 
-export function ImageCollage({ orientation, images, onImageClick }: ImageCollageProps) {
+export const ImageCollage = memo(({ orientation, images, onImageClick }: ImageCollageProps) => {
     const theme = useTheme();
 
     return (
@@ -23,7 +24,7 @@ export function ImageCollage({ orientation, images, onImageClick }: ImageCollage
             )}
 
             {images.length == 2 && (
-                <Stack direction={orientation == 'landscape' ? 'column' : 'row'} gap="2px" maxHeight={orientation == 'landscape' ? 700 : 500} justifyContent="center">
+                <Stack direction={orientation == 'landscape' ? 'column' : 'row'} gap="2px" justifyContent="center" sx={{ aspectRatio: 1.11 }}>
                     <Box sx={{ minHeight: 0, flex: 1, overflow: 'hidden', justifyContent: 'center', alignItems: 'center', display: 'flex' }} >
                         <CoverImage onImageClick={onImageClick} image={images[0]} />
                     </Box>
@@ -34,11 +35,13 @@ export function ImageCollage({ orientation, images, onImageClick }: ImageCollage
             )}
 
             {images.length == 3 && (
-                <Stack direction={orientation == 'landscape' ? 'column' : 'row'} gap="2px" minHeight={470} maxHeight={550} justifyContent="center" overflow="hidden">
-                    <Stack sx={{ flex: 1 }}>
-                        <CoverImage onImageClick={onImageClick} image={images[0]} />
+                <Stack direction={orientation == 'landscape' ? 'column' : 'row'} gap="2px" sx={{ aspectRatio: 1.11 }}>
+                    <Stack gap="2px" direction={orientation == 'landscape' ? 'row' : 'column'} sx={{ flex: 1 }} justifyContent="center" overflow="hidden">
+                        <Box sx={{ minHeight: 0, flex: 1 }}>
+                            <CoverImage onImageClick={onImageClick} image={images[0]} />
+                        </Box>
                     </Stack>
-                    <Stack gap="2px" direction={orientation == 'landscape' ? 'row' : 'column'} sx={{ flex: 1 }}>
+                    <Stack gap="2px" direction={orientation == 'landscape' ? 'row' : 'column'} sx={{ flex: 1 }} justifyContent="center" overflow="hidden">
                         <Box sx={{ minHeight: 0, flex: 1 }}>
                             <CoverImage onImageClick={onImageClick} image={images[1]} />
                         </Box>
@@ -50,7 +53,7 @@ export function ImageCollage({ orientation, images, onImageClick }: ImageCollage
             )}
 
             {images.length == 4 && (
-                <Stack direction={orientation == 'landscape' ? 'column' : 'row'} gap="2px" minHeight={470} maxHeight={550}>
+                <Stack direction={orientation == 'landscape' ? 'column' : 'row'} gap="2px" sx={{ aspectRatio: 1.11 }}>
                     <Stack gap="2px" direction={orientation == 'landscape' ? 'row' : 'column'} sx={{ flex: 1 }} justifyContent="center" overflow="hidden">
                         <Box sx={{ minHeight: 0, flex: 1 }}>
                             <CoverImage onImageClick={onImageClick} image={images[0]} />
@@ -79,8 +82,7 @@ export function ImageCollage({ orientation, images, onImageClick }: ImageCollage
                             aspectRatio: orientation == 'landscape' ? '4 / 4' : '4 / 3'
                         },
                         [theme.breakpoints.up('sm')]: {
-                            minHeight: 470,
-                            maxHeight: 550,
+                            aspectRatio: 1.11
                         },
                     }}
                 >
@@ -115,8 +117,7 @@ export function ImageCollage({ orientation, images, onImageClick }: ImageCollage
                             aspectRatio: orientation == 'landscape' ? '4 / 4' : '4 / 3'
                         },
                         [theme.breakpoints.up('sm')]: {
-                            minHeight: 470,
-                            maxHeight: 550,
+                            aspectRatio: 1.11
                         },
                     }}
                 >
@@ -157,4 +158,4 @@ export function ImageCollage({ orientation, images, onImageClick }: ImageCollage
             )}
         </>
     );
-}
+});

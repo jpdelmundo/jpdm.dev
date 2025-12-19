@@ -1,4 +1,4 @@
-import { getNewToken } from '@/auth/tokenManager';
+import { getNewToken, waitForRefreshIfNeeded } from '@/auth/tokenManager';
 import { useAuthStore } from '@/store/useAuthStore';
 import type { ApiErrorDetail, ApiResult } from '@shared/types/ApiResult';
 import { ErrorCode } from '@shared/types/ErrorCode';
@@ -28,6 +28,8 @@ type ApiGetParams = Record<string, string | number | boolean> | URLSearchParams;
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
 export async function apiRequest<T>(input: RequestInfo | URL, init?: RequestInit, isRetry = false) {
+    await waitForRefreshIfNeeded();
+
     try {
         const token = useAuthStore.getState().token;
         const setToken = useAuthStore.getState().setToken;
@@ -102,6 +104,8 @@ export async function apiPost<T>(url: string, body?: ApiRequestBody, onProgress?
     const requestUrl = `${baseUrl}${url}`;
 
     if (isFormData) {
+        await waitForRefreshIfNeeded();
+
         //when uploading a file this is used
         return new Promise<ApiResult<T>>((resolve, reject) => {
             const token = useAuthStore.getState().token;

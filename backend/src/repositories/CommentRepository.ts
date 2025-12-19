@@ -107,24 +107,47 @@ export class CommentRepository extends BaseRepository<Comment> {
         return result.rows[0];
     }
 
-    async delete(id: CommentId, context: { user_id?: UserId }): Promise<Comment> {
-        const { user_id } = context;
+    async delete(id: CommentId): Promise<Comment> {
         if (!id) throw new Error('Missing parameter: id');
 
-        const values: unknown[] = [];
-        const filters: string[] = [];
-        id.trim() && filters.push(`id = $${values.length + 1}`) && values.push(id.trim());
-        user_id?.trim() && filters.push(`user_id = $${values.length + 1}`) && values.push(user_id.trim());
-
-        let where = filters.join(' and ');
-        where = where ? `where ${where}` : '';
-
-        const sql = `delete from comments
-                     ${where}
-                     returning *`;
-        const result = await this.query(sql, values);
+        const sql = `delete
+                    from comments
+                    where id = $1
+                    returning *`;
+        const result = await this.query(sql, [id]);
         if (!result.rows[0]) throw new Error(`Delete failed`);
 
         return result.rows[0];
+    }
+
+    // async delete(id: CommentId, context: { user_id?: UserId }): Promise<Comment> {
+    //     const { user_id } = context;
+    //     if (!id) throw new Error('Missing parameter: id');
+
+    //     const values: unknown[] = [];
+    //     const filters: string[] = [];
+    //     id.trim() && filters.push(`id = $${values.length + 1}`) && values.push(id.trim());
+    //     user_id?.trim() && filters.push(`user_id = $${values.length + 1}`) && values.push(user_id.trim());
+
+    //     let where = filters.join(' and ');
+    //     where = where ? `where ${where}` : '';
+
+    //     const sql = `delete from comments
+    //                  ${where}
+    //                  returning *`;
+    //     const result = await this.query(sql, values);
+    //     if (!result.rows[0]) throw new Error(`Delete failed`);
+
+    //     return result.rows[0];
+    // }
+
+    async deleteByPostId(id: PostId) {
+        if (!id) throw new Error('Missing parameter: id');
+
+        const sql = `delete
+                    from comments
+                    where post_id = $1`;
+        const result = await this.query(sql, [id]);
+        return result.rowCount;
     }
 }

@@ -1,21 +1,35 @@
 import { apiGet } from '@/api/apiClient';
-import { CreatePostDialog } from '@/components/CreatePostDialog';
+import { ImageDialog } from '@/components/ImageDialog';
 import { Post } from '@/components/Post';
+import { PostDialog } from '@/components/PostDialog';
 import { PostSkeleton } from '@/components/skeleton/PostSkeleton';
 import { useAuthStore } from '@/store/useAuthStore';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
+import type ImageExtended from '@shared/models/extensions/ImageExtended';
 import type PostDTO from '@shared/models/extensions/PostExtended';
+import type { ImageId } from '@shared/models/generated/Image';
 import type { Paginated } from '@shared/types/Paginated';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate, type Location } from 'react-router-dom';
+
+type ImageDialogState = {
+    imageId: ImageId;
+    images: ImageExtended[];
+} | null;
 
 export const UpdatesPage = () => {
+    console.log('UpdatesPage render');
     const ready = useAuthStore(s => s.ready);
-    const [createPostDialogOpen, setCreatePostDialogOpen] = useState(false);
+    const [postDialogOpen, setPostDialogOpen] = useState(false);
     const [posts, setPosts] = useState<PostDTO[]>([]);
     const user = useAuthStore(s => s.user);
     const [isLoading, setIsLoading] = useState(false);
+    const [viewer, setViewer] = useState<ImageDialogState>(null);
+    const origLocation = useRef<Location | null>(null);
+    const location = useLocation();
+    const navigate = useNavigate();
 
     const getData = async () => {
         setIsLoading(true);
@@ -30,9 +44,30 @@ export const UpdatesPage = () => {
         getData();
     }
 
-    // const renderedPosts = useMemo(() => posts && posts.map(post => (
-    //     <Post key={post.id} post={post} />
-    // )), [posts]);
+    const handlePostDeleted = useCallback((post: PostDTO) => {
+        setPosts(prev => prev.filter(v => v.id !== post.id));
+    }, []);
+
+    const handlePostUpdated = useCallback((post: PostDTO) => {
+        setPosts(prev => prev.map(v => v.id === post.id ? post : v));
+    }, []);
+
+    const handlePostImageClick = useCallback((imageId: ImageId, images: ImageExtended[]) => {
+        setViewer({ imageId, images });
+        origLocation.current = location;
+        window.history.pushState({}, '', `/images/${imageId}`);
+    }, []);
+
+    // const handlePostImageClick = useCallback((imageId: ImageId, images: ImageExtended[]) => {
+    //     setViewer({ imageId, images });
+    //     origLocation.current = location;
+    //     window.history.pushState({}, '', `/images/${imageId}`);
+    // }, []);
+
+    const closeImageDialog = useCallback(() => {
+        setViewer(null);
+        navigate(origLocation.current ? (origLocation.current.pathname + origLocation.current.search) : '/', { replace: true });
+    }, [navigate]);
 
     useEffect(() => {
         ready && getData();
@@ -42,7 +77,7 @@ export const UpdatesPage = () => {
         {user?.username == 'jp'
             && <Paper
                 elevation={0}
-                onClick={() => setCreatePostDialogOpen(true)}
+                onClick={() => setPostDialogOpen(true)}
                 sx={{
                     borderRadius: '16px',
                     padding: '15px',
@@ -59,13 +94,26 @@ export const UpdatesPage = () => {
         {isLoading
             ? <PostSkeleton />
             : posts && posts.map(post => (
-                <Post key={post.id} post={post} />
+                <Post
+                    key={post.id}
+                    post={post}
+                    onDeleted={handlePostDeleted}
+                    onUpdated={handlePostUpdated}
+                    onImageClick={handlePostImageClick}
+                />
             ))}
 
-        <CreatePostDialog
-            open={createPostDialogOpen}
-            closeDialog={() => setCreatePostDialogOpen(false)}
-            onPosted={onPosted}
+        <PostDialog
+            open={postDialogOpen}
+            closeDialog={() => setPostDialogOpen(false)}
+            onCreated={onPosted}
         />
+
+        {viewer && <ImageDialog
+            open
+            imageId={viewer.imageId}
+            images={viewer.images}
+            closeDialog={closeImageDialog}
+        />}
     </Box>);
 }

@@ -1,17 +1,22 @@
+import { withTransaction } from '@/db/withTransaction';
 import { ServiceError } from '@/errors/ServiceError';
+import { CommentRepository } from '@/repositories/CommentRepository';
 import { FileRepository } from '@/repositories/FileRepository';
 import { ImageRepository } from '@/repositories/ImageRepository';
 import { PostRepository } from '@/repositories/PostRepository';
 import { UserRepository } from '@/repositories/UserRepository';
 import type { FindParamsBase } from '@/types/FindParams';
+import type { UserContext } from '@/types/UserContext';
 import type ImageExtended from '@shared/models/extensions/ImageExtended';
 import type PostDTO from '@shared/models/extensions/PostExtended';
+import { type File } from '@shared/models/generated/File';
 import type { ImageId } from '@shared/models/generated/Image';
-import type { PostId, PostInitializer } from '@shared/models/generated/Post';
+import type { PostId, PostInitializer, PostMutator } from '@shared/models/generated/Post';
 import type { UserId } from '@shared/models/generated/User';
 import type { VisibilityEnum } from '@shared/models/generated/VisibilityEnum';
 import { ErrorCode } from '@shared/types/ErrorCode';
 import type { OrderDirection } from '@shared/types/OrderDirection';
+import fs from 'fs';
 import { validate } from 'uuid';
 import * as commentService from './commentService';
 import * as imageService from './imageService';
@@ -42,9 +47,9 @@ type GetImagesParams = {
     post_id?: PostId;
 }
 
-type CreateParams = PostInitializer & {
-    files?: { fileId: string; sort: number }[];
-}
+type CreateParams = PostInitializer & { files?: { file_id: string; sort: number }[]; }
+type UpdateParams = PostMutator & { is_admin?: boolean; current_user_id?: UserId; files?: { id: string; file_id: string; sort: number }[]; };
+type DeleteParams = { is_admin?: boolean; current_user_id?: UserId };
 
 const getDisplayName = async (id: UserId): Promise<string> => {
     const repo = new UserRepository();
@@ -73,9 +78,9 @@ export const get = async <P extends FindParamsBase>(params: P) => {
     const items = ('page_items' in findResult ? findResult.page_items : findResult) as PostDTO[];
     for (const post of items) {
         const { id: post_id, user_id } = post;
-        if (!post.is_published && !current_user_id) throw new ServiceError(`Post not available`, ErrorCode.NOT_AVAILABLE);
-        if (!post.is_published && (current_user_id && current_user_id !== user_id)) throw new ServiceError(`Post not available`, ErrorCode.NOT_AVAILABLE);
-        if (post.visibility == 'private' && current_user_id !== user_id) throw new ServiceError(`Post not available`, ErrorCode.NOT_AVAILABLE);
+        // if (!post.is_published && !current_user_id) throw new ServiceError(`Post not available`, ErrorCode.NOT_AVAILABLE);
+        // if (!post.is_published && (current_user_id && current_user_id !== user_id)) throw new ServiceError(`Post not available`, ErrorCode.NOT_AVAILABLE);
+        // if (post.visibility == 'private' && current_user_id !== user_id) throw new ServiceError(`Post not available`, ErrorCode.NOT_AVAILABLE);
 
         post.display_name = await getDisplayName(user_id);
         post.is_liked = await postLikeService.isLiked(post.id, current_user_id);
@@ -90,6 +95,9 @@ export const getById = async (id: PostId, params: { include?: string[], current_
     if (!id) throw new ServiceError('Missing parameter: id');
     if (!validate(id)) throw new ServiceError('Invalid post id', ErrorCode.INVALID_ID);
     const { current_user_id, include } = params;
+
+    if (!canRead(id, { current_user_id: current_user_id! })) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
+
     const result = await get({ id, current_user_id, include });
     if (!result[0]) throw new ServiceError('Post not found', ErrorCode.NOT_FOUND);
     return result[0];
@@ -117,7 +125,7 @@ export const create = async (params: CreateParams): Promise<PostDTO> => {
         const fileRepo = new FileRepository();
         for (const file of files) {
             //check if file owned by user
-            const userFile = await fileRepo.findById(file.fileId);
+            const userFile = await fileRepo.findById(file.file_id);
             if (!userFile || userFile.user_id != newPost.user_id) continue;
 
             const newImage = await postImageRepo.create({ file_id: userFile.id, post_id: newPost.id, sort: file.sort });
@@ -133,23 +141,136 @@ export const create = async (params: CreateParams): Promise<PostDTO> => {
     return result[0];
 }
 
-export const hasAccess = async (current_user_id: UserId | undefined, id: PostId) => {
-    try {
-        const post = (await get({ current_user_id, id }))[0];
-        if (!post?.id) return false;
-        if (!post.is_published && !current_user_id) return false;
-        if (!post.is_published && (current_user_id && post.user_id != current_user_id)) return false;
-    } catch (error) {
-        if (error instanceof ServiceError && error.code == ErrorCode.NOT_AVAILABLE) {
-            return false;
-        }
-        throw error;
-    }
-}
-
 export const getCommentsCount = async (post_id: PostId) => {
     let count = 0;
     const result = await commentService.get({ post_id, page_num: 1, page_size: 1 });
     count = result.total;
     return count;
+}
+
+export const del = async (id: PostId, params: DeleteParams) => {
+    const { is_admin, current_user_id } = params;
+    if (!id) throw new ServiceError('Missing parameter: id');
+    if (!is_admin && !current_user_id) throw new ServiceError('Missing parameter: current_user_id');
+
+    //check if admin or if has access (current_user_id)
+    if (!is_admin && !canDelete(id, { current_user_id: current_user_id! })) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
+
+    const deleted = await withTransaction(async (tx) => {
+        //get the post to get the images
+        const post = await getById(id, { include: ['images'] }) as PostDTO;
+
+        //delete files, get list of files to unlink
+        const fileRepo = new FileRepository(tx);
+        const files = [];
+        for (const image of post.images) {
+            files.push(await fileRepo.delete(image.file_id));
+        }
+
+        //delete images
+        const imageRepo = new ImageRepository(tx);
+        imageRepo.deleteByPostId(id);
+
+        //delete comments
+        const commentsRepo = new CommentRepository(tx);
+        commentsRepo.deleteByPostId(id);
+
+        const postRepo = new PostRepository(tx);
+        const result = await postRepo.delete(id);
+        if (!result?.id) throw new ServiceError(`Delete failed: ${id}`);
+
+        return { post: result, files };
+    });
+
+    for (const file of deleted.files) {
+        fs.promises.unlink(file.path);
+    }
+
+    return deleted.post;
+}
+
+export const update = async (id: PostId, params: UpdateParams) => {
+    const { title, content, current_user_id, is_admin, files } = params;
+    if (!id) throw new ServiceError('Missing parameter: id or post_id');
+    if (!current_user_id) throw new ServiceError('Missing parameter: current_user_id');
+    if (!content || content.trim().length == 0) throw new ServiceError('Content cannot be empty', ErrorCode.MISSING_PARAMETER, { param: 'content' });
+    if (content.length > 2000) throw new ServiceError('Content too long', ErrorCode.LENGTH_TOO_LONG, { param: 'content' });
+
+    if (!is_admin && !canUpdate(id, { current_user_id: current_user_id! })) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
+
+    const post = (await getById(id, { include: ['images'] })) as PostDTO;
+    const images = post.images;
+    const updated = await withTransaction(async (tx) => {
+        const fileRepo = new FileRepository(tx);
+        const postImageRepo = new ImageRepository(tx);
+        const newImageSet = new Set<ImageId>();
+        if (files) {
+            for (const image of files) {
+                const existing = images.find(v => v.file_id == image.file_id);
+                if (existing) {
+                    //update sort
+                    postImageRepo.update(existing.id, { sort: image.sort });
+                    newImageSet.add(existing.id);
+                } else {
+                    //check if file owned by user
+                    const userFile = await fileRepo.findById(image.file_id);
+                    if (!userFile || userFile.user_id != current_user_id) continue;
+
+                    const newImage = await postImageRepo.create({ file_id: image.file_id, post_id: post.id, sort: image.sort });
+                    newImageSet.add(newImage.id);
+                    //create
+                }
+            }
+        }
+
+        const removeImages = images.filter(v => !newImageSet.has(v.id));
+        const deletedFiles = new Set<File>();
+        for (const image of removeImages) {
+            const deletedFile = await fileRepo.delete(image.file_id);
+            deletedFile && deletedFiles.add(deletedFile);
+            await postImageRepo.delete(image.id);
+        }
+
+        const repo = new PostRepository(tx);
+        const updated = await repo.update(id, { title: title ?? null, content });
+
+        return { post: updated, deletedFiles };
+    });
+
+    for (const file of updated.deletedFiles) {
+        fs.promises.unlink(file.path);
+    }
+
+    const result = (await get({ id, current_user_id, include: ['images'] }))[0];
+    if (!result?.id) throw new ServiceError(`Post not found. id: ${id}`, ErrorCode.NOT_FOUND);
+
+    return result;
+}
+
+export const canRead = async (id: PostId, userContext: UserContext) => {
+    const { current_user_id } = userContext;
+    const repo = new PostRepository();
+    const post = await repo.findById(id);
+    if (!post) throw new ServiceError(`Post not found. id: ${id}`, ErrorCode.NOT_FOUND);
+    if (post?.user_id === current_user_id) return true;
+    if (post.is_published && post.visibility == 'public') return true;
+    return false;
+}
+
+export const canUpdate = async (id: PostId, userContext: UserContext) => {
+    const { current_user_id } = userContext;
+    if (!current_user_id) throw new ServiceError('Missing parameter: current_user_id');
+    const repo = new PostRepository();
+    const post = await repo.findById(id);
+    if (post?.user_id === current_user_id) return true;
+    return false;
+}
+
+export const canDelete = async (id: PostId, userContext: UserContext) => {
+    const { current_user_id } = userContext;
+    if (!current_user_id) throw new ServiceError('Missing parameter: current_user_id');
+    const repo = new PostRepository();
+    const post = await repo.findById(id);
+    if (post?.user_id === current_user_id) return true;
+    return false;
 }

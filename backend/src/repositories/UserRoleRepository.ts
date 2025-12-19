@@ -14,7 +14,7 @@ export class UserRoleRepository extends BaseRepository<UserRole> {
             throw new Error('At least one filter must be provided');
         }
 
-        const result = await this.pool.query<UserRole>(`select id, user_id, role
+        const result = await this.db.query<UserRole>(`select id, user_id, role
                                                         from user_roles
                                                         where ${filters.join(' and ')}`, values);
         return result.rows;

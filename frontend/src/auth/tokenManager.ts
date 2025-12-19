@@ -3,22 +3,42 @@ import type { ApiResult } from '@shared/types/ApiResult';
 import { jsonBase64Encode } from '@shared/utils/encoding';
 import { getFingerprint } from '../utils/device';
 
+let refreshPromise: Promise<AccessToken | null> | null = null;
+
 export const getNewToken = async (): Promise<AccessToken> => {
-    console.log('__getNewToken__ called');
-    const baseUrl = import.meta.env.VITE_API_BASE_URL;
-    const fp = jsonBase64Encode(getFingerprint());
+    if (refreshPromise) return refreshPromise;
 
-    const res = await fetch(`${baseUrl}/auth/refresh-token`, {
-        method: 'post',
-        credentials: 'include',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ fp })
-    });
+    refreshPromise = (async () => {
+        try {
+            const baseUrl = import.meta.env.VITE_API_BASE_URL;
+            const fp = jsonBase64Encode(getFingerprint());
 
-    if (res.ok) {
-        const resData = await res.json() as ApiResult<AccessToken>;
-        return resData?.data ?? null;
-    }
+            const res = await fetch(`${baseUrl}/auth/refresh-token`, {
+                method: 'post',
+                credentials: 'include',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ fp })
+            });
 
-    return null;
+            if (res.ok) {
+                const resData = await res.json() as ApiResult<AccessToken>;
+                return resData?.data ?? null;
+            }
+
+            return null;
+        } catch (err) {
+            console.error('TOKEN_REFRESH_ERROR', err);
+            return null;
+        } finally {
+            refreshPromise = null;
+        }
+    })();
+
+    return refreshPromise;
 }
+
+export const waitForRefreshIfNeeded = async () => {
+    if (refreshPromise) {
+        await refreshPromise;
+    }
+};

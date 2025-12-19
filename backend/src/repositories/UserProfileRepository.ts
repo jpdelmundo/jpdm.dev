@@ -19,7 +19,7 @@ export class UserProfileRepository extends BaseRepository<UserProfile> {
             throw new Error('At least one filter must be provided');
         }
 
-        const result = await this.pool.query<UserProfile>(`select *
+        const result = await this.db.query<UserProfile>(`select *
                                                         from user_profiles
                                                         where ${filters.join(' and ')}`, values);
         return result.rows;

@@ -12,6 +12,8 @@ router.use(verifyToken);
 router.post('/', controller.create);
 router.post('/:id/like', controller.like);
 router.post('/:id/unlike', controller.unlike);
+router.delete('/:id', controller.del);
+router.put('/:id', controller.update);
 //router.post('/:id/comments', controller.createComment);
 // router.post('/email-code', controller.emailCode);
 // router.post('/email-code-confirm', controller.emailCodeConfirm);

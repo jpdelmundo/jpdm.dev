@@ -1,8 +1,9 @@
 import { ServiceError } from '@/errors/ServiceError';
 import { CommentRepository } from '@/repositories/CommentRepository';
+import { PostRepository } from '@/repositories/PostRepository';
 import { UserRepository } from '@/repositories/UserRepository';
-import * as postService from '@/services/postService';
 import type { FindParamsBase } from '@/types/FindParams';
+import type { UserContext } from '@/types/UserContext';
 import type { CommentDTO } from '@shared/models/dto/CommentDTO';
 import type { CommentId, CommentInitializer, CommentMutator } from '@shared/models/generated/Comment';
 import type { PostId } from '@shared/models/generated/Post';
@@ -46,18 +47,18 @@ export const get = async <P extends FindParamsBase>(params: P) => {
     const { current_user_id, id, post_id, user_id, page_num, page_size, order_by, order_dir } = params as GetParams;
     const repo = new CommentRepository();
 
-    let postId = post_id;
-    if (!postId) {
-        //id params is require
-        if (!id) throw new ServiceError('Missing parameter: id or post_id');
-        //get comment check post access
-        const comment = await repo.findById(id);
-        if (!comment) throw new ServiceError('Comment not found', ErrorCode.NOT_FOUND);
-        postId = comment.post_id;
-    }
+    // let postId = post_id;
+    // if (!postId) {
+    //     //id params is require
+    //     if (!id) throw new ServiceError('Missing parameter: id or post_id');
+    //     //get comment check post access
+    //     const comment = await repo.findById(id);
+    //     if (!comment) throw new ServiceError('Comment not found', ErrorCode.NOT_FOUND);
+    //     postId = comment.post_id;
+    // }
 
-    const post = (await postService.get({ id: postId, current_user_id }))[0];
-    if (!post?.id) throw new ServiceError('Post not found', ErrorCode.NOT_FOUND);
+    // const post = (await postService.get({ id: postId, current_user_id }))[0];
+    // if (!post?.id) throw new ServiceError('Post not found', ErrorCode.NOT_FOUND);
 
     const findParams = {
         ...(id && { id }),
@@ -109,11 +110,45 @@ export const del = async (id: CommentId, params: DeleteParams) => {
     if (!id) throw new ServiceError('Missing parameter: id');
     if (!is_admin && !current_user_id) throw new ServiceError('Missing parameter: current_user_id');
 
+    if (!is_admin && !canDelete(id, { current_user_id: current_user_id! })) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
+
     const repo = new CommentRepository();
-    const deleted = await repo.delete(id, {
-        ...(!is_admin && { user_id: current_user_id })
-    });
-    if (!deleted?.id) throw new ServiceError(`Delete failed: ${id}`);
+    const deleted = await repo.delete(id);
+    if (!deleted?.id) throw new ServiceError(`Failed deleting comment. id: ${id}`);
 
     return deleted;
+}
+
+export const delByPostId = async (id: PostId) => {
+    if (!id) throw new ServiceError('Missing parameter: id');
+    const repo = new CommentRepository();
+    const deletedCount = await repo.deleteByPostId(id);
+    return deletedCount;
+}
+
+export const canRead = async (id: CommentId, userContext: UserContext) => {
+    const { current_user_id } = userContext;
+    if (!current_user_id) throw new ServiceError('Missing parameter: current_user_id');
+    const commentRepo = new CommentRepository();
+    const comment = await commentRepo.findById(id);
+    if (!comment) throw new ServiceError(`Comment not found. id: ${id}`);
+
+    const repo = new PostRepository();
+    const post = await repo.findById(comment.post_id);
+    if (post?.user_id === current_user_id) return true;
+    if (post?.is_published && post?.visibility == 'public') return true;
+    return false;
+}
+
+export const canDelete = async (id: CommentId, userContext: UserContext) => {
+    const { current_user_id } = userContext;
+    if (!current_user_id) throw new ServiceError('Missing parameter: current_user_id');
+    const commentRepo = new CommentRepository();
+    const comment = await commentRepo.findById(id);
+    if (!comment) throw new ServiceError(`Comment not found. id: ${id}`);
+
+    const repo = new PostRepository();
+    const post = await repo.findById(comment.post_id);
+    if (post?.user_id === current_user_id) return true;
+    return false;
 }

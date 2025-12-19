@@ -1,9 +1,12 @@
+import { pool as sharedPool } from '@/db/db';
+import { getFullQuery } from '@/db/pgHelper';
 import type { FindParamsBase, FindParamsPaginated } from '@/types/FindParams';
 import type { InferFindResultType } from '@/types/InferFindResultType';
 import { OrderDirections, type OrderDirection } from '@shared/types/OrderDirection';
-import { Pool, type QueryResultRow } from 'pg';
-import { getFullQuery } from '../utils/pgHelper';
+import { Pool, type PoolClient, type QueryResultRow } from 'pg';
 
+
+export type Db = Pool | PoolClient;
 export interface GetOrderByParams {
     allowedOrderColumns: string[];
     order_by: string;
@@ -12,24 +15,16 @@ export interface GetOrderByParams {
 }
 
 export abstract class BaseRepository<T extends QueryResultRow> {
-    protected static sharedPool: Pool;
-    protected pool: Pool;
+    protected db: Db;
 
-    constructor(pool?: Pool) {
-        if (pool) {
-            this.pool = pool;
-        } else {
-            if (!BaseRepository.sharedPool) {
-                BaseRepository.sharedPool = new Pool({ connectionString: process.env.DATABASE_URL });
-            }
-            this.pool = BaseRepository.sharedPool;
-        }
+    constructor(db?: Db) {
+        this.db = db ?? sharedPool;
     }
 
     query<R extends QueryResultRow = T>(queryText: string, values?: unknown[]) {
         console.debug({ queryText, values });
         if (process.env.SQL_LOG == '1') console.log('[SQL]', getFullQuery(queryText, values));
-        return this.pool.query<R>(queryText, values);
+        return this.db.query<R>(queryText, values);
     }
 
     protected async getFindResult<P extends FindParamsBase>(tableName: string, filter: string, orderByParams: GetOrderByParams | null, values: unknown[], params: P) {
@@ -96,5 +91,5 @@ export abstract class BaseRepository<T extends QueryResultRow> {
     abstract findById(id: string): Promise<T | null>;
     abstract create(data: T): Promise<T>;
     abstract update(id: string, data: Partial<T>, context?: Record<string, unknown>): Promise<T>;
-    abstract delete(id: string, context?: Record<string, unknown>): Promise<T>;
+    abstract delete(id: string, context?: Record<string, unknown>): Promise<T | null>;
 }

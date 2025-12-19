@@ -119,3 +119,26 @@ export const unlike = async (req: Request, res: Response): Promise<Response> => 
     await postLikeService.unlike(id!, current_user_id!);
     return ok(res);
 }
+
+export const del = async (req: Request, res: Response): Promise<Response> => {
+    const { id } = req.params;
+    const current_user_id = getCurrentUser(req)?.id;
+    const deleted = await postService.del(id!, { current_user_id: current_user_id! });
+    return ok(res, deleted);
+}
+
+export const update = async (req: Request, res: Response): Promise<Response> => {
+    const { id } = req.params;
+    const { title, content, files } = req.body;
+    const current_user_id = getCurrentUser(req)?.id;
+
+    const result = await postService.update(id!, {
+        current_user_id: current_user_id!,
+        title,
+        content,
+        files
+    });
+    if (!result.id) return fail(res);
+
+    return ok(res, result);
+}

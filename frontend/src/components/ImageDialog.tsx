@@ -8,13 +8,12 @@ import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
 import type ImageExtended from '@shared/models/extensions/ImageExtended';
 import type { ImageId } from '@shared/models/generated/Image';
-import type { PostId } from '@shared/models/generated/Post';
 import { useEffect, useState } from 'react';
 
 type ImageDialogParams = {
     open: boolean;
     closeDialog: () => void;
-    postId?: PostId | null;
+    images?: ImageExtended[] | null;
     imageId: ImageId | null;
 };
 
@@ -38,10 +37,11 @@ type ApiGetResult = {
     post_image_set: ImageExtended[];
 };
 
-export function ImageDialog({ open, closeDialog, postId, imageId }: ImageDialogParams) {
-    const [isLoading, setIsLoading] = useState(true);
+export function ImageDialog({ open, closeDialog, imageId, images }: ImageDialogParams) {
+    console.log('ImageDialog render', { images, imageId });
+    const [isLoading, setIsLoading] = useState(false);
     const [selectedImage, setSelectedImage] = useState<ImageExtended | null>(null);
-    const [images, setImages] = useState<ImageExtended[] | null>(null);
+    const [imageSet, setImageSet] = useState<ImageExtended[] | null>(images || null);
 
     const getData = async ({ include_set }: { include_set?: boolean } = {}) => {
         setIsLoading(true);
@@ -49,39 +49,44 @@ export function ImageDialog({ open, closeDialog, postId, imageId }: ImageDialogP
         setIsLoading(false);
         if (result.ok && result.data) {
             setSelectedImage(result.data.post_image);
-            include_set && setImages(result.data.post_image_set);
-            console.log({ images: result.data.post_image_set });
+            include_set && setImageSet(result.data.post_image_set);
         }
     }
 
     //e: MouseEvent<HTMLButtonElement>
     const prevOnClick = () => {
-        if (images && selectedImage) {
-            let selectedIndex = images.findIndex(p => p.id == selectedImage.id) - 1;
+        if (imageSet && selectedImage) {
+            let selectedIndex = imageSet.findIndex(p => p.id == selectedImage.id) - 1;
             selectedIndex = selectedIndex < 0 ? 0 : selectedIndex;
-            setSelectedImage(images[selectedIndex]);
-            window.history.pushState({}, '', `/images/${images[selectedIndex].id}`);
+            setSelectedImage(imageSet[selectedIndex]);
+            window.history.pushState({}, '', `/images/${imageSet[selectedIndex].id}`);
         }
     }
 
     const nextOnClick = () => {
-        if (images && selectedImage) {
-            let selectedIndex = images.findIndex(p => p.id == selectedImage.id) + 1;
-            selectedIndex = selectedIndex > images.length - 1 ? images.length - 1 : selectedIndex;
-            console.log({ selectedIndex, id: images[selectedIndex].id });
-            setSelectedImage(images[selectedIndex]);
-            window.history.pushState({}, '', `/images/${images[selectedIndex].id}`);
+        if (imageSet && selectedImage) {
+            let selectedIndex = imageSet.findIndex(p => p.id == selectedImage.id) + 1;
+            selectedIndex = selectedIndex > imageSet.length - 1 ? imageSet.length - 1 : selectedIndex;
+            console.log({ selectedIndex, id: imageSet[selectedIndex].id });
+            setSelectedImage(imageSet[selectedIndex]);
+            window.history.pushState({}, '', `/images/${imageSet[selectedIndex].id}`);
         }
     }
 
     useEffect(() => {
-        getData({ include_set: true });
-    }, [postId]);
+        if (!open) return;
+        !imageSet && getData({ include_set: true });
+    }, []);
 
     useEffect(() => {
-        console.log({ images });
-        images && setSelectedImage(images[images.findIndex(p => p.id == imageId)]);
+        setImageSet(images ?? null);
+    }, [images]);
+
+    useEffect(() => {
+        imageSet && setSelectedImage(imageSet[imageSet.findIndex(p => p.id == imageId)]);
     }, [imageId]);
+
+    console.log('ImageDialog before return jsx', { isLoading, selectedImage, imageSet, images });
 
     return (
         <>
