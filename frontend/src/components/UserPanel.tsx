@@ -85,7 +85,7 @@ export const UserPanel = () => {
                                     display: 'block',
                                     position: 'absolute',
                                     top: 0,
-                                    right: '14px',
+                                    right: '15px',
                                     width: 10,
                                     height: 10,
                                     bgcolor: 'background.paper',
