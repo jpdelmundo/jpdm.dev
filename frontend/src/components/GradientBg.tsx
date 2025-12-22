@@ -1,5 +1,5 @@
 import Box from "@mui/material/Box";
-import { randomPercentage } from "@shared/utils/randomNum";
+import { randomPercentage } from "@shared/utils/random";
 
 export function GradientBg() {
     const colors = ["#ff0080", "#40e0d0", "#8000ff", "#ff8c00", "#0051ffff", "#f3f3f3"];

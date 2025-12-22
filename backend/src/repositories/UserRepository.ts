@@ -6,10 +6,12 @@ type FindParams = {
     username?: string;
     email?: string;
     vanity_id?: string;
+    email_confirmed?: boolean;
 }
 
 export class UserRepository extends BaseRepository<User> {
-    async find({ id, username, email, vanity_id }: FindParams): Promise<User[]> {
+    async find(params: FindParams): Promise<User[]> {
+        const { id, username, email, vanity_id, email_confirmed } = params;
         const filters: string[] = [];
         const values: unknown[] = [];
 
@@ -18,6 +20,7 @@ export class UserRepository extends BaseRepository<User> {
         username && filters.push(`username = $${filters.length + 1}`) && values.push(username);
         email && filters.push(`email = $${filters.length + 1}`) && values.push(email);
         vanity_id && filters.push(`vanity_id = $${filters.length + 1}`) && values.push(vanity_id);
+        email_confirmed && filters.push(`email_confirmed = $${filters.length + 1}`) && values.push(email_confirmed);
 
         if (filters.length == 0) {
             throw new Error('At least one filter must be provided');

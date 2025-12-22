@@ -1,4 +1,6 @@
 import { ServiceError } from '@/errors/ServiceError';
+import { PasswordResetRepository } from '@/repositories/PasswordResetRepository';
+import { randomString } from '@/utils/helper';
 import type UserWithRoles from '@shared/models/extensions/UserWithRoles';
 import type { RefreshTokenInitializer } from '@shared/models/generated/RefreshToken';
 import type { User, UserId, UserInitializer } from '@shared/models/generated/User';
@@ -6,7 +8,10 @@ import type { UserProfile } from '@shared/models/generated/UserProfile';
 import type { UserRole } from '@shared/models/generated/UserRole';
 import { ErrorCode } from '@shared/types/ErrorCode';
 import type { TokenUserData } from '@shared/types/Jwt';
+import { jsonBase64Decode } from '@shared/utils/encoding';
+import { isValidEmail, validatePassword } from '@shared/utils/validation';
 import * as bcrypt from 'bcrypt';
+import { validate } from 'uuid';
 import { RefreshTokenRepository } from '../repositories/RefreshTokenRepository';
 import { UserProfileRepository } from '../repositories/UserProfileRepository';
 import { UserRepository } from '../repositories/UserRepository';
@@ -216,4 +221,103 @@ export const findByVanityId = async (vanity_id: string): Promise<User | null> =>
     const repo = new UserRepository();
     const result = await repo.find({ vanity_id });
     return result[0] || null;
+}
+
+export const recoverAccount = async (email: string, fingerprint: string) => {
+    if (!email || !isValidEmail(email)) throw new ServiceError('Invalid parameter: email', ErrorCode.INVALID_PARAMETER);
+
+    const fingerprintObj = jsonBase64Decode(fingerprint);
+    if (!validate(fingerprintObj.device_id)) throw new ServiceError('Invalid parameter: fingerprint', ErrorCode.INVALID_PARAMETER);
+
+    const userRepo = new UserRepository();
+    const user = (await userRepo.find({ email, email_confirmed: true }))[0];
+    if (!user) throw new ServiceError(`User with confirmed email not found. email: ${email}`);
+
+    //check if already emailed in the last 15 minutes
+    const checkAllowed = await isAllowedToSendRecoveryEmail(user.id);
+    if (!checkAllowed.allowed) {
+        if (checkAllowed.reason == 'cooldown') throw new ServiceError('Still on cooldown...', ErrorCode.COOLDOWN);
+        throw new Error('isAllowedToSendRecoveryEmail not allowed for some reason');
+    }
+
+    const repo = new PasswordResetRepository();
+    const token_hash = randomString(64);
+    const result = await repo.create({ user_id: user.id, token_hash });
+    if (!result) throw new ServiceError('Failed creating password reset.');
+
+    const mailResult = await mail({
+        from: 'jpdm.dev <noreply@jpdm.dev>',
+        to: email,
+        subject: 'Account Recovery',
+        text: `Hi - You can reset your password using this link:
+
+${process.env.SITE_URL}/reset-password/${token_hash}
+
+Please disregard if you did not make this request.`
+    });
+
+    //TODO add logging here to monitor failed emails?
+    if (!mailResult || mailResult.rejected.length > 0 || !mailResult.response) throw new Error(`Problem generating/sending email confirm code for user : ${userId}`);
+
+    return mailResult;
+}
+
+export const isAllowedToSendRecoveryEmail = async (user_id: UserId) => {
+    const repo = new UserRepository();
+    const user = await repo.findById(user_id);
+    if (!user) throw new Error(`User not found: ${user_id}`);
+
+    const pwResRepo = new PasswordResetRepository();
+    const fifteenMinAgo = new Date(Date.now() - (15 * 60 * 1000));
+    const existing = (await pwResRepo.find({ user_id: user.id, limit: 1, order_by: 'created_at', order_dir: 'desc' }))[0];
+    if (existing && existing.created_at > fifteenMinAgo) return { allowed: false, reason: 'cooldown' };
+
+    return { allowed: true };
+}
+
+export const isResetPasswordTokenHashValid = async (token_hash: string) => {
+    if (!token_hash) throw new ServiceError('Missing/empty parameter: token_hash');
+
+    const repo = new PasswordResetRepository();
+    const result = (await repo.find({ token_hash }))[0];
+    if (!result || result.used_at || result.expires_at < new Date()) return false;
+    return true;
+}
+
+export const resetPasword = async (token_hash: string, password: string) => {
+    if (!await isResetPasswordTokenHashValid(String(token_hash))) throw new ServiceError('Token is invalid, expired, or already used.', ErrorCode.TOKEN_INVALID)
+
+    if (!password) throw new ServiceError('Missing or empty parameter: password', ErrorCode.MISSING_PARAMETER);
+    if (validatePassword(password).length > 0) throw new ServiceError('Invalid password', ErrorCode.INVALID_PARAMETER);
+
+    const pwResetRepo = new PasswordResetRepository();
+    const passwordReset = (await pwResetRepo.find({ token_hash }))[0];
+    if (!passwordReset) throw new Error('Password reset token not found');
+
+    //update password
+    const repo = new UserRepository();
+    const user = await repo.update(passwordReset.user_id, { password: await bcrypt.hash(password, 12) });
+    if (!user) throw new Error(`Cannot reset password. user_id: ${passwordReset.user_id}`);
+
+    await pwResetRepo.update(passwordReset.id, { used_at: new Date() });
+
+    const mailResult = await mail({
+        from: 'jpdm.dev <noreply@jpdm.dev>',
+        to: user.email!,
+        subject: 'Password reset successful',
+        text: `Hi,
+
+Your account password was successfully updated.
+
+If you initiated this change, you can safely ignore this message.
+
+If you don't recognize this activity, please reset your password immediately and contact support.
+
+Stay safe,
+The Support Team`
+    });
+
+    if (!mailResult || mailResult.rejected.length > 0 || !mailResult.response) throw new Error(`Problem generating/sending email confirm code for user : ${user.id}`);
+
+    return mailResult;
 }

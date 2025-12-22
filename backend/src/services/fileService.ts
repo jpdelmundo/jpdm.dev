@@ -20,12 +20,13 @@ export const del = async (id: FileId, params?: DeleteParams) => {
     if (!file) throw new ServiceError(`File not found: ${id}`);
 
     //delete actual file
-    fs.promises.unlink(file.path);
+    try {
+        await fs.promises.unlink(file.path);
+    } catch (err) {
+        const e = err as NodeJS.ErrnoException;
+        if (e.code !== 'ENOENT') throw e;
+    }
 
-    //delete record
-    // const deleted = await repo.delete(id, {
-    //     ...(!is_admin && { current_user_id })
-    // });
     const deleted = await repo.delete(id);
     if (!deleted?.id) throw new ServiceError(`File delete failed: ${id}`);
 

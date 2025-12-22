@@ -55,6 +55,7 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
     const [isDeleting, setIsDeleting] = useState(false);
     const [postDialogOpen, setPostDialogOpen] = useState(false);
     const [editPost, setEditPost] = useState<PostDTO | null>(null);
+    const user = useAuthStore(s => s.user);
 
     const orientation = useMemo(() => {
         if (!images.length) return 'portrait';
@@ -172,7 +173,7 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
             >
                 <Stack direction={'row'}>
                     {title && <Typography className="title"  {...(title.length <= 150 && { fontSize: { xs: '30px', sm: '40px' } })}>{title}</Typography>}
-                    <IconButton sx={{ marginLeft: 'auto', position: 'absolute', right: '25px', top: '20px', padding: '2px' }} onClick={postOptionsOnClick}><MoreHorizRounded /></IconButton>
+                    {user?.id == post.user_id && <IconButton sx={{ marginLeft: 'auto', position: 'absolute', right: '25px', top: '20px', padding: '2px' }} onClick={postOptionsOnClick}><MoreHorizRounded /></IconButton>}
                 </Stack>
                 <Stack direction={'row'} className="header">
                     <Avatar sx={{ bgcolor: `${stringToHslColor(display_name)}` }}>{display_name.charAt(0).toUpperCase()}</Avatar>

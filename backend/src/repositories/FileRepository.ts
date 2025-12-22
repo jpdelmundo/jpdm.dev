@@ -82,14 +82,13 @@ export class FileRepository extends BaseRepository<File> {
         return result.rows[0];
     }
 
-    async delete(id: FileId): Promise<File | null> {
+    async delete(id: FileId): Promise<File> {
         if (!id) throw new Error('Missing parameter: id');
         const sql = `delete from files
                      where id = $1
                      returning *`;
         const result = await this.query<File>(sql, [id]);
-        if (!result.rows[0]) console.error(`Failed to delete file. id: ${id}`);
-
-        return result.rows[0] ?? null;
+        if (!result.rows[0]) throw new Error(`Failed to delete file. id: ${id}`);
+        return result.rows[0];
     }
 }

@@ -1,7 +1,8 @@
+import { ServiceError } from '@/errors/ServiceError';
+import { botCheck } from '@/services/captchaService';
 import { get } from '@/services/postService';
-import { ErrorCode } from '@shared/types/ErrorCode';
 import { jsonBase64Decode } from '@shared/utils/encoding';
-import { validatePassword } from '@shared/utils/validate';
+import { validatePassword } from '@shared/utils/validation';
 import * as bcrypt from 'bcrypt';
 import type { Request, Response } from 'express';
 import type { AuthorizedRequest } from 'src/types/AuthorizedRequest';
@@ -20,17 +21,8 @@ export const profile = async (req: Request, res: Response): Promise<Response> =>
 export const create = async (req: Request, res: Response): Promise<Response> => {
     const { username, password, fp, token } = req.body;
 
-    const captchaVerifyResponse = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-        method: 'post',
-        headers: { 'content-type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-            secret: process.env.RECAPTCHAV3_SECRET_KEY as string,
-            response: token
-        }).toString()
-    });
+    await botCheck(token);
 
-    const captchaVerifyResult = await captchaVerifyResponse.json();
-    if (captchaVerifyResult.score <= 0.5) return fail(res, 'Low captcha score', 406, ErrorCode.BOT_DETECTED);
     if (!password) return fail(res, 'Password required');
     if (validatePassword(password).length > 0) return fail(res, 'Password invalid');
 
@@ -94,4 +86,38 @@ export const posts = async (req: Request, res: Response): Promise<Response> => {
     });
 
     return ok(res, posts);
+}
+
+export const recoverAccount = async (req: Request, res: Response): Promise<Response> => {
+    const { email, fp, token } = req.body;
+
+    await botCheck(token);
+
+    try {
+        await userService.recoverAccount(email, fp);
+    } catch (error) {
+        if (error instanceof ServiceError) {
+            console.error(`${error.message} (${error.code})`);
+        } else {
+            console.error((error as Error).message);
+        }
+    }
+
+    return ok(res);
+}
+
+export const isResetPasswordTokenHashValid = async (req: Request, res: Response): Promise<Response> => {
+    const { token_hash } = req.query;
+
+    return await userService.isResetPasswordTokenHashValid(String(token_hash))
+        ? ok(res)
+        : fail(res);
+}
+
+export const resetPassword = async (req: Request, res: Response): Promise<Response> => {
+    const { password, token_hash } = req.body;
+
+    await userService.resetPasword(token_hash, password);
+
+    return ok(res);
 }

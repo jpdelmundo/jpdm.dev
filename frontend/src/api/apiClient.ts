@@ -43,7 +43,6 @@ export async function apiRequest<T>(input: RequestInfo | URL, init?: RequestInit
 
         if (!res.ok) {
             const { error } = { ...(await res.json()) };
-            console.log({ error });
             if (error.code == ErrorCode.TOKEN_EXPIRED && !isRetry) {
                 try {
                     const newToken = await getNewToken();
@@ -62,10 +61,10 @@ export async function apiRequest<T>(input: RequestInfo | URL, init?: RequestInit
                     throw new ClientApiError(res, error);
                 }
             } else {
-                console.error('API_ERROR', { error });
                 //throw new ClientApiError(res, error);
                 //changed from throwing an error to returning as a an api "fail" result (with possible return data. ex. email update code request cooldown)
                 //throwing error is reserved for real errors
+                error.code == ErrorCode.BOT_DETECTED && (error.message = 'Unusual activity detected. Please try again.');
                 return { error, ok: res.ok, status: res.status } as ClientApiResult<T>;
             }
         }

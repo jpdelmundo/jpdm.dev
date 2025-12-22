@@ -16,7 +16,13 @@ export const upload = async (req: Request, res: Response): Promise<Response> => 
     if (!type) return fail(res, 'Cannot determine file type');
 
     if (!type.mime.startsWith('image/')) {
-        fs.promises.unlink(file.path);
+        try {
+            await fs.promises.unlink(file.path);
+        } catch (err) {
+            const e = err as NodeJS.ErrnoException;
+            if (e.code !== 'ENOENT') throw e;
+        }
+
         return fail(res, 'File type not allowed');
     }
 

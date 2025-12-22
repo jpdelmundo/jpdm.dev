@@ -46,10 +46,13 @@ export const UserPanel = () => {
 
     return (<>
         {
-            !location.pathname.startsWith('/signin')
-            && !location.pathname.startsWith('/signup')
-            &&
-            <Grid container gap={1}>
+            [
+                '/signin',
+                '/signup',
+                '/forgot-password',
+                '/reset-password'
+            ].every(path => !location.pathname.startsWith(path))
+            && <Grid container gap={1}>
                 <Grid>
                     <IconButton onClick={avatarOnClick} sx={{ padding: 0 }}>
                         {loading
@@ -63,6 +66,7 @@ export const UserPanel = () => {
                 {/* <Grid><Link component={RouterLink} to="/signin"></Link> {user?.username}</Grid> */}
                 {/* <Grid>{loading ? <CircularProgress /> : (isAuthenticated && <Link onClick={signOut} sx={{ cursor: 'pointer' }}>Logout</Link>)}</Grid> */}
                 <Menu
+                    className="context-menu"
                     anchorEl={userMenuAnchor}
                     anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                     transformOrigin={{ vertical: 'top', horizontal: 'right' }}
@@ -74,7 +78,6 @@ export const UserPanel = () => {
                         paper: {
                             elevation: 0,
                             sx: {
-                                boxShadow: '0 1px 2px #cccccc',
                                 overflow: 'unset',
                                 mt: '15px',
                                 '&::before': {

@@ -4,11 +4,13 @@ import { AdminHome } from './pages/admin/AdminHome';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { Users } from './pages/admin/Users';
 import { About } from './pages/public/About';
+import { ForgotPasswordPage } from './pages/public/ForgotPasswordPage';
 import { Home } from './pages/public/Home';
 import { ImagePage } from './pages/public/ImagePage';
 import { Layout } from './pages/public/Layout';
 import { NotFoundPage } from './pages/public/NotFoundPage';
 import { PostPage } from './pages/public/PostPage';
+import { ResetPasswordPage } from './pages/public/ResetPasswordPage';
 import { SignInPage } from './pages/public/SignInPage';
 import { SignUpPage } from './pages/public/SignUpPage';
 import { CreatePost } from './pages/user/CreatePost';
@@ -40,6 +42,8 @@ const routes = [
             },
             { path: 'posts/:id', element: <PostPage /> },
             { path: 'images/:id', element: <ImagePage /> },
+            { path: 'forgot-password', element: <ForgotPasswordPage /> },
+            { path: 'reset-password/:token_hash', element: <ResetPasswordPage /> },
             { path: '*', element: <NotFoundPage /> }
         ],
     },

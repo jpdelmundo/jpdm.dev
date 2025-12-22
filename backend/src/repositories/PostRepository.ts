@@ -127,7 +127,7 @@ export class PostRepository extends BaseRepository<Post> {
     async updateViews(id: PostId, amount: number = 1): Promise<Post> {
         if (!id) throw new Error('Missing parameter: id');
         const sql = `update posts
-                     set views = greatest(views + $2, 0),
+                     set views = views + $2,
                         updated_at = now()
                      where id = $1
                      returning *`;

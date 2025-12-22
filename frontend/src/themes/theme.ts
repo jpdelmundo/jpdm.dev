@@ -223,7 +223,16 @@ export const theme = createTheme({
                         },
                         '& .content': {
                             marginTop: '10px',
-                            marginBottom: '10px'
+                            marginBottom: '10px',
+                            [theme.breakpoints.down('sm')]: {
+                                fontSize: '14px',
+                            },
+                            [theme.breakpoints.up('sm')]: {
+                                fontSize: '16px',
+                            },
+                            [theme.breakpoints.up('md')]: {
+                                fontSize: '18px',
+                            },
                         },
                         '& .date': {
                             fontSize: '11px',
@@ -233,9 +242,7 @@ export const theme = createTheme({
                         '& .user-date-box': {
                             maxWidth: '92%'
                         },
-                        padding: '25px', // default = md and up
-
-                        // This is the correct & only working way in theme
+                        padding: '25px',
                         [theme.breakpoints.down('sm')]: {
                             padding: '15px',
                         },
@@ -330,14 +337,15 @@ export const theme = createTheme({
                             },
                             '& .detail': {
                                 justifySelf: 'flex-start',
-                                backgroundColor: '#eeeeeeff',
+                                backgroundColor: '#ffffff',
                                 borderRadius: '16px',
                                 padding: '6px 12px',
                                 //maxWidth: '85%',
                                 '& .user': {
                                     fontSize: '12px'
                                 },
-                                maxWidth: '80%'
+                                maxWidth: '80%',
+                                border: 'solid 1px #eeeeee'
                             },
                             '& .date': {
                                 padding: '6px 12px'
@@ -444,8 +452,11 @@ export const theme = createTheme({
                 root: {
                     '&.context-menu': {
                         '& .MuiPaper-root': {
-                            backgroundColor: '#f8f8f8'
-                        }
+                            boxShadow: '0 3px 6px #00000022',
+                        },
+                        '& .MuiMenuItem-root': {
+                            minHeight: '16px'
+                        },
                     }
                 }
             }

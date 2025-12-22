@@ -10,3 +10,11 @@ export const validatePassword = (value: string) => {
 
     return errors;
 }
+
+export const isValidEmail = (email: string) => {
+    return /^[a-zA-Z0-9_%+-]+(?:\.[a-zA-Z0-9_%+-]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/.test(email);
+}
+
+export const isNumber = (val: unknown) => {
+    return typeof val === 'number' && Number.isFinite(val);
+}

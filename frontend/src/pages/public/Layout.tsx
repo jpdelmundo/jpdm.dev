@@ -9,7 +9,7 @@ import Stack from '@mui/material/Stack';
 export const Layout = () => {
     return (
         <>
-            <Container component="header" className="header-container scrollbar-width-aware" sx={{ height: '60px', zIndex: 1 }}>
+            <Container component="header" className="header-container scrollbar-width-aware" sx={{ height: '60px', zIndex: 1000 }}>
                 <Stack direction="row" alignItems="center" maxWidth="md" sx={{ margin: '0 auto' }}>
                     <Box flex={1}>
                         <Link

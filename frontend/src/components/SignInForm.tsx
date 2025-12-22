@@ -93,7 +93,10 @@ export function SignInForm({ onSubmit, onSignInSuccess: onSignInSuccess }: {
                     <FormControlLabel label="Remember me on this device" control={<Checkbox name="remember" onChange={handleChange} />} />
                     <Button type="submit" disabled={isLoading} variant="contained">Sign In</Button>
                     {errorMessage && <Typography color="error" textAlign="center">{errorMessage}</Typography>}
-                    <Link component={RouterLink} to="/signup" textAlign={'center'} mt={1}>I want to create a new account</Link>
+                    <Stack>
+                        <Link component={RouterLink} to="/signup" textAlign={'center'} mt={1}>I want to create a new account</Link>
+                        <Link component={RouterLink} to="/forgot-password" textAlign={'center'} mt={1}>I forgot my password</Link>
+                    </Stack>
                 </Stack>
             </Box>
         </form>

@@ -24,9 +24,8 @@ function SignUpContent() {
             console.log('Execute recaptcha not yet available');
             return { ok: false, error: { message: 'Execute recaptcha not yet available' } };
         }
-        const token = await executeRecaptcha('submit_form');
-        console.log({ token });
 
+        const token = await executeRecaptcha('sign_up');
         const res = await apiPost<SignUpFormSubmitResult>('/users/create', { ...formInput, fp: jsonBase64Encode(getFingerprint()), token });
         return res; //return to show error message on form
     };

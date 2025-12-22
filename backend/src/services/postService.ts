@@ -131,7 +131,7 @@ export const create = async (params: CreateParams): Promise<PostDTO> => {
             const newImage = await postImageRepo.create({ file_id: userFile.id, post_id: newPost.id, sort: file.sort });
             if (!newImage) throw new Error('Failed creating post image');
 
-            fileRepo.update(userFile.id, { expire_at: null });
+            fileRepo.update(userFile.id, { expires_at: null });
         }
     }
 
@@ -183,7 +183,12 @@ export const del = async (id: PostId, params: DeleteParams) => {
     });
 
     for (const file of deleted.files) {
-        fs.promises.unlink(file.path);
+        try {
+            await fs.promises.unlink(file.path);
+        } catch (err) {
+            const e = err as NodeJS.ErrnoException;
+            if (e.code !== 'ENOENT') throw e;
+        }
     }
 
     return deleted.post;
@@ -238,7 +243,12 @@ export const update = async (id: PostId, params: UpdateParams) => {
     });
 
     for (const file of updated.deletedFiles) {
-        fs.promises.unlink(file.path);
+        try {
+            await fs.promises.unlink(file.path);
+        } catch (err) {
+            const e = err as NodeJS.ErrnoException;
+            if (e.code !== 'ENOENT') throw e;
+        }
     }
 
     const result = (await get({ id, current_user_id, include: ['images'] }))[0];

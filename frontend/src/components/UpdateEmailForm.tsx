@@ -1,4 +1,4 @@
-import { getErrorMessage, isValidEmail } from '@/utils/helper';
+import { getErrorMessage } from '@/utils/helper';
 import { type ApiResult } from '@shared/types/ApiResult';
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
@@ -9,6 +9,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { ErrorCode } from '@shared/types/ErrorCode';
+import { isValidEmail } from '@shared/utils/validation';
 
 export type FormInput = {
     email?: string;
@@ -27,6 +28,8 @@ export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed 
     const inputRef = useRef<HTMLInputElement>(null);
 
     const submitHandler: SubmitHandler<FormInput> = async (data) => {
+        if (isLoading) return;
+        inputRef.current?.blur();
         setErrorMessage('');
         setIsLoading(true);
         if (step == 'email') {

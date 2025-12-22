@@ -3,6 +3,7 @@ import { getFullQuery } from '@/db/pgHelper';
 import type { FindParamsBase, FindParamsPaginated } from '@/types/FindParams';
 import type { InferFindResultType } from '@/types/InferFindResultType';
 import { OrderDirections, type OrderDirection } from '@shared/types/OrderDirection';
+import { isNumber } from '@shared/utils/validation';
 import { Pool, type PoolClient, type QueryResultRow } from 'pg';
 
 
@@ -65,10 +66,12 @@ export abstract class BaseRepository<T extends QueryResultRow> {
 
     protected async getFindResultArray<P extends FindParamsBase>(tableName: string, filter: string, orderByParams: GetOrderByParams | null, values: unknown[], params?: P) { //params is needed here for TS to infer type
         const order = orderByParams ? this.getOrderBy(orderByParams, values) : '';
+        const limit = params?.limit && isNumber(params.limit) ? `limit ${params.limit}` : '';
         const result = await this.query(`select *
                                         from ${tableName}
                                         ${filter}
-                                        ${order}`, values);
+                                        ${order}
+                                        ${limit}`, values);
         return result.rows as InferFindResultType<P, T>;
     }
 
@@ -82,7 +85,7 @@ export abstract class BaseRepository<T extends QueryResultRow> {
                 priority = `case when user_id = $${values.length + 1} then 0 else 1 end,`;
                 values.push(prioritize_user_id);
             }
-            order = `order by ${priority} ${order_by} ${dir}`;
+            order = priority ? `order by ${priority} ${order_by} ${dir}` : `order by ${order_by} ${dir}`;
         }
         return order;
     }
@@ -91,5 +94,5 @@ export abstract class BaseRepository<T extends QueryResultRow> {
     abstract findById(id: string): Promise<T | null>;
     abstract create(data: T): Promise<T>;
     abstract update(id: string, data: Partial<T>, context?: Record<string, unknown>): Promise<T>;
-    abstract delete(id: string, context?: Record<string, unknown>): Promise<T | null>;
+    abstract delete(id: string, context?: Record<string, unknown>): Promise<T>;
 }

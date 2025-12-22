@@ -138,20 +138,22 @@ export const ImageCollage = memo(({ orientation, images, onImageClick }: ImageCo
                         </Box>
                         <Box sx={{ minHeight: 0, flex: 1 }} position="relative">
                             <CoverImage onImageClick={onImageClick} image={images[4]} />
-                            <div style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                width: '100%',
-                                height: '100%',
-                                backgroundColor: '#00000066',
-                                zIndex: 1,
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                color: '#ffffff',
-                                fontSize: '50px'
-                            }}>+{images.length - 5}</div>
+                            <div
+                                style={{
+                                    pointerEvents: 'none',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    width: '100%',
+                                    height: '100%',
+                                    backgroundColor: '#00000066',
+                                    zIndex: 1,
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    color: '#ffffff',
+                                    fontSize: '50px'
+                                }}>+{images.length - 5}</div>
                         </Box>
                     </Stack>
                 </Stack>

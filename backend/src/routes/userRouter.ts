@@ -7,6 +7,9 @@ export const router = Router();
 //public
 router.post('/create', controller.create);
 router.get('/:id/posts', controller.posts); //:id = id or vanity_id
+router.post('/recover-account', controller.recoverAccount);
+router.get('/reset-password', controller.isResetPasswordTokenHashValid);
+router.post('/reset-password', controller.resetPassword);
 
 //private
 router.use(verifyToken);
