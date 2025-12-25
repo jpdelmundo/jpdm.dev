@@ -7,4 +7,6 @@ export const router = Router()
 //public
 router.post('/signin', controller.signIn);
 router.post('/refresh-token', controller.refreshToken);
+
+//private
 router.post('/signout', verifyToken, controller.signOut);

@@ -5,17 +5,18 @@ import { jsonBase64Encode } from '@shared/utils/encoding';
 import { useState, type MouseEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { stringToHslColor } from '@/utils/helper';
+import { useAvatarProps } from '@/hooks/useAvatarProps';
 import AccountCircle from '@mui/icons-material/AccountCircle';
-import Avatar from '@mui/material/Avatar';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import { Avatar } from './Avatar';
 
 export const UserPanel = () => {
     const user = useAuthStore(s => s.user);
+    const avatarProps = useAvatarProps();
     const navigate = useNavigate();
     const location = useLocation();
     const clearToken = useAuthStore(s => s.clearToken);
@@ -58,7 +59,10 @@ export const UserPanel = () => {
                         {loading
                             ? <CircularProgress />
                             : isAuthenticated
-                                ? <Avatar sx={{ bgcolor: `${stringToHslColor(user?.username || '')}`, height: 40, width: 40 }}>{user?.username.charAt(0).toUpperCase()}</Avatar>
+                                ? <Avatar
+                                    sx={{ height: 40, width: 40 }}
+                                    {...avatarProps}
+                                />
                                 : <AccountCircle fontSize={'large'} color={isAuthenticated ? 'disabled' : 'disabled'} />}
                     </IconButton>
                 </Grid>

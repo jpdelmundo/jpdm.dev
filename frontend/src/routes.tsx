@@ -4,6 +4,7 @@ import { AdminHome } from './pages/admin/AdminHome';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { Users } from './pages/admin/Users';
 import { About } from './pages/public/About';
+import { AuthCallbackPage } from './pages/public/AuthCallback';
 import { ForgotPasswordPage } from './pages/public/ForgotPasswordPage';
 import { Home } from './pages/public/Home';
 import { ImagePage } from './pages/public/ImagePage';
@@ -20,6 +21,7 @@ const routes = [
         element: <Layout />,
         children: [
             { index: true, element: <Home /> },
+            { path: 'auth/callback', element: <AuthCallbackPage /> },
             { path: 'signin', element: <SignInPage /> },
             { path: 'about', element: <About /> },
             { path: 'signup', element: <SignUpPage /> },

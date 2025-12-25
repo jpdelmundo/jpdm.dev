@@ -1,7 +1,10 @@
+import type { User } from '@shared/models/generated/User';
 import type { DeviceFingerprint } from '@shared/types/DeviceFingerprint';
 import { ErrorCode } from '@shared/types/ErrorCode';
-import { jsonBase64Decode } from '@shared/utils/encoding';
+import { jsonBase64Decode, jsonBase64Encode } from '@shared/utils/encoding';
 import type { Request, Response } from 'express';
+import type { NextFunction } from 'express-serve-static-core';
+import passport from 'passport';
 import { UnexpectedError } from 'src/errors/UnexpectedError';
 import type { AuthorizedRequest } from 'src/types/AuthorizedRequest';
 import { clearRefreshTokenCookie, createRefreshTokenCookie } from '../services/authService';
@@ -142,4 +145,95 @@ export const refreshToken = async (req: Request, res: Response): Promise<Respons
         console.error(`${e.message} (${e.name})`);
         throw new Error('Error in creating new access token');
     }
+}
+
+export const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
+    const { fp } = req.query;
+    const customData = { fp, ip: req.ip };
+    const state = jsonBase64Encode(customData);
+
+    passport.authenticate('google', {
+        scope: ['profile', 'email'],
+        prompt: 'select_account',
+        session: false,
+        state
+    })(req, res, next);
+}
+
+export const googleAuthCallback = async (req: Request, res: Response, next: NextFunction) => {
+    const { state } = req.query;
+    passport.authenticate('google', { session: false }, async (err: Error, user: User, info: unknown) => {
+        console.log({ state, err, user, info });
+
+        const redirectUrl = new URL(`${process.env.SITE_URL}/auth/callback`);
+        try {
+            if (err) throw err;
+            if (!user) throw new Error('Authentication failed');
+            if (!state) throw new Error('Invalid authentication callback state');
+            const customData = jsonBase64Decode(state as string);
+            const { fp, ip } = customData;
+            if (!fp || !ip) throw new Error('Missing authentication parameters in state');
+
+            //create jwt and refresh token
+            const tokenData = await userService.getTokenData({ user_id: user.id });
+            if (!tokenData) throw new Error('Cannot get token data');
+
+            const access_token = generateAccessToken(tokenData);
+            const refreshToken = await userService.createRefreshToken({ ...jsonBase64Decode(fp), user_id: tokenData.id, request_ip: ip });
+
+            createRefreshTokenCookie(refreshToken, true, req, res);
+
+            redirectUrl.searchParams.set('token', access_token);
+            res.redirect(redirectUrl.toString());
+        } catch (error) {
+            redirectUrl.searchParams.set('error', error instanceof Error ? error.message : 'Authentication failed');
+            res.redirect(redirectUrl.toString());
+        }
+    })(req, res, next);
+}
+
+export const facebookAuth = async (req: Request, res: Response, next: NextFunction) => {
+    const { fp } = req.query;
+    const customData = { fp, ip: req.ip };
+    const state = jsonBase64Encode(customData);
+
+    passport.authenticate('facebook', {
+        scope: ['public_profile'],
+        prompt: 'select_account',
+        session: false,
+        state
+    })(req, res, next);
+}
+
+export const facebookAuthCallback = async (req: Request, res: Response, next: NextFunction) => {
+    const { state } = req.query;
+    passport.authenticate('facebook', { session: false }, async (err: Error, user, info: unknown) => {
+        //console.log({ state, err, user, info });
+
+        const redirectUrl = new URL(`${process.env.SITE_URL}/auth/callback`);
+        try {
+            if (err) throw err;
+            if (!user) throw new Error('Authentication failed');
+            if (!state) throw new Error('Invalid authentication callback state');
+            const customData = jsonBase64Decode(state as string);
+            const { fp, ip } = customData;
+            if (!fp || !ip) throw new Error('Missing authentication parameters in state');
+
+            //create jwt and refresh token
+            const tokenData = await userService.getTokenData({ user_id: user.id });
+            if (!tokenData) throw new Error('Cannot get token data');
+
+            const access_token = generateAccessToken(tokenData);
+            const refreshToken = await userService.createRefreshToken({ ...jsonBase64Decode(fp), user_id: tokenData.id, request_ip: ip });
+
+            createRefreshTokenCookie(refreshToken, true, req, res);
+
+            redirectUrl.searchParams.set('token', access_token);
+            res.redirect(redirectUrl.toString());
+        } catch (error) {
+            redirectUrl.searchParams.set('error', error instanceof Error ? error.message : 'Authentication failed');
+            res.redirect(redirectUrl.toString());
+        }
+
+    })(req, res, next);
 }

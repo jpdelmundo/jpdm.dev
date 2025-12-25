@@ -9,6 +9,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
 
 export const SignInPage = () => {
     const setToken = useAuthStore(s => s.setToken);
@@ -44,6 +45,7 @@ export const SignInPage = () => {
             mt={'60px'}
         >
             <Paper elevation={0} sx={{ p: 6, maxWidth: 400, mx: 'auto' }}>
+                {location.state?.error && <Typography mb={1} color="error" textAlign="center">{location.state?.error}</Typography>}
                 <SignInForm onSubmit={submit} onSignInSuccess={signInSuccess} />
             </Paper>
         </Box>

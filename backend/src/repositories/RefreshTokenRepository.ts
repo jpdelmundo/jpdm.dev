@@ -1,4 +1,4 @@
-import type { RefreshToken, RefreshTokenId, RefreshTokenInitializer, RefreshTokenMutator } from '@shared/models/generated/RefreshToken';
+import { RefreshTokenColumns, type RefreshToken, type RefreshTokenId, type RefreshTokenInitializer, type RefreshTokenMutator } from '@shared/models/generated/RefreshToken';
 import { BaseRepository } from './BaseRepository';
 
 interface FindParams {
@@ -33,7 +33,8 @@ export class RefreshTokenRepository extends BaseRepository<RefreshToken> {
     }
 
     async create(item: RefreshTokenInitializer): Promise<RefreshToken> {
-        const entries = Object.entries(item).filter(([key, value]) => value !== undefined);
+        const validColumns = new Set(RefreshTokenColumns as readonly string[]);
+        const entries = Object.entries(item).filter(([key, value]) => validColumns.has(key) && value !== undefined);
         const columns = entries.map(([key]) => key).join(', ');
         const placeholders = entries.map((_, i) => `$${i + 1}`).join(', ');
         const values = entries.map(([_, value]) => value);
@@ -51,7 +52,8 @@ export class RefreshTokenRepository extends BaseRepository<RefreshToken> {
     }
 
     async update(id: string, item: RefreshTokenMutator): Promise<RefreshToken> {
-        const entries = Object.entries(item).filter(([key, value]) => value !== undefined && key != 'id');
+        const validColumns = new Set(RefreshTokenColumns as readonly string[]);
+        const entries = Object.entries(item).filter(([key, value]) => validColumns.has(key) && value !== undefined && key != 'id');
         const set: string[] = [];
         const values: unknown[] = [];
 

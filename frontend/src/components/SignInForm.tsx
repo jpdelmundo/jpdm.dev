@@ -1,14 +1,19 @@
+import facebookButtonImage from '@/assets/images/signin-facebook.svg';
+import googleButtonImage from '@/assets/images/signin-google.svg';
 import { useFormValidation, type ValidationRuleFunction } from '@/hooks/useFormValidation';
+import { getFingerprint } from '@/utils/device';
 import { fieldErrorProps, getErrorMessage } from '@/utils/helper';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
+import Divider from '@mui/material/Divider';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import type { AccessToken } from '@shared/types/AccessToken';
 import type { ApiResult } from '@shared/types/ApiResult';
+import { jsonBase64Encode } from '@shared/utils/encoding';
 import { useRef, useState, type ChangeEvent, type FocusEvent, type FormEvent } from "react";
 import { Link as RouterLink } from 'react-router-dom';
 import PasswordField from './PasswordField';
@@ -77,6 +82,17 @@ export function SignInForm({ onSubmit, onSignInSuccess: onSignInSuccess }: {
         <form onSubmit={handleSubmit} noValidate>
             <Box display="flex" flexDirection="column" gap={1}>
                 <Stack gap={2}>
+                    <Stack>
+                        <Link
+                            href={`${import.meta.env.VITE_BACKEND_BASE_URL}/auth/google?fp=${jsonBase64Encode(getFingerprint())}`}>
+                            <img src={googleButtonImage} style={{ width: '100%' }} />
+                        </Link>
+                        <Link
+                            href={`${import.meta.env.VITE_BACKEND_BASE_URL}/auth/facebook?fp=${jsonBase64Encode(getFingerprint())}`}>
+                            <img src={facebookButtonImage} style={{ width: '100%' }} />
+                        </Link>
+                    </Stack>
+                    <Divider>OR</Divider>
                     <TextField name="username"
                         label="Username"
                         onChange={handleChange}

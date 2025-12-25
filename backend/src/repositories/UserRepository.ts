@@ -1,4 +1,5 @@
-import type { User, UserId, UserInitializer, UserMutator } from '@shared/models/generated/User';
+import type { FindParamsBase } from '@/types/FindParams';
+import { UserColumns, type User, type UserId, type UserInitializer, type UserMutator } from '@shared/models/generated/User';
 import { BaseRepository } from './BaseRepository';
 
 type FindParams = {
@@ -7,11 +8,12 @@ type FindParams = {
     email?: string;
     vanity_id?: string;
     email_confirmed?: boolean;
+    facebook_id: string;
 }
 
 export class UserRepository extends BaseRepository<User> {
-    async find(params: FindParams): Promise<User[]> {
-        const { id, username, email, vanity_id, email_confirmed } = params;
+    async find<P extends FindParamsBase>(params: P): Promise<User[]> {
+        const { id, username, email, vanity_id, email_confirmed, facebook_id } = params;
         const filters: string[] = [];
         const values: unknown[] = [];
 
@@ -21,6 +23,7 @@ export class UserRepository extends BaseRepository<User> {
         email && filters.push(`email = $${filters.length + 1}`) && values.push(email);
         vanity_id && filters.push(`vanity_id = $${filters.length + 1}`) && values.push(vanity_id);
         email_confirmed && filters.push(`email_confirmed = $${filters.length + 1}`) && values.push(email_confirmed);
+        facebook_id && filters.push(`facebook_id = $${filters.length + 1}`) && values.push(facebook_id);
 
         if (filters.length == 0) {
             throw new Error('At least one filter must be provided');
@@ -41,7 +44,8 @@ export class UserRepository extends BaseRepository<User> {
     }
 
     async create(item: UserInitializer): Promise<User> {
-        const entries = Object.entries(item).filter(([key, value]) => value != undefined && key != 'id');
+        const validColumns = new Set(UserColumns as readonly string[]);
+        const entries = Object.entries(item).filter(([key, value]) => validColumns.has(key) && value != undefined && key != 'id');
         const columns = entries.map(([key]) => key).join(', ');
         const placeholders = entries.map((_, i) => `$${i + 1}`).join(', ');
         const values = entries.map(([_, value]) => value);
@@ -59,7 +63,8 @@ export class UserRepository extends BaseRepository<User> {
     }
 
     async update(id: UserId, item: UserMutator): Promise<User> {
-        const entries = Object.entries(item).filter(([key, value]) => value !== undefined && key != 'id');
+        const validColumns = new Set(UserColumns as readonly string[]);
+        const entries = Object.entries(item).filter(([key, value]) => validColumns.has(key) && value !== undefined && key != 'id');
         const set: string[] = [];
         const values: unknown[] = [];
 

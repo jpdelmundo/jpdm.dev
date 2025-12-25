@@ -32,13 +32,13 @@ export const create = async (params: CreateParams): Promise<CommentDTO> => {
     if (!comment || comment.trim().length == 0) throw new ServiceError('Content cannot be empty', ErrorCode.MISSING_PARAMETER, { param: 'comment' });
     if (comment.length > 2000) throw new ServiceError('Content too long', ErrorCode.LENGTH_TOO_LONG, { param: 'comment' });
 
-    //create post
+    //create comment
     const repo = new CommentRepository();
     const newComment = await repo.create({ ...params, comment: String(comment).trim().replace(/\n{3,}/g, '\n\n') });
     if (!newComment) throw new Error('Failed creating comment');
 
     const result = (await get({ id: newComment.id })) as CommentDTO[];
-    if (!result[0]) throw new Error(`Post created but not found: ${newComment.id}`);
+    if (!result[0]) throw new Error(`Comment created but not found: ${newComment.id}`);
 
     return result[0];
 }

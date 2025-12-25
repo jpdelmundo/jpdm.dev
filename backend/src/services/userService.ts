@@ -1,5 +1,6 @@
 import { ServiceError } from '@/errors/ServiceError';
 import { PasswordResetRepository } from '@/repositories/PasswordResetRepository';
+import * as userProfileService from '@/services/userProfileService';
 import { randomString } from '@/utils/helper';
 import type UserWithRoles from '@shared/models/extensions/UserWithRoles';
 import type { RefreshTokenInitializer } from '@shared/models/generated/RefreshToken';
@@ -9,8 +10,11 @@ import type { UserRole } from '@shared/models/generated/UserRole';
 import { ErrorCode } from '@shared/types/ErrorCode';
 import type { TokenUserData } from '@shared/types/Jwt';
 import { jsonBase64Decode } from '@shared/utils/encoding';
+import { getEmailUsername, getRandomUsername } from '@shared/utils/username';
 import { isValidEmail, validatePassword } from '@shared/utils/validation';
 import * as bcrypt from 'bcrypt';
+import type { Profile as FacebookProfile } from 'passport-facebook';
+import type { Profile as GoogleProfile } from 'passport-google-oauth20';
 import { validate } from 'uuid';
 import { RefreshTokenRepository } from '../repositories/RefreshTokenRepository';
 import { UserProfileRepository } from '../repositories/UserProfileRepository';
@@ -320,4 +324,82 @@ The Support Team`
     if (!mailResult || mailResult.rejected.length > 0 || !mailResult.response) throw new Error(`Problem generating/sending email confirm code for user : ${user.id}`);
 
     return mailResult;
+}
+
+export const createUserFromSocialLogin = async (email: string, profile: GoogleProfile) => {
+    const emailUsername = getEmailUsername(email).replace(/[^A-Za-z0-9]/g, '').trim();
+    if (!emailUsername) throw new Error('No email username found in profile email');
+
+    let newUsername = emailUsername;
+    let findUsername = await findByUsername(newUsername);
+
+    let attempt = 0;
+    const maxAttempts = 10;
+    while (findUsername && attempt < maxAttempts) {
+        attempt++;
+        const rand4Digits = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        newUsername = `${emailUsername}${rand4Digits}`;
+        findUsername = await findByUsername(newUsername);
+    }
+
+    if (findUsername) throw new Error('Could not generate unique username');
+
+    const newUser = await createUser({
+        username: newUsername,
+        email,
+        ...(profile.provider == 'google' && { google_id: profile.id })
+    });
+
+    const avatar_url = profile.photos?.[0]?.value;
+    const first_name = profile.name?.givenName;
+    const last_name = profile.name?.familyName;
+    userProfileService.create({
+        user_id: newUser.id,
+        ...(first_name && { first_name }),
+        ...(last_name && { last_name }),
+        ...(avatar_url && { avatar_url })
+    });
+
+    return newUser;
+}
+
+export const createUserFromFacebookLogin = async (id: string, profile: FacebookProfile) => {
+    if (!id) throw new Error('Missing or empty parameter: id');
+
+    let newUsername = profile.name?.givenName && profile.name.givenName.length >= 2 ? profile.name.givenName : getRandomUsername({ numberPart: false });
+    let findUsername = await findByUsername(newUsername);
+
+    let attempt = 0;
+    const maxAttempts = 10;
+    while (findUsername && attempt < maxAttempts) {
+        attempt++;
+        const rand4Digits = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        newUsername = `${newUsername}${rand4Digits}`;
+        findUsername = await findByUsername(newUsername);
+    }
+
+    if (findUsername) throw new Error('Could not generate unique username');
+
+    const newUser = await createUser({
+        username: newUsername,
+        facebook_id: profile.id
+    });
+
+    const avatar_url = profile.photos?.[0]?.value;
+    const first_name = profile.name?.givenName;
+    const last_name = profile.name?.familyName;
+    userProfileService.create({
+        user_id: newUser.id,
+        ...(first_name && { first_name }),
+        ...(last_name && { last_name }),
+        ...(avatar_url && { avatar_url })
+    });
+
+    return newUser;
+}
+
+export const findByFacebookId = async (id: string): Promise<User | null> => {
+    const repo = new UserRepository();
+    const result = await repo.find({ facebook_id: id });
+    return result[0] || null;
 }

@@ -1,4 +1,3 @@
-const { tryParse } = require('tagged-comment-parser')
 const { join } = require('path');
 const { pascalCase } = require('change-case');
 const dotenv = require('dotenv');
@@ -14,8 +13,11 @@ module.exports = {
     },
     outputPath,
     enumStyle: 'type',
-    // added preRenderHooks to fix: /shared/src/models/generated/UserRoleEnum.ts:9:16 - error TS1284: An 'export default' must reference a value when 'verbatimModuleSyntax' is enabled, but 'UserRoleEnum' only refers to a type.
+    customTypeMap: {
+        'public.citext': 'string'
+    },
     preRenderHooks: [
+        // hook to fix: /shared/src/models/generated/UserRoleEnum.ts:9:16 - error TS1284: An 'export default' must reference a value when 'verbatimModuleSyntax' is enabled, but 'UserRoleEnum' only refers to a type.
         (files) => {
             // Change all default exports to named exports
             for (const file of Object.values(files)) {
@@ -25,13 +27,13 @@ module.exports = {
                     }
                 }
             }
+
             return files;
         }
     ],
-    // add postRenderHooks to fix: ../shared/src/models/generated/UserRole.ts:4:15 - error TS2305: Module '"./UserRoleEnum"' has no exported member 'default'.
     postRenderHooks: [
+        // add postRenderHooks to fix: ../shared/src/models/generated/UserRole.ts:4:15 - error TS2305: Module '"./UserRoleEnum"' has no exported member 'default'.
         (path, lines) => {
-            // Only process files that import enums (skip enum files themselves)
             if (path.endsWith('Enum.ts')) return lines;
 
             // Replace: import type { default as X } from './XEnum';
@@ -43,13 +45,72 @@ module.exports = {
 
             return lines;
         },
+        // generate table column names constant
+        (path, lines) => {
+            if (path.endsWith('Enum.ts')) return lines;
+
+            //check for "export interface"
+            const interfaceMatch = lines.find(l =>
+                l.startsWith('export interface ')
+            );
+            if (!interfaceMatch) return lines;
+
+            // Example: "export interface RefreshToken {"
+            const interfaceName = interfaceMatch
+                .replace('export interface ', '')
+                .replace('{', '')
+                .trim();
+
+            // Generate constant name: RefreshTokenColumns
+            const constantName = `${interfaceName}Columns`;
+
+            // Extract properties safely
+            const columns = [];
+            let insideInterface = false;
+
+            for (const line of lines) {
+                if (line.startsWith('export interface ')) {
+                    insideInterface = true;
+                    continue;
+                }
+
+                if (insideInterface && line.startsWith('}')) {
+                    insideInterface = false;
+                    break;
+                }
+
+                if (!insideInterface) continue;
+
+                const trimmed = line.trim();
+
+                // Skip comments and empty lines
+                if (
+                    !trimmed ||
+                    trimmed.startsWith('/**') ||
+                    trimmed.startsWith('*') ||
+                    trimmed.startsWith('//')
+                ) {
+                    continue;
+                }
+
+                // Match: columnName: type;
+                const match = trimmed.match(/^(\w+)\??:\s+/);
+                if (match) {
+                    columns.push(match[1]);
+                }
+            }
+
+            if (!columns.length) return lines;
+
+            return [
+                ...lines,
+                '',
+                `export const ${constantName} = [`,
+                ...columns.map(c => `  "${c}",`),
+                `] as const;`,
+            ];
+        }
     ],
-    // postRenderHooks: [
-    //     (filename, content) => content.replace(
-    //         /import type \{ default as (\w+) \} from '([^']+)';/g,
-    //         "import type { $1 } from '$2';"
-    //     ),
-    // ],
     getMetadata: (details, generateFor) => {
         const isAgentNoun = ['initializer', 'mutator'].includes(generateFor);
         const suffix = isAgentNoun ? `_${generateFor}` : '';
@@ -77,5 +138,5 @@ module.exports = {
             typeDefinition: [`${tsType} & { __flavor?: '${name}' }`],
             comment: [`Identifier type for ${details.name}`],
         };
-    },
+    }
 };

@@ -22,9 +22,9 @@ type ImageDialogState = {
 export const UpdatesPage = () => {
     console.log('UpdatesPage render');
     const ready = useAuthStore(s => s.ready);
+    const user = useAuthStore(s => s.user);
     const [postDialogOpen, setPostDialogOpen] = useState(false);
     const [posts, setPosts] = useState<PostDTO[]>([]);
-    const user = useAuthStore(s => s.user);
     const [isLoading, setIsLoading] = useState(false);
     const [viewer, setViewer] = useState<ImageDialogState>(null);
     const origLocation = useRef<Location | null>(null);

@@ -20,7 +20,7 @@ type ConfirmState = {
     onCancel: () => void;
 };
 
-export const useConfirmStore = create<ConfirmState>((set, get) => ({
+export const useConfirmStore = create<ConfirmState>()((set, get) => ({
     open: false,
     title: "",
     message: null,

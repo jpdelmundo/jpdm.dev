@@ -1,44 +1,120 @@
-import type { UserProfile, UserProfileId, UserProfileMutator } from '@shared/models/generated/UserProfile';
+import type { FindParamsBase } from '@/types/FindParams';
+import type { PostId } from '@shared/models/generated/Post';
+import type { UserId } from '@shared/models/generated/User';
+import type { UserProfile, UserProfileId, UserProfileInitializer, UserProfileMutator } from '@shared/models/generated/UserProfile';
+import { type OrderDirection } from '@shared/types/OrderDirection';
 import { BaseRepository } from './BaseRepository';
 
-interface FindParams {
-    id?: string;
-    userId?: string;
+type FindParams = {
+    id?: UserProfileId;
+    post_id?: PostId;
+    user_id?: UserId;
+    limit?: number;
+    page_num?: number;
+    page_size?: number;
+    order_by?: string;
+    order_dir?: OrderDirection;
 }
 
 export class UserProfileRepository extends BaseRepository<UserProfile> {
-    async find({ id, userId }: FindParams): Promise<UserProfile[]> {
+    async find<P extends FindParamsBase>(params: P) {
+        const { id, user_id, order_by, order_dir, limit } = params as FindParams;
         const filters: string[] = [];
         const values: unknown[] = [];
 
+        //where
         id && filters.push(`id = $${filters.length + 1}`) && values.push(id);
-        userId && filters.push(`user_id = $${filters.length + 1}`) && values.push(userId);
-        // email && filters.push(`email = $${filters.length + 1}`) && values.push(email);
+        user_id && filters.push(`user_id = $${filters.length + 1}`) && values.push(user_id);
 
         if (filters.length == 0) {
             throw new Error('At least one filter must be provided');
         }
 
-        const result = await this.db.query<UserProfile>(`select *
-                                                        from user_profiles
-                                                        where ${filters.join(' and ')}`, values);
-        return result.rows;
+        let filter = filters.join(' and ');
+        filter = filter ? `where ${filter}` : '';
+
+        //order by params
+        const orderByParams = order_by
+            ? {
+                allowedOrderColumns: ['created_at'],
+                order_by,
+                order_dir
+            }
+            : null;
+
+        //get and return result
+        return this.getFindResult('user_profiles', filter, orderByParams, values, params);
     }
 
-    async findById(id: string): Promise<UserProfile | null> {
-        const result = await this.find({ id });
-        return result[0] || null;
+    async findById(id: UserProfileId): Promise<UserProfile | null> {
+        return (await this.find({ id }))[0] || null;
     }
 
-    create(item: UserProfile): Promise<UserProfile> {
-        throw new Error("Method not implemented.")
+    async create(item: UserProfileInitializer): Promise<UserProfile> {
+        const entries = Object.entries(item).filter(([key, value]) => value !== undefined && key != 'id');
+        const columns = entries.map(([key]) => key).join(', ');
+        const placeholders = entries.map((_, i) => `$${i + 1}`).join(', ');
+        const values = entries.map(([_, value]) => value);
+
+        const sql = `insert into user_profiles (${columns})
+                     values (${placeholders})
+                     returning *`;
+        const result = await this.query(sql, values);
+
+        if (!result.rows[0]) {
+            throw new Error(`Record creation failed`);
+        }
+
+        return result.rows[0];
     }
 
-    update(id: string, item: UserProfileMutator): Promise<UserProfile> {
-        throw new Error("Method not implemented.")
+    async update(id: string, data: UserProfileMutator): Promise<UserProfile> {
+        const entries = Object.entries(data).filter(([key, value]) => value !== undefined && key != 'id');
+        const set: string[] = [];
+        const values: unknown[] = [];
+
+        entries.forEach(([key, value]) => {
+            set.push(`${key} = $${values.length + 1}`);
+            values.push(value);
+        });
+
+        if (set.length == 0) {
+            throw new Error('Update set missing');
+        }
+        set.push(`updated_at = now()`);
+
+        const filters: string[] = [];
+        id.trim() && filters.push(`id = $${values.length + 1}`) && values.push(id.trim());
+        //user_id?.trim() && filters.push(`user_id = $${values.length + 1}`) && values.push(user_id.trim());
+
+        if (filters.length == 0) {
+            throw new Error('Update condition missing');
+        }
+
+        let where = filters.join(' and ');
+        where = where ? `where ${where}` : '';
+
+        const sql = `update user_profiles
+                     set ${set.join(', ')}
+                     ${where}
+                     returning *`;
+
+        const result = await this.query(sql, values);
+        if (!result.rows[0]) throw new Error(`Update failed`);
+
+        return result.rows[0];
     }
 
-    delete(id: UserProfileId): Promise<UserProfile> {
-        throw new Error("Method not implemented.")
+    async delete(id: UserProfileId): Promise<UserProfile> {
+        if (!id) throw new Error('Missing parameter: id');
+
+        const sql = `delete
+                    from user_profiles
+                    where id = $1
+                    returning *`;
+        const result = await this.query(sql, [id]);
+        if (!result.rows[0]) throw new Error(`Delete failed`);
+
+        return result.rows[0];
     }
 }
