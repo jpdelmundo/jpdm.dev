@@ -19,25 +19,29 @@ import { Link as RouterLink } from 'react-router-dom';
 import PasswordField from './PasswordField';
 import TextField from './TextField';
 
-export type FormInput = { username: string, password: string };
+export type FormInput = {
+    username: string;
+    password: string;
+    remember: boolean;
+};
 
 export function SignInForm({ onSubmit, onSignInSuccess: onSignInSuccess }: {
     onSubmit: (formInput: FormInput) => Promise<ApiResult<AccessToken>>,
     onSignInSuccess: (result: ApiResult<AccessToken>) => void
 }) {
     //const formInputRef = useRef<FormInput>(Object.fromEntries(Object.keys({} as FormInput).map(key => [key, ''])) as FormInput);
-    const formInputRef = useRef<FormInput>({ username: '', password: '' });
+    const formInputRef = useRef<FormInput>({ username: '', password: '', remember: true });
     const [errorMessage, setErrorMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
 
-    const validationRules: Record<keyof FormInput, ValidationRuleFunction> = {
-        username: (value: string) => {
-            if (!value.trim()) return 'Username required';
+    const validationRules: Record<keyof Omit<FormInput, 'remember'>, ValidationRuleFunction> = {
+        username: (value: unknown) => {
+            if (!String(value).trim()) return 'Username required';
             return '';
         },
-        password: (value: string) => {
-            if (!value.trim()) return 'Password required';
+        password: (value: unknown) => {
+            if (!String(value).trim()) return 'Password required';
             return '';
         }
     };
@@ -106,7 +110,7 @@ export function SignInForm({ onSubmit, onSignInSuccess: onSignInSuccess }: {
                         onBlur={handleBlur}
                         fullWidth
                         {...fieldErrorProps(errors, 'password')} />
-                    <FormControlLabel label="Remember me on this device" control={<Checkbox name="remember" onChange={handleChange} />} />
+                    <FormControlLabel label="Remember me on this device" control={<Checkbox name="remember" onChange={handleChange} checked />} />
                     <Button type="submit" disabled={isLoading} variant="contained">Sign In</Button>
                     {errorMessage && <Typography color="error" textAlign="center">{errorMessage}</Typography>}
                     <Stack>
