@@ -7,15 +7,20 @@ import type { ApiResult } from '@shared/types/ApiResult';
 import { jsonBase64Encode } from '@shared/utils/encoding';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import { theme } from '@/themes/theme';
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
+import { useEffect } from 'react';
 
 export const SignInPage = () => {
     const setToken = useAuthStore(s => s.setToken);
+    const signOutReason = useAuthStore.getState().signOutReason;
     // const isAuthenticated = useAuthStore(s => s.isAuthenticated);
     const location = useLocation();
     const navigate = useNavigate();
+
 
     //const from = location.state?.from?.pathname || '/';
     // if (isAuthenticated) {
@@ -34,6 +39,12 @@ export const SignInPage = () => {
         setToken(result.data);
         navigate(from, { replace: true });
     };
+    console.log({ signOutReason });
+    const message = signOutReason == 'password_changed' ? 'Successfully changed password. You have been signed-out on all your devices. Sign in with your new password.' : '';
+
+    useEffect(() => {
+        useAuthStore.setState({ signOutReason: null });
+    }, []);
 
     return (
         <Box
@@ -45,6 +56,7 @@ export const SignInPage = () => {
             mt={'60px'}
         >
             <Paper elevation={0} sx={{ p: 6, maxWidth: 400, mx: 'auto' }}>
+                {message && <Alert severity="info" sx={{ mb: 1, fontSize: theme.typography.body1 }}>{message}</Alert>}
                 {location.state?.error && <Typography mb={1} color="error" textAlign="center">{location.state?.error}</Typography>}
                 <SignInForm onSubmit={submit} onSignInSuccess={signInSuccess} />
             </Paper>

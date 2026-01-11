@@ -1,6 +1,6 @@
 import { ServiceError } from '@/errors/ServiceError';
 import { botCheck } from '@/services/captchaService';
-import { get } from '@/services/postService';
+import * as postService from '@/services/postService';
 import { jsonBase64Decode } from '@shared/utils/encoding';
 import { validatePassword } from '@shared/utils/validation';
 import * as bcrypt from 'bcrypt';
@@ -10,7 +10,14 @@ import { validate } from 'uuid';
 import { createRefreshTokenCookie } from '../services/authService';
 import * as userService from '../services/userService';
 import { fail, ok } from '../utils/apiHelper';
-import { generateAccessToken, getCurrentUser } from '../utils/auth';
+import { generateJwt, getCurrentUser } from '../utils/auth';
+
+export const me = async (req: Request, res: Response) => {
+    const id = getCurrentUser(req)?.id;
+    const user = await userService.findById(id!);
+    const me = userService.toMe(user);
+    return ok(res, me);
+}
 
 export const profile = async (req: Request, res: Response): Promise<Response> => {
     const authReq = req as AuthorizedRequest;
@@ -30,11 +37,11 @@ export const create = async (req: Request, res: Response): Promise<Response> => 
     const newUser = await userService.createUser({ username, password: await bcrypt.hash(password, 12) });
 
     //create jwt and refresh token
-    const tokenData = await userService.getTokenData({ username: newUser.username });
-    if (!tokenData) throw new Error('Cannot get token data');
+    const payload = await userService.getTokenData({ username: newUser.username });
+    if (!payload) throw new Error('Cannot get token data');
 
-    const access_token = generateAccessToken(tokenData);
-    const refreshToken = await userService.createRefreshToken({ ...jsonBase64Decode(fp), user_id: tokenData.id, request_ip: req.ip });
+    const access_token = generateJwt(payload);
+    const refreshToken = await userService.createRefreshToken({ ...jsonBase64Decode(fp), user_id: payload.id, request_ip: req.ip });
 
     createRefreshTokenCookie(refreshToken, false, req, res);
 
@@ -73,7 +80,7 @@ export const posts = async (req: Request, res: Response): Promise<Response> => {
 
     const current_user_id = getCurrentUser(req)?.id;
     console.log({ current_user_id });
-    const posts = await get({
+    const posts = await postService.get({
         user_id,
         visibility: 'public',
         is_published: true,
@@ -120,4 +127,28 @@ export const resetPassword = async (req: Request, res: Response): Promise<Respon
     await userService.resetPasword(token_hash, password);
 
     return ok(res);
+}
+
+export const update = async (req: Request, res: Response): Promise<Response> => {
+    const { id } = req.params;
+    const user = getCurrentUser(req);
+    const { old_password, new_password } = req.body;
+
+    const result = await userService.update(id!, {
+        old_password,
+        new_password
+    }, {
+        actor: user
+    });
+
+    return result ? ok(res) : fail(res);
+}
+
+export const del = async (req: Request, res: Response): Promise<Response> => {
+    const { id } = req.params;
+    const { password, token } = req.body;
+    const user = getCurrentUser(req);
+    const result = await userService.del(id!, { password, token }, { actor: user });
+
+    return result.id ? ok(res) : fail(res);
 }

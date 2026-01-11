@@ -14,7 +14,7 @@ export default function TextField(props: TextFieldPropsCustom) {
     const isHelperTextCentered = inputTextAlign == 'center';
 
     return (
-        <Stack spacing={1} sx={{ '&>:not(style)~:not(style)': { mt: '4px' } }}>
+        <Stack gap={'4px'}>
             <Typography fontWeight="500">{label}</Typography>
             <MuiTextField
                 autoComplete="off"

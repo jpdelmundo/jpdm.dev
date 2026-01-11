@@ -60,6 +60,8 @@ function SignUpContent() {
         {step == 'create_user' && <SignUpForm onSubmit={submit} onSignUpSuccess={signUpSuccess} />}
 
         {step == 'update_email' && <>
+            <Typography variant="h5" fontWeight="bold" mb={1}>Secure your account?</Typography>
+            <Typography mb={1}>In case you forgot your password, we can send a recovery link to your email address.</Typography>
             <UpdateEmailForm onEmailSubmit={emailSubmit} onCodeSubmit={codeSubmit} onEmailConfirmed={emailConfirmed} />
             <Box textAlign="center" mt={2}><Link to="/">I'll do this later.</Link></Box>
         </>}

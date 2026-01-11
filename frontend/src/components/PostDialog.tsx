@@ -42,7 +42,7 @@ type PostDialogProps = {
 };
 
 export const PostDialog = ({ post, open, closeDialog, onCreated, onUpdated }: PostDialogProps) => {
-    console.log('PostDialog render', { post });
+    //console.log('PostDialog render', { post });
     const { register, handleSubmit, reset, formState: { errors, isValid }, resetField, setFocus, setValue } = useForm<FormInput>({
         defaultValues: {
             title: null
@@ -193,7 +193,6 @@ export const PostDialog = ({ post, open, closeDialog, onCreated, onUpdated }: Po
     }
 
     useEffect(() => {
-        console.log('PostDialog useEffect 1');
         if (!open) return;
 
         let cancelled = false;
@@ -278,7 +277,7 @@ export const PostDialog = ({ post, open, closeDialog, onCreated, onUpdated }: Po
 
     return (<>
         <Dialog
-            className={'create-post-dialog scrollbar-width-aware'}
+            className={'create-post-dialog'}
             open={open}
             onClose={closeDialog}
             scroll="paper"

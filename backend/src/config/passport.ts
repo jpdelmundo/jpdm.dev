@@ -25,6 +25,8 @@ passport.use(new GoogleStrategy({
         if (!user) {
             user = await userService.createUserFromSocialLogin(email, profile);
         } else {
+            userService.update(user.id, { deleted: null, deleted_at: null }, { isSystem: true });
+
             const userProfile = (await userProfileService.get({ user_id: user.id }))[0];
             const avatar_url = profile.photos?.[0]?.value;
             const first_name = profile.name?.givenName;

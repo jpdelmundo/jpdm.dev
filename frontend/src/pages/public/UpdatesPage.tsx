@@ -20,7 +20,7 @@ type ImageDialogState = {
 } | null;
 
 export const UpdatesPage = () => {
-    console.log('UpdatesPage render');
+    //console.log('UpdatesPage render');
     const ready = useAuthStore(s => s.ready);
     const user = useAuthStore(s => s.user);
     const [postDialogOpen, setPostDialogOpen] = useState(false);

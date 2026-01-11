@@ -1,4 +1,5 @@
 import { RefreshTokenColumns, type RefreshToken, type RefreshTokenId, type RefreshTokenInitializer, type RefreshTokenMutator } from '@shared/models/generated/RefreshToken';
+import type { UserId } from '@shared/models/generated/User';
 import { BaseRepository } from './BaseRepository';
 
 interface FindParams {
@@ -51,7 +52,7 @@ export class RefreshTokenRepository extends BaseRepository<RefreshToken> {
         return result.rows[0];
     }
 
-    async update(id: string, item: RefreshTokenMutator): Promise<RefreshToken> {
+    async update(id: RefreshTokenId, item: RefreshTokenMutator): Promise<RefreshToken> {
         const validColumns = new Set(RefreshTokenColumns as readonly string[]);
         const entries = Object.entries(item).filter(([key, value]) => validColumns.has(key) && value !== undefined && key != 'id');
         const set: string[] = [];
@@ -94,5 +95,29 @@ export class RefreshTokenRepository extends BaseRepository<RefreshToken> {
         if (!result.rows[0]) throw new Error('Delete failed');
 
         return result.rows[0];
+    }
+
+    async markUserRefreshTokensAsUsed(user_id: UserId) {
+        if (!user_id) throw new Error('Missing parameter: user_id');
+        const sql = `update refresh_tokens
+                    set used_at = now()
+                    where user_id = $1
+                    and used_at is null
+                    returning *`;
+        const result = await this.query<RefreshToken>(sql, [user_id]);
+
+        return result.rows;
+    }
+
+    async markUserRefreshTokensAsRevoked(user_id: UserId) {
+        if (!user_id) throw new Error('Missing parameter: user_id');
+        const sql = `update refresh_tokens
+                    set revoked_at = now()
+                    where user_id = $1
+                    and revoked_at is null
+                    returning *`;
+        const result = await this.query<RefreshToken>(sql, [user_id]);
+
+        return result.rows;
     }
 }

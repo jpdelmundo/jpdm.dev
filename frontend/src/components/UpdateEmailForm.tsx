@@ -8,26 +8,32 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import type { EmailFormInput } from '@shared/types/EmailFormInput';
 import { ErrorCode } from '@shared/types/ErrorCode';
 import { isValidEmail } from '@shared/utils/validation';
+import { CountdownTimer } from './CountdownTimer';
 
-export type FormInput = {
+type Props = {
+    onEmailSubmit: (formInput: EmailFormInput) => Promise<ApiResult<{ code: ErrorCode }>>,
+    onCodeSubmit: (formInput: EmailFormInput) => Promise<ApiResult<never>>,
+    onEmailConfirmed: (result: ApiResult<never>) => void,
     email?: string;
-    code?: string;
 };
 
-export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed }: {
-    onEmailSubmit: (formInput: FormInput) => Promise<ApiResult<{ code: ErrorCode }>>,
-    onCodeSubmit: (formInput: FormInput) => Promise<ApiResult<never>>,
-    onEmailConfirmed: (result: ApiResult<never>) => void
-}) {
-    const { register, handleSubmit, setError, formState: { errors } } = useForm<FormInput>();
+export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed, email }: Props) {
+    console.log('UpdateEmailForm render');
+    const { register, handleSubmit, setError, formState: { errors }, setValue } = useForm<EmailFormInput>({
+        defaultValues: {
+            email: email || ''
+        }
+    });
     const [errorMessage, setErrorMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [step, setStep] = useState<'email' | 'code'>('email');
     const inputRef = useRef<HTMLInputElement>(null);
+    const [cooldown, setCooldown] = useState<number | null>(null);
 
-    const submitHandler: SubmitHandler<FormInput> = async (data) => {
+    const submitHandler: SubmitHandler<EmailFormInput> = async (data) => {
         if (isLoading) return;
         inputRef.current?.blur();
         setErrorMessage('');
@@ -37,11 +43,19 @@ export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed 
             if (result.ok) {
                 setStep('code');
             } else {
-                if (result.error?.code == ErrorCode.ALREADY_USED) setError('email', { type: 'manual', message: 'Please use a different email' }, { shouldFocus: true });
-                setErrorMessage(getErrorMessage(result));
+                if (result.error?.code == ErrorCode.COOLDOWN) {
+                    const errorData = result.error?.data as { cooldown: number };
+                    setCooldown(errorData.cooldown);
+                } else if (result.error?.code == ErrorCode.ALREADY_USED) {
+                    setError('email', { type: 'manual', message: 'Please use a different email' }, { shouldFocus: true });
+                    setErrorMessage(getErrorMessage(result));
+                } else {
+                    setErrorMessage(getErrorMessage(result));
+                }
             }
         } else if (step == 'code') {
             const result = await onCodeSubmit(data);
+            console.log({ error: result.error, code: result.error?.code });
             if (result.ok) {
                 onEmailConfirmed(result);
             } else {
@@ -51,24 +65,29 @@ export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed 
         setIsLoading(false);
     }
 
+    const cooldownOnComplete = () => {
+        setCooldown(null);
+        console.log('setCooldown called');
+    }
+
     useEffect(() => {
         inputRef.current?.focus();
-    }, [step]);
+    }, [step, email]);
 
     return (
         <form noValidate onSubmit={handleSubmit(submitHandler)}>
             <Stack gap={2}>
                 {step == 'email' && (
                     <>
-                        <Typography variant="h5" fontWeight="bold" mb={1}>Secure your account?</Typography>
-                        <Typography mb={1}>In case you forgot your password, we can send a recovery link to your email address.</Typography>
+                        {/* <Typography variant="h5" fontWeight="bold" mb={1}>Secure your account?</Typography>
+                        <Typography mb={1}>In case you forgot your password, we can send a recovery link to your email address.</Typography> */}
                         <TextField inputRef={inputRef} key="email" label="Email"
                             {...register('email', {
                                 required: 'Please enter your email address',
                                 maxLength: { value: 255, message: 'Email length too long' },
                                 validate: (value?: string) => isValidEmail(value || '') || 'Please enter a valid email address'
                             })}
-                            placeholder=""
+                            placeholder="Enter your email address"
                             error={!!errors.email}
                             helperText={errors.email?.message}
                             fullWidth />
@@ -81,7 +100,7 @@ export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed 
 
                 {step == 'code' && (
                     <>
-                        <Typography variant="h5" fontWeight="bold" mb={1}>Code sent</Typography>
+                        <Typography fontWeight="bold" mb={1}>Code sent</Typography>
                         <Typography>Please enter the code we sent to your email:</Typography>
                         <TextField inputRef={inputRef} key="code" label=""
                             {...register('code', {
@@ -120,7 +139,8 @@ export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed 
                         </Button>
                     </>
                 )}
-                <Typography color="error" textAlign="center" minHeight="21px">{errorMessage}</Typography>
+                {cooldown && <Typography color="error" textAlign="center" minHeight="21px">Please wait <CountdownTimer endTimeMs={cooldown} onComplete={cooldownOnComplete} /> before sending a new code</Typography>}
+                {errorMessage && <Typography color="error" textAlign="center" minHeight="21px">{errorMessage}</Typography>}
             </Stack>
         </form>
     );

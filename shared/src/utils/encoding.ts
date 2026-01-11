@@ -25,7 +25,7 @@ export const jsonBase64Decode = (str: string) => {
 
     if (isNode) {
         //node
-        jsonString = Buffer.from(str, 'base64').toString('utf8');
+        jsonString = Buffer.from(str, 'base64').toString();
     } else {
         //browser
         const binary = atob(str);

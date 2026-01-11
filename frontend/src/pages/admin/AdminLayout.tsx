@@ -1,16 +1,32 @@
-import { Outlet } from "react-router-dom"
-import Link from '@mui/material/Link';
+import { UserPanel } from '@/components/UserPanel';
+import { Outlet, Link as RLink } from "react-router-dom";
 
-export const AdminLayout = ()=>{
-    return (<div>
-        <header>
-            Admin Page
-        </header>
-        <nav>
-            <Link href="/admin">Home</Link>
-        </nav>
-        <main>
-            <Outlet />
-        </main>
-    </div>)
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
+import Link from '@mui/material/Link';
+import Stack from '@mui/material/Stack';
+
+export const AdminLayout = () => {
+    return (
+        <>
+            <Container component="header" className="header-container" sx={{ height: '60px', zIndex: 1000 }}>
+                <Stack direction="row" alignItems="center" maxWidth="md" sx={{ margin: '0 auto' }}>
+                    <Box flex={1}>
+                        <Link
+                            component={RLink}
+                            to="/"
+                            sx={{ fontFamily: 'Anton SC, sans-serif', fontSize: '25px', color: 'black', textDecoration: 'none' }}
+                            tabIndex={-1}
+                        >JPDM</Link>
+                    </Box>
+                    <Box component="nav" display="flex" flex={1} justifyContent="flex-end">
+                        <UserPanel />
+                    </Box>
+                </Stack>
+            </Container>
+            <Container component={'main'} maxWidth="sm" sx={{ pt: '60px' }}>
+                <Outlet />
+            </Container >
+        </>
+    );
 }

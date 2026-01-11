@@ -1,9 +1,9 @@
 import { useState } from 'react';
 
-export type ValidationRuleFunction = (value: string) => string;
+export type ValidationRuleFunction = (value: unknown) => string;
 export type ValidationRules = Record<string, ValidationRuleFunction>;
 
-const validate = (fields: Record<string, string>, validationRules: ValidationRules) => {
+const validate = (fields: Record<string, unknown>, validationRules: ValidationRules) => {
     const newErrors: Record<string, string> = {};
     for (const [key, value] of Object.entries(fields)) {
         const rule = validationRules[key as keyof typeof validationRules];
@@ -15,7 +15,7 @@ const validate = (fields: Record<string, string>, validationRules: ValidationRul
     return newErrors;
 }
 
-export const useFormValidation = <T extends Record<string, any>>(validationRules: Record<keyof T, ValidationRuleFunction>) => {
+export const useFormValidation = <T extends Record<string, unknown>>(validationRules: Record<keyof T, ValidationRuleFunction>) => {
     const [errors, setErrors] = useState({});
 
     const validateForm = (values: T): boolean => {

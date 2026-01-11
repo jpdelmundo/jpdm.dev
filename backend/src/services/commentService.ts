@@ -23,7 +23,7 @@ type GetParams = {
 }
 
 type CreateParams = CommentInitializer;
-type UpdateParams = CommentMutator & { current_user_id?: UserId };
+type UpdateParams = CommentMutator;
 type DeleteParams = { is_admin?: boolean; current_user_id?: UserId };
 
 export const create = async (params: CreateParams): Promise<CommentDTO> => {
@@ -88,14 +88,14 @@ const getDisplayName = async (id: UserId): Promise<string> => {
     return result;
 }
 
-export const update = async (id: CommentId, params: UpdateParams) => {
-    const { comment, current_user_id } = params;
+export const update = async (id: CommentId, params: UpdateParams, options: Record<string, unknown>) => {
+    const { comment } = params;
+    const { current_user_id } = options;
     if (!id) throw new ServiceError('Missing parameter: id or post_id');
     if (!current_user_id) throw new ServiceError('Missing parameter: current_user_id');
 
     const repo = new CommentRepository();
     const updated = await repo.update(id, {
-        user_id: current_user_id,
         ...(comment && { comment })
     });
 

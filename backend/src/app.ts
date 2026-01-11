@@ -7,18 +7,13 @@ import cors from 'cors';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import https from 'https';
 import fs from 'node:fs';
-import { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 import passport from 'passport';
-import path from 'path';
 import { ServiceError } from './errors/ServiceError';
 import router from './router';
 import { router as passportRouter } from './routes/passportRouter';
 import { ApiError, error } from './utils/apiHelper';
 import './utils/logger';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 const app = express();
 const port = process.env.API_PORT;
@@ -54,8 +49,8 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 https.createServer({
-  key: fs.readFileSync(path.join(__dirname, '../../certs/jp-pc.home.arpa+3-key.pem')),
-  cert: fs.readFileSync(path.join(__dirname, '../../certs/jp-pc.home.arpa+3.pem')),
+  key: fs.readFileSync(resolve(process.cwd(), process.env.SSL_KEY_PATH!)),
+  cert: fs.readFileSync(resolve(process.cwd(), process.env.SSL_CERT_PATH!)),
 }, app)
   .listen(`4${port}`, () => {
     console.log(`NODE_ENV is: ${process.env.NODE_ENV}`);

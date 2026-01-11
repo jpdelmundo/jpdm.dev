@@ -93,7 +93,18 @@ export class UserRepository extends BaseRepository<User> {
         return result.rows[0];
     }
 
-    delete(id: UserId): Promise<User> {
-        throw new Error("Method not implemented.")
+    async delete(id: UserId, options: Record<string, unknown> = {}): Promise<User> {
+        if (!id) throw new Error('Missing parameter: id');
+        const permanent = !!options.permanent;
+
+        //TODO if permanent = true, delete dependents as well
+        const sql = permanent
+            ? `delete from users where id = $1 returning *`
+            : `update users set deleted = true, deleted_at = now() where id = $1 returning *`;
+
+        const result = await this.query(sql, [id]);
+        if (!result.rows[0]) throw new Error(`Delete failed. id: ${id}`);
+
+        return result.rows[0];
     }
 }

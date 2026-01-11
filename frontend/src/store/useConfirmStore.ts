@@ -15,7 +15,7 @@ type ConfirmState = {
     confirmText: string;
     cancelText: string;
     resolve: ((v: boolean) => void) | null;
-    confirm: (options?: ConfirmOptions) => Promise<boolean>;
+    confirm: (param?: ConfirmOptions | string) => Promise<boolean>;
     onConfirm: () => void;
     onCancel: () => void;
 };
@@ -28,16 +28,20 @@ export const useConfirmStore = create<ConfirmState>()((set, get) => ({
     cancelText: "Cancel",
     resolve: null,
 
-    confirm: (options) => {
+    confirm: (param) => {
         return new Promise<boolean>((resolve) => {
-            set({
+            const defaultParams = {
                 open: true,
-                title: options?.title ?? "Confirm",
-                message: options?.message ?? "",
-                confirmText: options?.confirmText ?? "OK",
-                cancelText: options?.cancelText ?? "Cancel",
-                resolve,
-            });
+                title: 'Confirm',
+                message: '',
+                confirmText: 'OK',
+                cancelText: 'Cancel'
+            };
+
+            if (typeof param == 'object')
+                set({ ...defaultParams, ...param, resolve });
+            else
+                set({ ...defaultParams, message: param, resolve });
         });
     },
 

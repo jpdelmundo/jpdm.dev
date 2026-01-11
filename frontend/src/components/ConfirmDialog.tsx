@@ -29,7 +29,6 @@ export function ConfirmDialog() {
         fullWidth
         disableScrollLock
         maxWidth="xs"
-        className="scrollbar-width-aware"
     >
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>{message}</DialogContent>

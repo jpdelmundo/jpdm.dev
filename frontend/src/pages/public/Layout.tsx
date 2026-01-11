@@ -9,13 +9,13 @@ import Stack from '@mui/material/Stack';
 export const Layout = () => {
     return (
         <>
-            <Container component="header" className="header-container scrollbar-width-aware" sx={{ height: '60px', zIndex: 1000 }}>
+            <Container component="header" className="header-container" sx={{ height: '60px', zIndex: 1000 }}>
                 <Stack direction="row" alignItems="center" maxWidth="md" sx={{ margin: '0 auto' }}>
                     <Box flex={1}>
                         <Link
                             component={RLink}
                             to="/"
-                            sx={{ fontFamily: 'Anton, sans-serif', fontSize: '25px', color: 'black', textDecoration: 'none' }}
+                            sx={{ fontFamily: 'Anton SC, sans-serif', fontSize: '25px', color: 'black', textDecoration: 'none' }}
                             tabIndex={-1}
                         >JPDM</Link>
                     </Box>

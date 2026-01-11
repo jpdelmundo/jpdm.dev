@@ -26,10 +26,10 @@ export const UserPanel = () => {
     const [userMenuOpen, setUserMenuOpen] = useState(false);
 
     const signOut = async () => {
+        userMenuOnClose();
         setLoading(true);
         await apiPost('/auth/signout', { fp: jsonBase64Encode(getFingerprint()) });
         setLoading(false);
-        userMenuOnClose();
         clearToken();
         navigate('/');
     }
@@ -43,6 +43,16 @@ export const UserPanel = () => {
     const userMenuOnClose = () => {
         setUserMenuOpen(false);
         setUserMenuAnchor(null);
+    }
+
+    const profileOnClick = () => {
+        userMenuOnClose();
+        navigate('/user/profile');
+    }
+
+    const accountOnClick = () => {
+        userMenuOnClose();
+        navigate('/user/account');
     }
 
     return (<>
@@ -100,8 +110,8 @@ export const UserPanel = () => {
                         }
                     }}
                 >
-                    <MenuItem>Settings</MenuItem>
-                    <MenuItem>Profile</MenuItem>
+                    <MenuItem onClick={profileOnClick}>Profile</MenuItem>
+                    <MenuItem onClick={accountOnClick}>Account & Security</MenuItem>
                     <MenuItem onClick={signOut}>Sign Out</MenuItem>
                 </Menu>
             </Grid>

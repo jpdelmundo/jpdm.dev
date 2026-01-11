@@ -74,6 +74,10 @@ export function SignUpForm({ onSubmit, onSignUpSuccess }: {
                     <TextField label="Username"
                         {...register('username', {
                             required: 'Username is required',
+                            pattern: {
+                                value: /^[a-zA-Z][a-zA-Z0-9]*(-[a-zA-Z0-9]+)?$/i,
+                                message: 'Usernames may contain letters and numbers, and may include a single optional dash (-).'
+                            },
                             minLength: { value: 2, message: 'Username length too short' },
                             maxLength: { value: 100, message: 'Username length too long' }
                         })}

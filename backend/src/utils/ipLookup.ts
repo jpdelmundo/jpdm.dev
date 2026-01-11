@@ -7,7 +7,7 @@ export const ipGeoLookup = async (ip: string) => {
     if (!ip) return location;
     try {
         if (ip) {
-            const dbPath = path.join(process.cwd(), 'db/GeoLite2-City.mmdb');
+            const dbPath = path.join(process.cwd(), process.env.GEOIP_DB_PATH!);
             const dbBuffer = fs.readFileSync(dbPath);
             const reader = await Reader.openBuffer(dbBuffer);
             const result = reader.city(ip);

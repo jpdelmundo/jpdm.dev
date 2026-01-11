@@ -45,6 +45,25 @@ export const getImageFileDetail = (file: File): Promise<ImageDetail> => {
     });
 }
 
+export const formatDateTime = (dateTime: Date | string, locale: string = navigator.language) => {
+    const dateFormatter = new Intl.DateTimeFormat(locale, {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+    });
+
+    const timeFormatter = new Intl.DateTimeFormat(locale, {
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    });
+
+    const dt = typeof dateTime == 'string' ? new Date(dateTime) : dateTime;
+
+    return `${dateFormatter.format(dt)} ${timeFormatter.format(dt)}`;
+}
+
 export const getRelativeTime = (dateTime: string, locale: string = navigator.language) => {
     const date = new Date();
     const past = new Date(dateTime);
@@ -122,7 +141,7 @@ export async function copyToClipboard(text: string) {
 
 export function scrollbarWidthAware(apply: boolean) {
     if (apply) {
-        const hasScrollbar = document.body.scrollHeight > window.innerHeight;
+        const hasScrollbar = document.body.scrollHeight > window.innerHeight - 60; //60 is header height
         if (hasScrollbar) {
             const scrollbarWidth = window.innerWidth - document.body.clientWidth;
             //document.body.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);

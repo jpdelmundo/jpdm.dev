@@ -92,7 +92,7 @@ export async function apiGet<T>(url: string, params?: ApiGetParams) {
     }
 
     let requestUrl = `${baseUrl}${url}`;
-    requestUrl = getParams ? `${requestUrl}?${getParams.toString()}` : requestUrl;
+    requestUrl = getParams.size > 0 ? `${requestUrl}?${getParams.toString()}` : requestUrl;
     const init = { method: 'get', credentials: 'include' as RequestCredentials };
 
     return apiRequest<T>(requestUrl, init);

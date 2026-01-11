@@ -40,10 +40,6 @@ export const theme = createTheme({
                         '& body': {
                             overflowY: 'scroll'
                         }
-                        // marginRight: 'var(--scrollbar-width, 0px)',
-                        // '& .scrollbar-width-aware': {
-                        //     marginRight: 'var(--scrollbar-width, 0px)'
-                        // }
                     },
                     paddingBottom: '50px'
                 },
@@ -55,6 +51,15 @@ export const theme = createTheme({
                 },
                 '.grecaptcha-badge': {
                     display: 'none'
+                },
+                '.bordered-box': {
+                    border: 'solid 1px #cccccc',
+                    borderRadius: '16px',
+                },
+                '.inline-flex-box': {
+                    display: 'inline-flex',
+                    gap: '8px',
+                    alignItems: 'center'
                 }
             }
         },
@@ -111,11 +116,17 @@ export const theme = createTheme({
         },
         MuiButton: {
             styleOverrides: {
+                containedPrimary: {
+                    backgroundColor: '#1b54a5ff',
+                    '&:hover': {
+                        backgroundColor: '#2e70ffff'
+                    }
+                },
                 root: ({ theme }) => ({
                     fontSize: 15,
                     textTransform: 'none',
                     boxShadow: 'none',
-                    '&:hover': { boxShadow: 'none' },
+                    '&:hover': { boxShadow: 'none', },
                     '&:active': { boxShadow: 'none' },
                     '&:focus': { boxShadow: 'none' },
                     '&.Mui-disabled': {
@@ -176,10 +187,7 @@ export const theme = createTheme({
                         }
                     },
                     '&.post': {
-                        // '&:first-of-type': {
-                        //     marginTop: 0
-                        // },
-                        boxShadow: '0 1px 5px -4px #00000066',
+                        boxShadow: '0 4px 1px -2px #00000022',
                         position: 'relative',
                         background: 'none',
                         '&::before': {
@@ -275,9 +283,10 @@ export const theme = createTheme({
                             '& .MuiInputBase-root': {
                                 fontSize: '14px',
                                 borderRadius: '16px',
-                                backgroundColor: '#eeeeeeff',
                                 paddingRight: 0,
                                 marginTop: '10px',
+                                backgroundColor: '#ffffff',
+                                border: 'solid 1px #dddddd',
                                 '&.Mui-focused': {
                                     transition: 'none',
                                     boxShadow: 'none',
@@ -288,17 +297,12 @@ export const theme = createTheme({
                                         padding: '8px 12px'
                                     }
                                 },
-                                // '& .MuiInputBase-input, .MuiInputBase-inputMultiline': {
-                                //     padding: '4px 12px',
-                                //     lineHeight: '20px',
-                                //     height: '36px'
-                                // },
                                 '& .MuiInputBase-input::placeholder': {
                                     color: '#555555',
                                     opacity: 1
                                 },
                                 '& .MuiOutlinedInput-notchedOutline': {
-                                    borderColor: '#ededed'
+                                    border: 'none'
                                 }
                             }
                         },
@@ -311,12 +315,13 @@ export const theme = createTheme({
                             '& .list': {
                                 '& .show-more': {
                                     '&:hover': {
-                                        backgroundColor: '#aaaaaa88',
+                                        backgroundColor: '#ffffff',
                                     },
                                     fontSize: '12px',
                                     margin: '0 auto',
-                                    backgroundColor: '#dddddd88',
-                                    color: theme.palette.getContrastText('#dddddd88')
+                                    backgroundColor: '#f8f8f8',
+                                    border: 'solid 1px #dddddd',
+                                    color: theme.palette.getContrastText('#f8f8f8')
                                 }
                             }
                         },
@@ -345,7 +350,7 @@ export const theme = createTheme({
                                     fontSize: '12px'
                                 },
                                 maxWidth: '80%',
-                                border: 'solid 1px #eeeeee'
+                                border: 'solid 1px #dddddd'
                             },
                             '& .date': {
                                 padding: '6px 12px'
@@ -373,6 +378,27 @@ export const theme = createTheme({
                                 }
                             }
                         }
+                    },
+                    '&.page': {
+                        padding: '25px',
+                        borderRadius: '16px',
+                        position: 'relative',
+                        background: 'none',
+                        '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            //backdropFilter: 'saturate(1.8) blur(20px)',
+                            backgroundColor: '#ffffffcc',
+
+                            // backgroundColor: '#ffffff',
+                            zIndex: -1,
+                            borderRadius: '16px',
+                            overflow: 'hidden'
+                        },
                     }
                 })
             }

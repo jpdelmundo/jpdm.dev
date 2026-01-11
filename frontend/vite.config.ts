@@ -27,6 +27,10 @@ export default defineConfig({
     }
   },
   server: {
-    allowedHosts: ['jp-pc.home.arpa']
+    allowedHosts: ['jp-pc.home.arpa'],
+    hmr: {
+      host: 'jp-pc.home.arpa',
+      port: 5173
+    }
   }
 });

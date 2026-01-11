@@ -10,7 +10,7 @@ import type { AuthorizedRequest } from 'src/types/AuthorizedRequest';
 import { clearRefreshTokenCookie, createRefreshTokenCookie } from '../services/authService';
 import * as userService from '../services/userService';
 import { fail, ok } from '../utils/apiHelper';
-import { generateAccessToken } from '../utils/auth';
+import { generateJwt } from '../utils/auth';
 
 interface LoginParams {
     username: string;
@@ -24,19 +24,19 @@ export const signIn = async (req: Request, res: Response): Promise<Response> => 
 
     if (await userService.isValidCredentials(username, password)) {
         //get user
-        const tokenUserData = await userService.getTokenData({ username });
-        if (!tokenUserData) throw new UnexpectedError();
+        const payload = await userService.getTokenData({ username });
+        if (!payload) throw new UnexpectedError();
 
         //create refresh token and jwt
         const { device_id, client_tz, screen_width, screen_height, cpu_count } = jsonBase64Decode(fp) as DeviceFingerprint;
-        const accessToken = generateAccessToken(tokenUserData);
+        const accessToken = generateJwt(payload);
         const refreshToken = await userService.createRefreshToken({
             device_id,
             client_tz,
             screen_width,
             screen_height,
             cpu_count,
-            user_id: tokenUserData.id,
+            user_id: payload.id,
             ...(req.ip && { request_ip: req.ip }),
             remember
         });
@@ -55,7 +55,7 @@ export const signOut = async (req: Request, res: Response): Promise<Response> =>
     if (fp) {
         const fingerprintObj = jsonBase64Decode(fp) as DeviceFingerprint;
         const deviceId = fingerprintObj.device_id;
-        userService.signOutUser(authReq.user.id, deviceId);
+        userService.signOut(authReq.user.id, deviceId);
     }
 
     clearRefreshTokenCookie(req, res);
@@ -115,10 +115,10 @@ export const refreshToken = async (req: Request, res: Response): Promise<Respons
     try {
         //valid create new access token
         //get user
-        const user = await userService.getTokenData({ user_id: refreshToken.user_id });
+        const payload = await userService.getTokenData({ user_id: refreshToken.user_id });
         //console.log({ user });
         //create new access token
-        const newAccessToken = generateAccessToken(user);
+        const newAccessToken = generateJwt(payload);
         //console.log({ newAccessToken });
         //create new refresh token only if the refresh token used is more than 1 hour old
         //if (Date.now() - refreshToken.created_at.getTime() > 3600000) {
@@ -129,7 +129,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<Respons
             screen_width,
             screen_height,
             cpu_count,
-            user_id: user.id,
+            user_id: payload.id,
             request_ip: req.ip || null,
             previous_refresh_token_id: refreshToken.id,
             remember: refreshToken.remember
@@ -148,8 +148,8 @@ export const refreshToken = async (req: Request, res: Response): Promise<Respons
 }
 
 export const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
-    const { fp } = req.query;
-    const customData = { fp, ip: req.ip };
+    const { fp, intent } = req.query;
+    const customData = { fp, ip: req.ip, intent };
     const state = jsonBase64Encode(customData);
 
     passport.authenticate('google', {
@@ -162,32 +162,55 @@ export const googleAuth = async (req: Request, res: Response, next: NextFunction
 
 export const googleAuthCallback = async (req: Request, res: Response, next: NextFunction) => {
     const { state } = req.query;
+    const redirectUrl = new URL(`${process.env.SITE_URL}/auth/callback`);
+    let intent: string | undefined, customData;
     passport.authenticate('google', { session: false }, async (err: Error, user: User, info: unknown) => {
-        console.log({ state, err, user, info });
-
-        const redirectUrl = new URL(`${process.env.SITE_URL}/auth/callback`);
         try {
-            if (err) throw err;
-            if (!user) throw new Error('Authentication failed');
-            if (!state) throw new Error('Invalid authentication callback state');
-            const customData = jsonBase64Decode(state as string);
-            const { fp, ip } = customData;
-            if (!fp || !ip) throw new Error('Missing authentication parameters in state');
-
-            //create jwt and refresh token
-            const tokenData = await userService.getTokenData({ user_id: user.id });
-            if (!tokenData) throw new Error('Cannot get token data');
-
-            const access_token = generateAccessToken(tokenData);
-            const refreshToken = await userService.createRefreshToken({ ...jsonBase64Decode(fp), user_id: tokenData.id, request_ip: ip });
-
-            createRefreshTokenCookie(refreshToken, true, req, res);
-
-            redirectUrl.searchParams.set('token', access_token);
-            res.redirect(redirectUrl.toString());
+            customData = jsonBase64Decode(state as string);
+            intent = customData.intent;
         } catch (error) {
             redirectUrl.searchParams.set('error', error instanceof Error ? error.message : 'Authentication failed');
             res.redirect(redirectUrl.toString());
+            return;
+        }
+
+        switch (intent) {
+            //only return a delete token to a popup window
+            case 'get_delete_token':
+                try {
+                    const payload = await userService.getTokenData({ user_id: user.id });
+                    const token = generateJwt({ ...payload, scope: 'delete_account' });
+                    res.send(`<script>
+                        window.opener.postMessage({
+                            token: '${token}'
+                        }, '${process.env.SITE_URL}');
+                        window.close();
+                    </script>`);
+                } catch (error) {
+                    res.send(`<script>
+                        window.opener.postMessage({
+                            error: '${(error as Error).message}'
+                        }, '${process.env.SITE_URL}');
+                        window.close();
+                    </script>`);
+                }
+                break;
+            //oauth login
+            default:
+                try {
+                    const { fp, ip } = customData;
+                    const payload = await userService.getTokenData({ user_id: user.id });
+                    const access_token = generateJwt(payload);
+                    const refreshToken = await userService.createRefreshToken({ ...jsonBase64Decode(fp), user_id: payload.id, request_ip: ip });
+
+                    createRefreshTokenCookie(refreshToken, true, req, res);
+
+                    redirectUrl.searchParams.set('token', access_token);
+                    res.redirect(redirectUrl.toString());
+                } catch (error) {
+                    redirectUrl.searchParams.set('error', error instanceof Error ? error.message : 'Authentication failed');
+                    res.redirect(redirectUrl.toString());
+                }
         }
     })(req, res, next);
 }
@@ -207,33 +230,55 @@ export const facebookAuth = async (req: Request, res: Response, next: NextFuncti
 
 export const facebookAuthCallback = async (req: Request, res: Response, next: NextFunction) => {
     const { state } = req.query;
-    passport.authenticate('facebook', { session: false }, async (err: Error, user, info: unknown) => {
-        //console.log({ state, err, user, info });
-
-        const redirectUrl = new URL(`${process.env.SITE_URL}/auth/callback`);
+    const redirectUrl = new URL(`${process.env.SITE_URL}/auth/callback`);
+    let intent: string | undefined, customData;
+    passport.authenticate('facebook', { session: false }, async (err: Error, user: User, info: unknown) => {
         try {
-            if (err) throw err;
-            if (!user) throw new Error('Authentication failed');
-            if (!state) throw new Error('Invalid authentication callback state');
-            const customData = jsonBase64Decode(state as string);
-            const { fp, ip } = customData;
-            if (!fp || !ip) throw new Error('Missing authentication parameters in state');
-
-            //create jwt and refresh token
-            const tokenData = await userService.getTokenData({ user_id: user.id });
-            if (!tokenData) throw new Error('Cannot get token data');
-
-            const access_token = generateAccessToken(tokenData);
-            const refreshToken = await userService.createRefreshToken({ ...jsonBase64Decode(fp), user_id: tokenData.id, request_ip: ip });
-
-            createRefreshTokenCookie(refreshToken, true, req, res);
-
-            redirectUrl.searchParams.set('token', access_token);
-            res.redirect(redirectUrl.toString());
+            customData = jsonBase64Decode(state as string);
+            intent = customData.intent;
         } catch (error) {
             redirectUrl.searchParams.set('error', error instanceof Error ? error.message : 'Authentication failed');
             res.redirect(redirectUrl.toString());
+            return;
         }
 
+        switch (intent) {
+            //only return a delete token to a popup window
+            case 'get_delete_token':
+                try {
+                    const payload = await userService.getTokenData({ user_id: user.id });
+                    const token = generateJwt({ ...payload, scope: 'delete_account' });
+                    res.send(`<script>
+                        window.opener.postMessage({
+                            token: '${token}'
+                        }, '${process.env.SITE_URL}');
+                        window.close();
+                    </script>`);
+                } catch (error) {
+                    res.send(`<script>
+                        window.opener.postMessage({
+                            error: '${(error as Error).message}'
+                        }, '${process.env.SITE_URL}');
+                        window.close();
+                    </script>`);
+                }
+                break;
+            //oauth login
+            default:
+                try {
+                    const { fp, ip } = customData;
+                    const payload = await userService.getTokenData({ user_id: user.id });
+                    const access_token = generateJwt(payload);
+                    const refreshToken = await userService.createRefreshToken({ ...jsonBase64Decode(fp), user_id: payload.id, request_ip: ip });
+
+                    createRefreshTokenCookie(refreshToken, true, req, res);
+
+                    redirectUrl.searchParams.set('token', access_token);
+                    res.redirect(redirectUrl.toString());
+                } catch (error) {
+                    redirectUrl.searchParams.set('error', error instanceof Error ? error.message : 'Authentication failed');
+                    res.redirect(redirectUrl.toString());
+                }
+        }
     })(req, res, next);
 }

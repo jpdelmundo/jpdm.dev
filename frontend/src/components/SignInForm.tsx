@@ -1,4 +1,3 @@
-import facebookButtonImage from '@/assets/images/signin-facebook.svg';
 import googleButtonImage from '@/assets/images/signin-google.svg';
 import { useFormValidation, type ValidationRuleFunction } from '@/hooks/useFormValidation';
 import { getFingerprint } from '@/utils/device';
@@ -89,12 +88,12 @@ export function SignInForm({ onSubmit, onSignInSuccess: onSignInSuccess }: {
                     <Stack>
                         <Link
                             href={`${import.meta.env.VITE_BACKEND_BASE_URL}/auth/google?fp=${jsonBase64Encode(getFingerprint())}`}>
-                            <img src={googleButtonImage} style={{ width: '100%' }} />
+                            <img src={googleButtonImage} style={{ width: '100%' }} alt="Sign In with Google" />
                         </Link>
-                        <Link
+                        {/* <Link
                             href={`${import.meta.env.VITE_BACKEND_BASE_URL}/auth/facebook?fp=${jsonBase64Encode(getFingerprint())}`}>
                             <img src={facebookButtonImage} style={{ width: '100%' }} />
-                        </Link>
+                        </Link> */}
                     </Stack>
                     <Divider>OR</Divider>
                     <TextField name="username"

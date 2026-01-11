@@ -2,7 +2,7 @@ export const getEmailUsername = (email: string) => {
     return email.split('@')[0] ?? '';
 }
 
-export const getRandomUsername = ({ numberPart = true }: { numberPart?: boolean } = {}) => {
+export const generateRandomUsername = ({ numberPart = true }: { numberPart?: boolean } = {}) => {
     const namePart1 = [
         'Mystic', 'Cosmic', 'Quantum', 'Digital', 'Virtual', 'Neon', 'Phantom',
         'Shadow', 'Silver', 'Golden', 'Crimson', 'Azure', 'Emerald', 'Arctic',

@@ -37,10 +37,7 @@ export const update = async (req: Request, res: Response): Promise<Response> => 
     const { comment } = req.body;
     const current_user_id = getCurrentUser(req)?.id;
 
-    const result = await commentService.update(id!, {
-        ...(current_user_id && { current_user_id }),
-        comment
-    });
+    const result = await commentService.update(id!, { comment }, { current_user_id });
     if (!result.id) return fail(res);
 
     return ok(res, result);
@@ -53,7 +50,6 @@ export const del = async (req: Request, res: Response): Promise<Response> => {
     const result = await commentService.del(id!, {
         current_user_id: current_user_id!
     });
-    if (!result.id) return fail(res);
 
-    return ok(res);
+    return result.id ? ok(res) : fail(res);
 }

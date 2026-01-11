@@ -1,18 +1,23 @@
 import { ServiceError } from '@/errors/ServiceError';
 import { PasswordResetRepository } from '@/repositories/PasswordResetRepository';
 import * as userProfileService from '@/services/userProfileService';
+import type { FindParamsBase } from '@/types/FindParams';
 import { randomString } from '@/utils/helper';
+import type { MeDTO } from '@shared/models/dto/MeDTO';
 import type UserWithRoles from '@shared/models/extensions/UserWithRoles';
 import type { RefreshTokenInitializer } from '@shared/models/generated/RefreshToken';
-import type { User, UserId, UserInitializer } from '@shared/models/generated/User';
+import type { User, UserId, UserInitializer, UserMutator } from '@shared/models/generated/User';
 import type { UserProfile } from '@shared/models/generated/UserProfile';
 import type { UserRole } from '@shared/models/generated/UserRole';
 import { ErrorCode } from '@shared/types/ErrorCode';
-import type { TokenUserData } from '@shared/types/Jwt';
+import type { Jwt, PayloadData } from '@shared/types/Jwt';
+import type { OrderDirection } from '@shared/types/OrderDirection';
+import type { UserIdentity } from '@shared/types/User';
 import { jsonBase64Decode } from '@shared/utils/encoding';
-import { getEmailUsername, getRandomUsername } from '@shared/utils/username';
+import { generateRandomUsername, getEmailUsername } from '@shared/utils/username';
 import { isValidEmail, validatePassword } from '@shared/utils/validation';
 import * as bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import type { Profile as FacebookProfile } from 'passport-facebook';
 import type { Profile as GoogleProfile } from 'passport-google-oauth20';
 import { validate } from 'uuid';
@@ -23,12 +28,36 @@ import { UserRoleRepository } from '../repositories/UserRoleRepository';
 import { ApiError } from '../utils/apiHelper';
 import { mail } from '../utils/mailer';
 
+type GetParams = {
+    current_user_id?: UserId;
+    id?: UserId;
+    page_num?: number;
+    page_size?: number;
+    order_by?: string;
+    order_dir?: OrderDirection;
+}
+
+type UpdateParams = UserMutator & {
+    old_password?: string;
+    new_password?: string;
+};
+
+type DeleteParams = {
+    password?: string;
+    token?: string;
+};
+
+type Context = {
+    isSystem?: boolean;
+    actor?: UserIdentity;
+}
+
 export const isValidCredentials = async (username: string, password: string): Promise<boolean> => {
     const user = await findByUsernameOrEmail(username);
     return bcrypt.compare(password, user?.password || '');
 }
 
-export const getTokenData = async ({ user_id, username, email }: { user_id?: string; username?: string; email?: string }): Promise<TokenUserData> => {
+export const getTokenData = async ({ user_id, username, email }: { user_id?: string; username?: string; email?: string }): Promise<PayloadData> => {
     let user;
     if (user_id) {
         const repo = new UserRepository();
@@ -133,6 +162,7 @@ export const isAllowedToEmailConfirmCode = async (userId: UserId) => {
     const timeSinceLastSent = Date.now() - user.email_confirm_code_last_sent_at.getTime();
 
     //still in cooldown: not allowed
+    //console.log({ timeSinceLastSent, resendCooldown });
     if (timeSinceLastSent < resendCooldown) return { allowed: false, reason: 'cooldown', cooldown: resendCooldown - timeSinceLastSent };
 
     //already 5 emails sent in the last hour: not allowed
@@ -149,21 +179,25 @@ export const isAllowedToEmailConfirmCode = async (userId: UserId) => {
 
 export const sendEmailConfirmCode = async (userId: UserId, email: string) => {
     //check if email is used
-    if (await isEmailAlreadyUsed(email)) throw new ServiceError('The email address is already used in another account.', ErrorCode.ALREADY_USED, { param: 'email' });
-    //not existing, create code, send email
+    const repo = new UserRepository();
+    const emailCheckResult = (await repo.find({ email }))[0];
+    if (emailCheckResult?.email_confirmed) {
+        if (emailCheckResult.id == userId) throw new ServiceError('You are already using this email.');
+        throw new ServiceError('The email address is already used in another account.', ErrorCode.ALREADY_USED, { param: 'email' });
+    }
 
+    //not existing, create code, send email
     const checkAllowed = await isAllowedToEmailConfirmCode(userId);
     if (!checkAllowed.allowed) {
         if (checkAllowed.reason == 'max_sent_limit') throw new ServiceError('Request limit reached. Please try again after 1 hour.', ErrorCode.MAX_SENT_LIMIT);
-        if (checkAllowed.reason == 'cooldown') throw new ServiceError('Still on cooldown...', ErrorCode.COOLDOWN, { cooldown: checkAllowed.cooldown });
+        if (checkAllowed.reason == 'cooldown') throw new ServiceError(`Please wait a couple of minutes to send another confirmation code.`, ErrorCode.COOLDOWN, { cooldown: checkAllowed.cooldown });
         throw new Error();
     }
 
-    //generate
-    const repo = new UserRepository();
+    //generate    
     const code = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
-    const result = await repo.update(userId, { unconfirmed_email: email, email_confirm_code: code });
-    if (result.email_confirm_code != code) return false;
+    const updatedUser = await repo.update(userId, { unconfirmed_email: email, email_confirm_code: code });
+    if (updatedUser.email_confirm_code != code) return false;
 
     const mailResult = await mail({
         from: 'jpdm.dev <noreply@jpdm.dev>',
@@ -174,6 +208,13 @@ export const sendEmailConfirmCode = async (userId: UserId, email: string) => {
 
     //TODO add logging here to monitor failed emails?
     if (!mailResult || mailResult.rejected.length > 0 || !mailResult.response) throw new Error(`Problem generating/sending email confirm code for user : ${userId}`);
+
+    //update first/last sent date (for rate limiting)
+    await repo.update(userId, {
+        ...(!updatedUser.email_confirm_code_first_sent_at && { email_confirm_code_first_sent_at: new Date() }),
+        email_confirm_code_last_sent_at: new Date(),
+        email_confirm_code_num_sent: updatedUser.email_confirm_code_num_sent + 1
+    });
 
     return mailResult;
 }
@@ -203,19 +244,20 @@ export const confirmEmailCode = async (userId: UserId, code: string) => {
     return true;
 }
 
-export const signOutUser = async (userId: UserId, deviceId: string) => {
-    if (!deviceId) return
+export const signOut = async (userId: UserId, deviceId: string) => {
+    if (!deviceId) return;
     const repo = new RefreshTokenRepository();
     const refreshTokens = await repo.find({ deviceId, userId });
     refreshTokens.forEach(v => {
         //repo.delete(v.id);
         if (!v.is_used) repo.query(`update refresh_tokens
-                                    set used_at = now()
+                                    set revoked_at = now()
                                     where id = $1`, [v.id]);
     });
 }
 
 export const findById = async (id: string): Promise<User | null> => {
+    if (!id) throw new ServiceError(`Missing or empty parameter: id`);
     const repo = new UserRepository();
     const result = await repo.find({ id });
     return result[0] || null;
@@ -244,9 +286,9 @@ export const recoverAccount = async (email: string, fingerprint: string) => {
         throw new Error('isAllowedToSendRecoveryEmail not allowed for some reason');
     }
 
-    const repo = new PasswordResetRepository();
+    const passwordResetRepo = new PasswordResetRepository();
     const token_hash = randomString(64);
-    const result = await repo.create({ user_id: user.id, token_hash });
+    const result = await passwordResetRepo.create({ user_id: user.id, token_hash });
     if (!result) throw new ServiceError('Failed creating password reset.');
 
     const mailResult = await mail({
@@ -261,7 +303,7 @@ Please disregard if you did not make this request.`
     });
 
     //TODO add logging here to monitor failed emails?
-    if (!mailResult || mailResult.rejected.length > 0 || !mailResult.response) throw new Error(`Problem generating/sending email confirm code for user : ${userId}`);
+    if (!mailResult || mailResult.rejected.length > 0 || !mailResult.response) throw new Error(`Problem generating/sending email confirm code for user : ${user.id}`);
 
     return mailResult;
 }
@@ -366,7 +408,7 @@ export const createUserFromSocialLogin = async (email: string, profile: GooglePr
 export const createUserFromFacebookLogin = async (id: string, profile: FacebookProfile) => {
     if (!id) throw new Error('Missing or empty parameter: id');
 
-    let newUsername = profile.name?.givenName && profile.name.givenName.length >= 2 ? profile.name.givenName : getRandomUsername({ numberPart: false });
+    let newUsername = profile.name?.givenName && profile.name.givenName.length >= 2 ? profile.name.givenName : generateRandomUsername({ numberPart: false });
     let findUsername = await findByUsername(newUsername);
 
     let attempt = 0;
@@ -402,4 +444,101 @@ export const findByFacebookId = async (id: string): Promise<User | null> => {
     const repo = new UserRepository();
     const result = await repo.find({ facebook_id: id });
     return result[0] || null;
+}
+
+export const get = async <P extends FindParamsBase>(params: P) => {
+    const { id, page_num, page_size, order_by, order_dir } = params as GetParams;
+    const repo = new UserRepository();
+
+    const findParams = {
+        ...(id && { id }),
+        ...(page_num && { page_num }),
+        ...(page_size && { page_size }),
+        ...(order_by && { order_by }),
+        ...(order_dir && { order_dir }),
+    } as P;
+
+    const findResult = await repo.find(findParams);
+
+    // const items = ('page_items' in findResult ? findResult.page_items : findResult) as User[];
+    // for (const item of items) {
+    //     item.display_name = await getDisplayName(item.user_id);
+    // }
+
+    return findResult;
+}
+
+export const update = async (id: UserId, params: UpdateParams, context: Context) => {
+    const { old_password, new_password, deleted, deleted_at } = params;
+    const { actor, isSystem } = context;
+    if (!id) throw new ServiceError('Missing parameter: id');
+    if (!isSystem && !actor?.roles.includes('admin') && actor?.id != id) throw new ServiceError('Unauthorized request');
+
+    if (old_password && new_password) {
+        const user = await findById(id);
+        if (!user?.id) throw new ServiceError('User not found.');
+        if (!await bcrypt.compare(old_password, user.password || '')) throw new ServiceError('Incorrect old password.', ErrorCode.INVALID_CREDENTIALS);
+        if (await bcrypt.compare(new_password, user.password || '')) throw new ServiceError('New password is the same as the old password.', ErrorCode.INVALID_CREDENTIALS);
+    }
+
+    const repo = new UserRepository();
+    const updated = await repo.update(id, {
+        ...(new_password && { password: await bcrypt.hash(new_password, 12), password_updated_at: new Date() }),
+        ...('deleted' in params && { deleted }),
+        ...(deleted_at && { deleted_at })
+    });
+
+    const result = (await get({ id: updated?.id }))[0];
+    if (!result?.id) throw new ServiceError('User not found.');
+
+    if (new_password) {
+        const refreshTokenRepo = new RefreshTokenRepository();
+        await refreshTokenRepo.markUserRefreshTokensAsUsed(result.id);
+    }
+
+    return result;
+}
+
+export const del = async (id: UserId, params: DeleteParams, context: Context) => {
+    const { password, token } = params;
+    const { actor, isSystem } = context;
+
+    if (!isSystem && !actor?.roles.includes('admin')) {
+        if (!password && !token) throw new ServiceError('Missing or empty require parameter: password or token');
+        if (actor?.id != id) throw new ServiceError('Unauthorized request');
+    }
+
+    const user = await findById(id);
+    if (!user) throw new Error(`User not found. id: ${id}`);
+    if (password && !await bcrypt.compare(password, user.password || '')) throw new ServiceError('Incorrect password', ErrorCode.INVALID_CREDENTIALS);
+    if (token) {
+        const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as Jwt;
+        if (!decoded.id || decoded.scope != 'delete_account') throw new ServiceError('Invalid delete token');
+        if (decoded.id != id) throw new ServiceError('Unauthorized request');
+    }
+
+    const repo = new UserRepository();
+    const deleted = await repo.delete(id);
+    if (!deleted?.id) throw new Error(`Failed deleting user. id: ${id}`);
+
+    new RefreshTokenRepository().markUserRefreshTokensAsRevoked(id);
+
+    return deleted;
+}
+
+export const toMe = (user: User | null): MeDTO => {
+    if (!user) throw new ServiceError(`Missing or empty parameter: user`);
+
+    const result: MeDTO = {
+        id: user.id,
+        username: user.username,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+        email: user.email,
+        has_password: !!user.password,
+        social_login: user.google_id ? 'google' : (user.facebook_id ? 'facebook' : null),
+        password_updated_at: user.password_updated_at
+    }
+
+    return result;
 }

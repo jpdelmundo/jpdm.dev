@@ -39,7 +39,7 @@ type PostProps = {
 };
 
 export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProps) => {
-    console.log('Post render');
+    //console.log('Post render');
     const { id, title, content, images, display_name, created_at, comments_count, views, likes, is_liked } = post;
     const [commentsOpen, setCommentsOpen] = useState(false);
     const [commentsCount, setCommentsCount] = useState(comments_count);

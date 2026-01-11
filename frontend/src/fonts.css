@@ -1,4 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
+@font-face {
+    font-display: swap;
+    font-family: 'Anton SC';
+    font-style: normal;
+    font-weight: 400;
+    src: url('./assets/fonts/anton-sc-v1-latin-regular.woff2');
+}
 
 /* geist-regular - latin */
 @font-face {
