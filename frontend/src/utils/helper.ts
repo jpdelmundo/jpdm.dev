@@ -45,7 +45,7 @@ export const getImageFileDetail = (file: File): Promise<ImageDetail> => {
     });
 }
 
-export const formatDateTime = (dateTime: Date | string, locale: string = navigator.language) => {
+export const formatDateTime = (dateTime: Date | string, locale: string = navigator.language, options?: { date_only?: boolean; time_only?: boolean; }) => {
     const dateFormatter = new Intl.DateTimeFormat(locale, {
         month: 'long',
         day: 'numeric',
@@ -60,6 +60,9 @@ export const formatDateTime = (dateTime: Date | string, locale: string = navigat
     });
 
     const dt = typeof dateTime == 'string' ? new Date(dateTime) : dateTime;
+    //console.log({ dateTime, t: typeof dateTime });
+    if (options?.date_only) return dateFormatter.format(dt);
+    if (options?.time_only) return timeFormatter.format(dt);
 
     return `${dateFormatter.format(dt)} ${timeFormatter.format(dt)}`;
 }

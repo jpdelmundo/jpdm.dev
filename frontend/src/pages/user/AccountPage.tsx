@@ -117,7 +117,7 @@ export const AccountPage = () => {
 
     return <Paper elevation={0} className="page">
         <Box mb={2}>
-            <Typography variant="h5" fontWeight={'bold'}>Account</Typography>
+            <Typography variant="h5" fontWeight={'bold'}>Account & Security</Typography>
             <Typography fontSize={'small'} color="textDisabled">Created on {formatDateTime(data.created_at)}</Typography>
         </Box>
         <Typography>Email</Typography>

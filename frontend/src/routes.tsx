@@ -4,7 +4,6 @@ import { AdminHome } from './pages/admin/AdminHome';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { Users } from './pages/admin/Users';
 import { About } from './pages/public/About';
-import { AccountPage } from './pages/public/AccountPage';
 import { AuthCallbackPage } from './pages/public/AuthCallback';
 import { ForgotPasswordPage } from './pages/public/ForgotPasswordPage';
 import { Home } from './pages/public/Home';
@@ -12,12 +11,13 @@ import { ImagePage } from './pages/public/ImagePage';
 import { Layout } from './pages/public/Layout';
 import { NotFoundPage } from './pages/public/NotFoundPage';
 import { PostPage } from './pages/public/PostPage';
-import { ProfilePage } from './pages/public/ProfilePage';
 import { ResetPasswordPage } from './pages/public/ResetPasswordPage';
 import { SignInPage } from './pages/public/SignInPage';
 import { SignUpPage } from './pages/public/SignUpPage';
+import { AccountPage } from './pages/user/AccountPage';
 import { ChangePasswordPage } from './pages/user/ChangePasswordPage';
 import { CreatePost } from './pages/user/CreatePost';
+import { ProfilePage } from './pages/user/ProfilePage';
 import { UpdateEmailAccountPage } from './pages/user/UpdateEmailAccountPage';
 
 const routes = [

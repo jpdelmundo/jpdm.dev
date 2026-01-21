@@ -1,8 +1,18 @@
 import { ServiceError } from "@/errors/ServiceError";
 import { UserProfileRepository } from "@/repositories/UserProfileRepository";
+import * as fileService from '@/services/fileService';
 import type { FindParamsBase } from "@/types/FindParams";
+import { compress } from "@/utils/image";
+import type { FileInitializer } from "@shared/models/generated/File";
 import type { UserId } from "@shared/models/generated/User";
 import type { UserProfileId, UserProfileInitializer, UserProfileMutator } from "@shared/models/generated/UserProfile";
+import type { Actor } from "@shared/types/Actor";
+import { ErrorCode } from "@shared/types/ErrorCode";
+import crypto from 'crypto';
+import { fileTypeFromFile } from "file-type";
+import fs from 'fs';
+import { imageSizeFromFile } from "image-size/fromFile";
+import path from 'path';
 
 type GetParams = {
     id?: UserProfileId;
@@ -40,10 +50,115 @@ export const get = async <P extends FindParamsBase>(params: P) => {
 
 export const update = async (id: UserProfileId, params: UserProfileMutator) => {
     //const { avatar_url, first_name, last_name } = params;
-    if (!id) throw new ServiceError('Missing parameter: i');
+    if (!id) throw new ServiceError('Missing parameter: id');
 
     const repo = new UserProfileRepository();
     const updated = await repo.update(id, params);
 
     return updated;
+}
+
+export const updateByUserId = async (user_id: UserId, param: UserProfileMutator, actor: Actor) => {
+    if (!canModify(user_id, actor)) throw new ServiceError('Unauthorized request');
+    if (!user_id) throw new ServiceError('Missing parameter: user_id');
+    const { avatar_url, bio, date_of_birth, first_name, last_name, gender, phone_number, avatar_file_id } = param;
+    const params = {
+        ...(avatar_url !== undefined && { avatar_url }),
+        ...(avatar_file_id !== undefined && { avatar_file_id }),
+        ...(bio !== undefined && { bio }),
+        ...(date_of_birth !== undefined && { date_of_birth: date_of_birth || null }),
+        ...(first_name !== undefined && { first_name }),
+        ...(last_name !== undefined && { last_name }),
+        ...(gender !== undefined && { gender: gender || null }),
+        ...(phone_number !== undefined && { phone_number }),
+    };
+
+    let userProfile = (await get({ user_id }))[0];
+    if (!userProfile) {
+        userProfile = await create({
+            user_id,
+            ...params
+        });
+    } else {
+        //if avatar_url is being updated and user has existing avatar, delete avatar file
+        if ((avatar_url || avatar_url === null) && userProfile.avatar_file_id) {
+            await fileService.del(userProfile.avatar_file_id);
+            avatar_url === null && (params.avatar_file_id = null);
+        }
+
+        userProfile = await update(userProfile.id, params);
+    }
+
+    if (!userProfile) throw new Error('Failed updating user profile by user_id');
+
+    return userProfile;
+}
+
+export const updateAvatar = async (user_id: UserId, file: Express.Multer.File, actor: Actor) => {
+    if (!canModify(user_id, actor)) throw new ServiceError('Unauthorized request');
+    if (!user_id) throw new ServiceError('Missing required parameter: user_id');
+    if (!file) throw new ServiceError('Missing required parameter: file');
+    const type = await fileTypeFromFile(file.path);
+    if (!type) throw new ServiceError('Cannot determine file type');
+
+    if (!type.mime.startsWith('image/')) {
+        try {
+            await fs.promises.unlink(file.path);
+        } catch (err) {
+            const e = err as NodeJS.ErrnoException;
+            if (e.code !== 'ENOENT') throw e;
+        }
+
+        throw new ServiceError('File type not allowed', ErrorCode.NOT_ALLOWED);
+    }
+
+    const userDir = path.posix.join('avatars', crypto.createHash('sha256').update(user_id).digest('hex').slice(-6));
+    const destDir = path.resolve(process.env.USERCONTENT_DIR!, userDir);
+    if (!fs.existsSync(destDir)) {
+        fs.mkdirSync(destDir, { recursive: true });
+    }
+
+    const dimensions = type.mime.startsWith('image/') ? await imageSizeFromFile(`${file.path}`) : null;
+
+    //compress uploaded file
+    //console.log({ file });
+    const parsed = path.parse(file.path);
+    const compressed = await compress(file.path, { format: 'webp' });
+    const compressedFilename = `${parsed.name}.webp`;
+    const compressedFilePath = path.posix.join(destDir, compressedFilename);
+    //console.log({ parsed: path.parse(compressedFilePath) });
+    fs.writeFileSync(compressedFilePath, compressed);
+    fs.unlinkSync(file.path);
+
+    const newFile: FileInitializer = {
+        user_id,
+        filename: path.basename(compressedFilePath),
+        orig_filename: file.originalname,
+        mime_type: type.mime,
+        path: path.posix.join(userDir, compressedFilename),
+        size: file.size,
+        expires_at: new Date(Date.now() + (60 * 60 * 1000)),
+        ...(dimensions ? { width: dimensions.width, height: dimensions.height } : {})
+    };
+    const avatarFile = await fileService.createFile(newFile);
+
+    const avatar_url = `${process.env.USERCONTENT_BASE_URL}/${avatarFile.path}`;
+    await updateByUserId(user_id, { avatar_url, avatar_file_id: avatarFile.id }, actor);
+
+    return avatarFile;
+}
+
+export const deleteAvatar = async (user_id: UserId, actor: Actor) => {
+    if (!canModify(user_id, actor)) throw new ServiceError('Unauthorized request');
+    if (!user_id) throw new ServiceError('Missing required parameter: user_id');
+
+    await updateByUserId(user_id, { avatar_url: null }, actor);
+}
+
+export const canModify = (user_id: UserId, actor: Actor) => {
+    if (actor.type == 'user' && actor.id == user_id) return true;
+    if (actor.type == 'system') return true;
+    if (actor.roles.includes('admin')) return true;
+    //console.log({ actor, user_id });
+    return false;
 }

@@ -16,6 +16,7 @@ export const ErrorCode = {
     COOLDOWN: 'COOLDOWN',
     NOT_FOUND: 'NOT_FOUND',
     NOT_AVAILABLE: 'NOT_AVAILABLE',
+    NOT_ALLOWED: 'NOT_ALLOWED',
     INVALID_ID: 'INVALID_ID',
     FORBIDDEN: 'FORBIDDEN'
 } as const;

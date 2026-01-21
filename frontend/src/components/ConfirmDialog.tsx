@@ -20,7 +20,8 @@ export function ConfirmDialog() {
 
     useEffect(() => {
         scrollbarWidthAware(open);
-    }, [open]);
+        return () => scrollbarWidthAware(false);
+    }, []);
 
     return <Dialog
         open={open}

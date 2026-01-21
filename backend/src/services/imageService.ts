@@ -1,15 +1,14 @@
 import { ServiceError } from "@/errors/ServiceError";
 import { FileRepository } from "@/repositories/FileRepository";
-
-import type { FindParamsBase } from "@/types/FindParams";
-
 import { ImageRepository } from "@/repositories/ImageRepository";
+import type { FindParamsBase } from "@/types/FindParams";
 import type { UserContext } from "@/types/UserContext";
 import type ImageExtended from "@shared/models/extensions/ImageExtended";
 import type { ImageId } from "@shared/models/generated/Image";
 import type { PostId } from "@shared/models/generated/Post";
 import type { UserId } from "@shared/models/generated/User";
 import { ErrorCode } from "@shared/types/ErrorCode";
+import path from 'path';
 import * as fileService from './fileService';
 import * as postService from './postService';
 
@@ -54,7 +53,8 @@ export const get = async <P extends FindParamsBase>(params: P) => {
     const items = ('page_items' in findResult ? findResult.page_items : findResult) as ImageExtended[];
     for (const item of items) {
         const file = await fileRepo.findById(item.file_id);
-        item.url = `${process.env.STATIC_SERVER}${process.env.USERCONTENT_IMAGE_PATH}/${file?.filename}`;
+        const url = new URL(path.posix.join(process.env.USERCONTENT_BASE_PATH || '', 'images', file?.filename || ''), process.env.STATIC_SERVER);
+        item.url = url.toString();
         item.width = file?.width || 0;
         item.height = file?.height || 0;
     }

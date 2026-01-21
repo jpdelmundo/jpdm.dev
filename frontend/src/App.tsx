@@ -1,5 +1,8 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthInitializer } from './auth/AuthInitializer';
 import { ConfirmDialog } from './components/ConfirmDialog';
@@ -16,17 +19,19 @@ function App() {
     <GradientBg />
     <ThemeProvider theme={theme}>
       <BrowserRouter>
-        <Snackbar />
-        <CssBaseline />
-        <ErrorBoundary>
-          <ConfirmDialog />
-          <AuthInitializer />
-          <UserProfileInitializer />
-          <AppRoutes />
-        </ErrorBoundary>
-        <GlobalErrorHandler />
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={dayjs.locale()}>
+          <Snackbar />
+          <CssBaseline />
+          <ErrorBoundary>
+            <ConfirmDialog />
+            <AuthInitializer />
+            <UserProfileInitializer />
+            <AppRoutes />
+          </ErrorBoundary>
+          <GlobalErrorHandler />
+        </LocalizationProvider>
       </BrowserRouter>
-    </ThemeProvider>
+    </ThemeProvider >
   </>
   )
 }

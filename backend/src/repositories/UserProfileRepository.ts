@@ -1,7 +1,7 @@
 import type { FindParamsBase } from '@/types/FindParams';
 import type { PostId } from '@shared/models/generated/Post';
 import type { UserId } from '@shared/models/generated/User';
-import type { UserProfile, UserProfileId, UserProfileInitializer, UserProfileMutator } from '@shared/models/generated/UserProfile';
+import { UserProfileColumns, type UserProfile, type UserProfileId, type UserProfileInitializer, type UserProfileMutator } from '@shared/models/generated/UserProfile';
 import { type OrderDirection } from '@shared/types/OrderDirection';
 import { BaseRepository } from './BaseRepository';
 
@@ -51,7 +51,8 @@ export class UserProfileRepository extends BaseRepository<UserProfile> {
     }
 
     async create(item: UserProfileInitializer): Promise<UserProfile> {
-        const entries = Object.entries(item).filter(([key, value]) => value !== undefined && key != 'id');
+        const validColumns = new Set(UserProfileColumns as readonly string[]);
+        const entries = Object.entries(item).filter(([key, value]) => validColumns.has(key) && value !== undefined && key != 'id');
         const columns = entries.map(([key]) => key).join(', ');
         const placeholders = entries.map((_, i) => `$${i + 1}`).join(', ');
         const values = entries.map(([_, value]) => value);
@@ -69,7 +70,8 @@ export class UserProfileRepository extends BaseRepository<UserProfile> {
     }
 
     async update(id: string, data: UserProfileMutator): Promise<UserProfile> {
-        const entries = Object.entries(data).filter(([key, value]) => value !== undefined && key != 'id');
+        const validColumns = new Set(UserProfileColumns as readonly string[]);
+        const entries = Object.entries(data).filter(([key, value]) => validColumns.has(key) && value !== undefined && key != 'id');
         const set: string[] = [];
         const values: unknown[] = [];
 

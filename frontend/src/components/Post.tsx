@@ -157,7 +157,7 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
             observer.unobserve(element);
             observer.disconnect();
         };
-    }, [post]);
+    }, []);
 
     return (
         <>

@@ -1,13 +1,13 @@
-import basicSsl from '@vitejs/plugin-basic-ssl';
 import react from '@vitejs/plugin-react-swc';
 import path from 'path';
 import { defineConfig } from 'vite';
+import mkcert from 'vite-plugin-mkcert';
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
-    basicSsl()
+    mkcert()
   ],
   resolve: {
     alias: {
@@ -26,11 +26,17 @@ export default defineConfig({
       }
     }
   },
-  server: {
-    allowedHosts: ['jp-pc.home.arpa'],
-    hmr: {
-      host: 'jp-pc.home.arpa',
-      port: 5173
-    }
-  }
+  // server: {
+  //   //allowedHosts: ['jp-pc.home.arpa'],
+  //   host: 'jp-pc.home.arpa',
+  //   // https: {
+  //   //   key: fs.readFileSync('./certs/jp-pc.home.arpa+3-key.pem'),
+  //   //   cert: fs.readFileSync('./certs/jp-pc.home.arpa+3.pem'),
+  //   // },
+  //   // hmr: {
+  //   //   //protocol: 'wss',
+  //   //   host: 'jp-pc.home.arpa',
+  //   //   port: 5173
+  //   // }
+  // }
 });

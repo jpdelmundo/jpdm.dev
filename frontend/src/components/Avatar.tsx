@@ -7,7 +7,7 @@ type AvatarProps = MuiAvatarProps & {
 }
 
 export const Avatar = ({ avatar_url, display_name, sx, ...otherProps }: AvatarProps) => {
-    console.log({ avatar_url, display_name });
+    //console.log({ avatar_url, display_name });
     return <MuiAvatar
         sx={{
             bgcolor: `${stringToHslColor(display_name || '')}`,

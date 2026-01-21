@@ -7,7 +7,7 @@ import cors from 'cors';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import https from 'https';
 import fs from 'node:fs';
-import { resolve } from 'node:path';
+import path, { resolve } from 'node:path';
 import passport from 'passport';
 import { ServiceError } from './errors/ServiceError';
 import router from './router';
@@ -22,18 +22,18 @@ const apiBasePath = String(process.env.API_BASE_PATH); // /api/<version> ex. /ap
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'http://jp-pc.home.arpa:5173',
+    //'http://jp-pc.home.arpa:5173',
     'https://localhost:5173',
-    'https://jp-pc.home.arpa:5173',
+    //'https://jp-pc.home.arpa:5173',
     'http://localhost:4173',
-    'http://jp-pc.home.arpa:4173'
+    //'http://jp-pc.home.arpa:4173'
   ], credentials: true
 }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(passport.initialize());
 app.use('/auth', passportRouter);
-app.use('/usercontent/images', express.static(String(process.env.UPLOAD_PATH)));
+app.use('/usercontent', express.static(path.resolve(process.env.USERCONTENT_DIR!)));
 app.use(apiBasePath, router);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

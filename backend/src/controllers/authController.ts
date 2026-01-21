@@ -166,7 +166,7 @@ export const googleAuthCallback = async (req: Request, res: Response, next: Next
     let intent: string | undefined, customData;
     passport.authenticate('google', { session: false }, async (err: Error, user: User, info: unknown) => {
         try {
-            customData = jsonBase64Decode(state as string);
+            customData = jsonBase64Decode(decodeURIComponent(state as string));
             intent = customData.intent;
         } catch (error) {
             redirectUrl.searchParams.set('error', error instanceof Error ? error.message : 'Authentication failed');
@@ -234,7 +234,7 @@ export const facebookAuthCallback = async (req: Request, res: Response, next: Ne
     let intent: string | undefined, customData;
     passport.authenticate('facebook', { session: false }, async (err: Error, user: User, info: unknown) => {
         try {
-            customData = jsonBase64Decode(state as string);
+            customData = jsonBase64Decode(decodeURIComponent(state as string));
             intent = customData.intent;
         } catch (error) {
             redirectUrl.searchParams.set('error', error instanceof Error ? error.message : 'Authentication failed');

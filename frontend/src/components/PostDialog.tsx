@@ -85,7 +85,8 @@ export const PostDialog = ({ post, open, closeDialog, onCreated, onUpdated }: Po
                         const formData = new FormData();
                         formData.append('file', imageFile.file);
                         formData.append('fp', jsonBase64Encode(getFingerprint()));
-                        const result = await apiPost<FileModel>('/files/upload', formData);
+                        formData.append('type', 'image');
+                        const result = await apiPost<FileModel>('/files/image', formData);
                         if (!result.ok || !result.data?.id) throw Error(`Upload failed: ${result.error?.message}`);
 
                         const file_id = result.data.id;

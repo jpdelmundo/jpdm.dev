@@ -2,12 +2,14 @@ import { ServiceError } from '@/errors/ServiceError';
 import { FileRepository } from '@/repositories/FileRepository';
 import type { FileId, FileInitializer } from '@shared/models/generated/File';
 import fs from 'fs';
+import path from 'path';
 
 type DeleteParams = { is_admin?: boolean; current_user_id?: UserId };
 
 export const createFile = async (data: FileInitializer) => {
     const repo = new FileRepository();
     const result = await repo.create(data);
+    if (!result?.id) throw new ServiceError('Failed creating file record');
 
     return result;
 }
@@ -21,7 +23,7 @@ export const del = async (id: FileId, params?: DeleteParams) => {
 
     //delete actual file
     try {
-        await fs.promises.unlink(file.path);
+        await fs.promises.unlink(path.resolve(process.env.USERCONTENT_DIR!, file.path));
     } catch (err) {
         const e = err as NodeJS.ErrnoException;
         if (e.code !== 'ENOENT') throw e;

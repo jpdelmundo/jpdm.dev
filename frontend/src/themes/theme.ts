@@ -1,4 +1,5 @@
 import { createTheme } from '@mui/material/styles';
+import type { } from '@mui/x-date-pickers/themeAugmentation';
 
 export const theme = createTheme({
     breakpoints: {
@@ -12,7 +13,7 @@ export const theme = createTheme({
     },
     palette: {
         primary: {
-            main: '#006effff'
+            main: '#1b54a5ff'
         },
         background: {
             default: '#f3f3f3'
@@ -33,7 +34,7 @@ export const theme = createTheme({
     },
     components: { //no MuiBox under createTheme components (for MuiBox classes add it here)
         MuiCssBaseline: {
-            styleOverrides: {
+            styleOverrides: (theme) => ({
                 html: {
                     '&.modal-dialog-open': {
                         overflow: 'hidden',
@@ -61,7 +62,7 @@ export const theme = createTheme({
                     gap: '8px',
                     alignItems: 'center'
                 }
-            }
+            })
         },
         MuiOutlinedInput: {
             styleOverrides: {
@@ -112,6 +113,20 @@ export const theme = createTheme({
                         }
                     }
                 },
+            },
+            styleOverrides: {
+                root: ({ theme }) => ({
+                    '& .MuiInputBase-multiline': {
+                        boxSizing: 'border-box',
+                        lineHeight: '20px',
+                        padding: '8px 12px',
+                        // marginTop: '10px',
+                        // marginBottom: '10px',
+                        '& .MuiInputBase-inputMultiline': {
+                            padding: 0
+                        }
+                    }
+                })
             }
         },
         MuiButton: {
@@ -148,11 +163,6 @@ export const theme = createTheme({
             }
         },
         MuiCircularProgress: {
-            styleOverrides: {
-                root: {
-                    color: '#88888888'
-                }
-            },
             defaultProps: {
                 size: 15,
             }
@@ -408,6 +418,8 @@ export const theme = createTheme({
                 root: () => ({
                     '& .MuiDialog-paper': {
                         boxShadow: '0 1px 2px #00000021, 0 4px 8px #00000010',
+                        width: '100%',
+                        margin: '10px'
                     },
                     '& .MuiModal-backdrop': {
                         backgroundColor: '#f3f3f3dd'
@@ -486,6 +498,70 @@ export const theme = createTheme({
                     }
                 }
             }
-        }
+        },
+        MuiSelect: {
+            styleOverrides: {
+                root: {
+                    '& .MuiSelect-select': {
+                        lineHeight: '28px',
+                        height: '36px'
+                    }
+                }
+            }
+        },
+        MuiPickersOutlinedInput: {
+            styleOverrides: {
+                root: ({ theme }) => ({
+                    '& .MuiPickersOutlinedInput-notchedOutline': {
+                        //boxShadow: '0 1px 2px 0px rgba(0,0,0,.1)',
+                        borderColor: '#e5e5e5'
+                    },
+                    '&:hover .MuiPickersOutlinedInput-notchedOutline': {
+                        borderColor: '#e5e5e5'
+                    },
+                    '&.Mui-error:hover .MuiPickersOutlinedInput-notchedOutline': {
+                        borderColor: theme.palette.error.main,
+                    },
+                    '&.Mui-focused:not(.Mui-error) .MuiPickersOutlinedInput-notchedOutline': {
+                        borderWidth: '1px',
+                        borderColor: '#e5e5e5'
+                    },
+                    '&.Mui-focused': {
+                        transition: 'box-shadow 0.25s ease',
+                        boxShadow: '0 0 0 3px rgba(25, 118, 210, 0.20)',
+                    },
+                    '&.Mui-focused.Mui-error': {
+                        boxShadow: `0 0 0 3px ${theme.palette.error.main}40`
+                    },
+                    '&.Mui-focused.Mui-error .MuiPickersOutlinedInput-notchedOutline': {
+                        borderWidth: '1px',
+                        borderColor: theme.palette.error.main
+                    },
+                }),
+                sectionsContainer: {
+                    '& .MuiPickersSectionList-section': {
+                        lineHeight: '28px'
+                    },
+                    boxSizing: 'border-box',
+                    height: '36px',
+                    lineHeight: '20px',
+                    padding: '4px 12px'
+                }
+            }
+        },
+        MuiPickersTextField: {
+            defaultProps: {
+                FormHelperTextProps: {
+
+                    sx: {
+                        display: 'block',
+                        color: 'error.main',
+                        fontSize: '12px',
+                        transition: 'opacity 300ms ease'
+                    }
+
+                }
+            }
+        },
     }
 });

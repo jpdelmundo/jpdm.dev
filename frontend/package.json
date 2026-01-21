@@ -17,10 +17,12 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.4",
     "@mui/material": "^7.3.2",
+    "@mui/x-date-pickers": "^8.25.0",
     "@project/shared": "^1.0.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.4.2",
     "@react-three/postprocessing": "^3.0.4",
+    "dayjs": "^1.11.19",
     "jwt-decode": "^4.0.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -35,7 +37,6 @@
   },
   "devDependencies": {
     "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
-    "@vitejs/plugin-basic-ssl": "^2.1.0"
+    "@types/react-dom": "^19.1.6"
   }
 }
