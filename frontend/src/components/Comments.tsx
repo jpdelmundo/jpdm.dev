@@ -3,6 +3,8 @@ import { useAuthStore } from '@/store/useAuthStore';
 import type { CommentsUpdatedParams } from '@/types/CommentsUpdatedParams';
 import { getErrorMessage, isTopInView, scrollIntoView } from '@/utils/helper';
 import SendRounded from '@mui/icons-material/SendRounded';
+import SmartToyOutlined from '@mui/icons-material/SmartToyOutlined';
+import WarningRounded from '@mui/icons-material/WarningRounded';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -69,7 +71,7 @@ export function Comments({ open, postId, onCommentsUpdated }: CommentsProps) {
         if (!data.comment.trim()) return;
         setErrorMessage('');
         setIsSubmitting(true);
-        const result = await apiPost<Paginated<CommentDTO>>(`/comments`, { ...data, post_id: postId });
+        const result = await apiPost<CommentDTO>(`/comments`, { ...data, post_id: postId });
         if (result.ok) {
             resetField('comment');
             setPageNum(1);
@@ -178,7 +180,7 @@ export function Comments({ open, postId, onCommentsUpdated }: CommentsProps) {
                                         <InputAdornment position="end">
                                             {isSubmitting
                                                 ? <Box sx={{ display: 'flex', gap: 1, marginRight: '12px' }}><Typography fontSize={'small'}>Posting</Typography> <CircularProgress size="20px" /></Box>
-                                                : <IconButton type="submit" sx={{ '&:hover': { background: 'none', opacity: 0.7 } }}><SendRounded /></IconButton>}
+                                                : <IconButton type="submit" color="primary"><SendRounded /></IconButton>}
                                         </InputAdornment>
                                     )
                                 }
@@ -189,7 +191,13 @@ export function Comments({ open, postId, onCommentsUpdated }: CommentsProps) {
                         />
                     </form>
                 </Box>
-                {errorMessage && <Typography color="error" textAlign="center" mt={'10px'}>Something went wrong</Typography>}
+                {errorMessage && <Typography
+                    color="error"
+                    mt={'10px'}
+                    display={'flex'}
+                    alignItems={'center'}
+                ><WarningRounded color="warning" /> <SmartToyOutlined sx={{ color: '#555555' }} /> <span style={{ marginLeft: '5px' }}>{errorMessage}</span>
+                </Typography>}
             </Box>
         </Collapse>
     </>

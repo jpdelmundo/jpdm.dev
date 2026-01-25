@@ -10,6 +10,7 @@ import type { PostId } from '@shared/models/generated/Post';
 import type { UserId } from '@shared/models/generated/User';
 import { ErrorCode } from '@shared/types/ErrorCode';
 import type { OrderDirection } from '@shared/types/OrderDirection';
+import OpenAI from 'openai';
 
 type GetParams = {
     current_user_id?: UserId;
@@ -25,12 +26,17 @@ type GetParams = {
 type CreateParams = CommentInitializer;
 type UpdateParams = CommentMutator;
 type DeleteParams = { is_admin?: boolean; current_user_id?: UserId };
+type Moderation = { is_allowed: boolean; reason: string; }
 
 export const create = async (params: CreateParams): Promise<CommentDTO> => {
     const { comment, post_id } = params;
     if (!post_id) throw new ServiceError('Missing parameter: post_id');
     if (!comment || comment.trim().length == 0) throw new ServiceError('Content cannot be empty', ErrorCode.MISSING_PARAMETER, { param: 'comment' });
     if (comment.length > 2000) throw new ServiceError('Content too long', ErrorCode.LENGTH_TOO_LONG, { param: 'comment' });
+
+    const moderation = await moderate(comment);
+    if (!moderation) throw new Error('Invalid AI moderation result');
+    if (!moderation.is_allowed) throw new ServiceError(`AI Moderation: ${moderation.reason}`);
 
     //create comment
     const repo = new CommentRepository();
@@ -93,6 +99,13 @@ export const update = async (id: CommentId, params: UpdateParams, options: Recor
     const { current_user_id } = options;
     if (!id) throw new ServiceError('Missing parameter: id or post_id');
     if (!current_user_id) throw new ServiceError('Missing parameter: current_user_id');
+    if (!comment || comment.trim().length == 0) throw new ServiceError('Content cannot be empty', ErrorCode.MISSING_PARAMETER, { param: 'comment' });
+    if (comment.length > 2000) throw new ServiceError('Content too long', ErrorCode.LENGTH_TOO_LONG, { param: 'comment' });
+
+    const moderation = await moderate(comment);
+    console.log({ moderation });
+    if (!moderation) throw new Error('Invalid AI moderation result');
+    if (!moderation.is_allowed) throw new ServiceError(`AI Moderation: ${moderation.reason}`);
 
     const repo = new CommentRepository();
     const updated = await repo.update(id, {
@@ -151,4 +164,42 @@ export const canDelete = async (id: CommentId, userContext: UserContext) => {
     const post = await repo.findById(comment.post_id);
     if (post?.user_id === current_user_id) return true;
     return false;
+}
+
+const moderate = async (comment: string): Promise<Moderation | null> => {
+    const llm = new OpenAI({
+        apiKey: process.env.LITELLM_VIRTUAL_KEY,
+        baseURL: process.env.LITELLM_API_BASE_URL
+    });
+
+    const result = await llm.chat.completions.create({
+        model: 'moderation-model',
+        messages: [
+            {
+                role: 'system',
+                content: `You are a content moderation system.
+Respond ONLY with valid JSON:
+{
+  "is_allowed": boolean,
+  "reason": string
+}
+
+DO NOT:
+- include the comment in the reason value
+- allow insults, anything about the face, mouth or look
+- accept spam messages
+
+If is_allowed = true, set reason to empty string, otherwise state clearly but concisely like talking to a human being why it's not allowed.`
+            },
+            {
+                role: 'user',
+                content: comment
+            }
+        ],
+        temperature: 0
+    });
+
+    const content = result.choices[0]?.message.content;
+
+    return content ? JSON.parse(content) : null;
 }

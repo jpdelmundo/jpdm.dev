@@ -5,6 +5,8 @@ import { getErrorMessage, getRelativeTime, stringToHslColor } from '@/utils/help
 import { formatLineBreaks } from '@/utils/tsxHelper';
 import ClearRounded from '@mui/icons-material/ClearRounded';
 import SendRounded from '@mui/icons-material/SendRounded';
+import SmartToyOutlined from '@mui/icons-material/SmartToyOutlined';
+import WarningRounded from '@mui/icons-material/WarningRounded';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -124,7 +126,12 @@ export function Comment({ comment, index, onDeleted, onUpdated }: CommentProps) 
                             />
                         </form>
                     </Box>
-                    {errorMessage && <Typography color="error" textAlign="center" mt={'10px'}>Something went wrong</Typography>}
+                    {errorMessage && <Typography
+                        color="error"
+                        display={'flex'}
+                        alignItems={'center'}
+                    ><WarningRounded color="warning" /> <SmartToyOutlined sx={{ color: '#555555' }} /> <span style={{ marginLeft: '5px' }}>{errorMessage}</span>
+                    </Typography>}
                 </Box>
                 : <Box flexGrow={1}>
                     <Stack direction={'row'} gap={1}>
