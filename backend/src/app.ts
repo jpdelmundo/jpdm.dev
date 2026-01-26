@@ -19,14 +19,12 @@ const app = express();
 const port = process.env.API_PORT;
 const apiBasePath = String(process.env.API_BASE_PATH); // /api/<version> ex. /api/v1
 
+app.set('trust proxy', 1); //for cloudflare/proxy
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    //'http://jp-pc.home.arpa:5173',
     'https://localhost:5173',
-    //'https://jp-pc.home.arpa:5173',
     'http://localhost:4173',
-    //'http://jp-pc.home.arpa:4173'
   ], credentials: true
 }));
 app.use(express.json());
