@@ -124,7 +124,7 @@ export const create = async (data: CreateInput, deps: Deps, actor: Actor): Promi
                 if (!newImage) throw new Error('Failed creating post image');
 
                 //TODO move file from temp_upload to images/<post dir>/
-                const userDir = path.posix.join('images', createHash('sha256').update(newPost.id).digest('hex').slice(0, 24));
+                const userDir = path.posix.join('images', createHash('sha256').update(newPost.id).digest('hex').slice(0, 16));
                 const destDir = path.resolve(process.env.USERCONTENT_DIR!, userDir);
                 if (!fs.existsSync(destDir)) {
                     fs.mkdirSync(destDir, { recursive: true });
@@ -312,7 +312,7 @@ export const uploadImage = async (post_id: PostId, file: Express.Multer.File, ac
 
     if (!canModify(post_id, actor)) throw new ServiceError('Unauthorized request');
 
-    const userDir = path.posix.join('images', createHash('sha256').update(post_id).digest('hex').slice(0, 24));
+    const userDir = path.posix.join('images', createHash('sha256').update(post_id).digest('hex').slice(0, 16));
     const destDir = path.resolve(process.env.USERCONTENT_DIR!, userDir);
     if (!fs.existsSync(destDir)) {
         fs.mkdirSync(destDir, { recursive: true });

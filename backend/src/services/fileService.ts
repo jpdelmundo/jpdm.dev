@@ -62,7 +62,7 @@ export const uploadImage = async (file: Express.Multer.File, actor: Actor) => {
 
     //if (!canModify(post_id, actor)) throw new ServiceError('Unauthorized request');
 
-    const userDir = path.posix.join('temp_upload', createHash('sha256').update(actor?.type == 'user' ? actor.id : 'system').digest('hex').slice(0, 24));
+    const userDir = path.posix.join('temp_upload', createHash('sha256').update(actor?.type == 'user' ? actor.id : 'system').digest('hex').slice(0, 16));
     const destDir = path.resolve(process.env.USERCONTENT_DIR!, userDir);
     if (!fs.existsSync(destDir)) {
         fs.mkdirSync(destDir, { recursive: true });
