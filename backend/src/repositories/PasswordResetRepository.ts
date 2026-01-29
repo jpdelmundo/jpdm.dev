@@ -1,4 +1,4 @@
-import { getDateParamCondition } from '@/db/pgHelper';
+import { getDateParamCondition } from '@/infra/pgHelper';
 import type { FindParamsBase } from '@/types/FindParams';
 import type { PasswordReset, PasswordResetId, PasswordResetInitializer, PasswordResetMutator } from '@shared/models/generated/PasswordReset';
 import type { UserId } from '@shared/models/generated/User';

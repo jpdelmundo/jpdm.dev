@@ -1,9 +1,11 @@
-// import type { TokenUserData } from '@shared/types/Jwt';
+import type { UserIdentity } from "@shared/types/UserIdentity";
 
-// declare global {
-//     namespace Express {
-//         interface Request {
-//             user?: TokenUserData;
-//         }
-//     }
-// }
+declare global {
+    namespace Express {
+        // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+        interface User extends UserIdentity { };
+        interface Request {
+            user?: User;
+        }
+    }
+}

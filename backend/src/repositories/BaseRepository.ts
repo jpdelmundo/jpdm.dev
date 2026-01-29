@@ -1,13 +1,12 @@
-import { pool as sharedPool } from '@/db/db';
-import { getFullQuery } from '@/db/pgHelper';
+import { pool as sharedPool } from '@/infra/db';
+import { getFullQuery } from '@/infra/pgHelper';
+import type { Db } from '@/types/Db';
 import type { FindParamsBase, FindParamsPaginated } from '@/types/FindParams';
 import type { InferFindResultType } from '@/types/InferFindResultType';
 import { OrderDirections, type OrderDirection } from '@shared/types/OrderDirection';
 import { isNumber } from '@shared/utils/validation';
-import { Pool, type PoolClient, type QueryResultRow } from 'pg';
+import { type QueryResultRow } from 'pg';
 
-
-export type Db = Pool | PoolClient;
 export interface GetOrderByParams {
     allowedOrderColumns: string[];
     order_by: string;

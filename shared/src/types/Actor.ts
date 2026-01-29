@@ -1,5 +1,4 @@
-import { PayloadData } from "./Jwt";
+import { SystemIdentity } from "./SystemIdentity";
+import { UserIdentity } from "./UserIdentity";
 
-export type Actor =
-    | { type: 'user'; } & Pick<PayloadData, 'id' | 'roles'>
-    | { type: 'system' };
+export type Actor = UserIdentity | SystemIdentity;

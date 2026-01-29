@@ -6,4 +6,5 @@ export interface UserIdentity {
     username: string;
     email: string | null;
     roles: UserRoleEnum[];
+    type: 'user'
 }

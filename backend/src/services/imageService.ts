@@ -53,7 +53,7 @@ export const get = async <P extends FindParamsBase>(params: P) => {
     const items = ('page_items' in findResult ? findResult.page_items : findResult) as ImageExtended[];
     for (const item of items) {
         const file = await fileRepo.findById(item.file_id);
-        const url = new URL(path.posix.join(process.env.USERCONTENT_BASE_PATH || '', 'images', file?.filename || ''), process.env.STATIC_SERVER);
+        const url = new URL(path.posix.join(process.env.USERCONTENT_DIR!, file?.path || ''), process.env.STATIC_SERVER);
         item.url = url.toString();
         item.width = file?.width || 0;
         item.height = file?.height || 0;

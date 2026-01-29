@@ -112,7 +112,7 @@ export const updateAvatar = async (user_id: UserId, file: Express.Multer.File, a
         throw new ServiceError('File type not allowed', ErrorCode.NOT_ALLOWED);
     }
 
-    const userDir = path.posix.join('avatars', crypto.createHash('sha256').update(user_id).digest('hex').slice(-6));
+    const userDir = path.posix.join('avatars', crypto.createHash('sha256').update(user_id).digest('hex').slice(0, 24));
     const destDir = path.resolve(process.env.USERCONTENT_DIR!, userDir);
     if (!fs.existsSync(destDir)) {
         fs.mkdirSync(destDir, { recursive: true });

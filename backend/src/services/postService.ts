@@ -1,24 +1,33 @@
-import { withTransaction } from '@/db/withTransaction';
 import { ServiceError } from '@/errors/ServiceError';
+import { withTransaction } from '@/infra/withTransaction';
 import { CommentRepository } from '@/repositories/CommentRepository';
 import { FileRepository } from '@/repositories/FileRepository';
 import { ImageRepository } from '@/repositories/ImageRepository';
 import { PostRepository } from '@/repositories/PostRepository';
 import { UserRepository } from '@/repositories/UserRepository';
+import type { Deps } from '@/types/Deps';
 import type { FindParamsBase } from '@/types/FindParams';
 import type { UserContext } from '@/types/UserContext';
+import { checkRequiredParameter } from '@/utils/helper';
+import { compress } from '@/utils/image';
 import type ImageExtended from '@shared/models/extensions/ImageExtended';
 import type PostDTO from '@shared/models/extensions/PostExtended';
-import { type File } from '@shared/models/generated/File';
+import { type File, type FileInitializer } from '@shared/models/generated/File';
 import type { ImageId } from '@shared/models/generated/Image';
 import type { PostId, PostInitializer, PostMutator } from '@shared/models/generated/Post';
 import type { UserId } from '@shared/models/generated/User';
 import type { VisibilityEnum } from '@shared/models/generated/VisibilityEnum';
+import type { Actor } from '@shared/types/Actor';
 import { ErrorCode } from '@shared/types/ErrorCode';
 import type { OrderDirection } from '@shared/types/OrderDirection';
+import { createHash } from 'crypto';
+import { fileTypeFromFile } from 'file-type';
 import fs from 'fs';
+import { imageSizeFromFile } from 'image-size/fromFile';
+import path from 'path';
 import { validate } from 'uuid';
 import * as commentService from './commentService';
+import * as fileService from './fileService';
 import * as imageService from './imageService';
 import * as postLikeService from './postLikeService';
 
@@ -35,21 +44,9 @@ type GetParams = {
     include?: string[];
 }
 
-type GetImageParams = {
-    current_user_id?: UserId;
-    id?: ImageId;
-    is_published?: boolean;
-    skip_access_check?: boolean;
-}
-
-type GetImagesParams = {
-    current_user_id?: UserId;
-    post_id?: PostId;
-}
-
-type CreateParams = PostInitializer & { files?: { file_id: string; sort: number }[]; }
-type UpdateParams = PostMutator & { is_admin?: boolean; current_user_id?: UserId; files?: { id: string; file_id: string; sort: number }[]; };
-type DeleteParams = { is_admin?: boolean; current_user_id?: UserId };
+type CreateInput = PostInitializer & { files?: { file_id: string; sort: number }[]; }
+type UpdateInput = PostMutator & { is_admin?: boolean; current_user_id?: UserId; files?: { id: string; file_id: string; sort: number }[]; };
+type DeleteInput = { is_admin?: boolean; current_user_id?: UserId };
 
 const getDisplayName = async (id: UserId): Promise<string> => {
     const repo = new UserRepository();
@@ -78,10 +75,6 @@ export const get = async <P extends FindParamsBase>(params: P) => {
     const items = ('page_items' in findResult ? findResult.page_items : findResult) as PostDTO[];
     for (const post of items) {
         const { id: post_id, user_id } = post;
-        // if (!post.is_published && !current_user_id) throw new ServiceError(`Post not available`, ErrorCode.NOT_AVAILABLE);
-        // if (!post.is_published && (current_user_id && current_user_id !== user_id)) throw new ServiceError(`Post not available`, ErrorCode.NOT_AVAILABLE);
-        // if (post.visibility == 'private' && current_user_id !== user_id) throw new ServiceError(`Post not available`, ErrorCode.NOT_AVAILABLE);
-
         post.display_name = await getDisplayName(user_id);
         post.is_liked = await postLikeService.isLiked(post.id, current_user_id);
         include?.includes('stats') && (post.comments_count = await getCommentsCount(post_id));
@@ -103,42 +96,57 @@ export const getById = async (id: PostId, params: { include?: string[], current_
     return result[0];
 }
 
-export const create = async (params: CreateParams): Promise<PostDTO> => {
-    const { user_id, title, content, files } = params;
+export const create = async (data: CreateInput, deps: Deps, actor: Actor): Promise<PostDTO> => {
+    const { user_id, title, content, files } = data;
     if (!user_id) throw new ServiceError('Missing parameter: user_id');
     if (!content || content.trim().length == 0) throw new ServiceError('Content cannot be empty', ErrorCode.MISSING_PARAMETER, { param: 'content' });
     if (content.length > 2000) throw new ServiceError('Content too long', ErrorCode.LENGTH_TOO_LONG, { param: 'content' });
+    if (actor.type == 'user' && data.user_id != actor.id) throw new ServiceError('Unauthorized request.', ErrorCode.FORBIDDEN);
 
-    //create post
-    const postRepo = new PostRepository();
-    const newPost = await postRepo.create({
-        user_id,
-        content,
-        ...(title && { title })
-    });
-    if (!newPost) throw new Error('Failed creating post');
+    const txResult = await deps.withTransaction(async (deps: Deps) => {
+        //create post
+        const { postRepo, imageRepo, fileRepo } = deps;
+        const newPost = await postRepo.create({
+            user_id,
+            content,
+            ...(title && { title })
+        });
+        if (!newPost) throw new Error('Failed creating post');
 
-    //get id
-    //create post files
-    if (files && files.length > 0) {
-        const postImageRepo = new ImageRepository();
-        const fileRepo = new FileRepository();
-        for (const file of files) {
-            //check if file owned by user
-            const userFile = await fileRepo.findById(file.file_id);
-            if (!userFile || userFile.user_id != newPost.user_id) continue;
+        //get id
+        //create post files
+        if (files && files.length > 0) {
+            for (const file of files) {
+                const userFile = await fileRepo.findById(file.file_id);
+                if (!userFile || userFile.user_id != newPost.user_id) continue;
 
-            const newImage = await postImageRepo.create({ file_id: userFile.id, post_id: newPost.id, sort: file.sort });
-            if (!newImage) throw new Error('Failed creating post image');
+                const newImage = await imageRepo.create({ file_id: userFile.id, post_id: newPost.id, sort: file.sort });
+                if (!newImage) throw new Error('Failed creating post image');
 
-            fileRepo.update(userFile.id, { expires_at: null });
+                //TODO move file from temp_upload to images/<post dir>/
+                const userDir = path.posix.join('images', createHash('sha256').update(newPost.id).digest('hex').slice(0, 24));
+                const destDir = path.resolve(process.env.USERCONTENT_DIR!, userDir);
+                if (!fs.existsSync(destDir)) {
+                    fs.mkdirSync(destDir, { recursive: true });
+                }
+
+                const filePath = path.resolve(process.env.USERCONTENT_DIR!, userFile.path);
+                const newPath = path.join(userDir, path.basename(filePath));
+                fs.copyFileSync(filePath, path.join(process.env.USERCONTENT_DIR!, newPath));
+                fs.unlinkSync(filePath);
+
+                //TODO update file.path to new path
+                fileRepo.update(userFile.id, { path: newPath, expires_at: null });
+            }
         }
-    }
 
-    const result = await get({ id: newPost.id }) as PostDTO[];
-    if (!result[0]) throw new Error(`Post created but not found: ${newPost.id}`);
+        return newPost;
+    });
 
-    return result[0];
+    const result = (await get({ id: txResult.id, include: ['images'] }) as PostDTO[])[0];
+    if (!result) throw new Error(`Post created but not found: ${txResult.id}`);
+
+    return result;
 }
 
 export const getCommentsCount = async (post_id: PostId) => {
@@ -148,7 +156,7 @@ export const getCommentsCount = async (post_id: PostId) => {
     return count;
 }
 
-export const del = async (id: PostId, params: DeleteParams) => {
+export const del = async (id: PostId, params: DeleteInput) => {
     const { is_admin, current_user_id } = params;
     if (!id) throw new ServiceError('Missing parameter: id');
     if (!is_admin && !current_user_id) throw new ServiceError('Missing parameter: current_user_id');
@@ -194,7 +202,7 @@ export const del = async (id: PostId, params: DeleteParams) => {
     return deleted.post;
 }
 
-export const update = async (id: PostId, params: UpdateParams) => {
+export const update = async (id: PostId, params: UpdateInput) => {
     const { title, content, current_user_id, is_admin, files } = params;
     if (!id) throw new ServiceError('Missing parameter: id or post_id');
     if (!current_user_id) throw new ServiceError('Missing parameter: current_user_id');
@@ -282,5 +290,69 @@ export const canDelete = async (id: PostId, userContext: UserContext) => {
     const repo = new PostRepository();
     const post = await repo.findById(id);
     if (post?.user_id === current_user_id) return true;
+    return false;
+}
+
+export const uploadImage = async (post_id: PostId, file: Express.Multer.File, actor: Actor) => {
+    if (!post_id) throw new ServiceError('Missing required parameter: post_id');
+    if (!file) throw new ServiceError('Missing required parameter: file');
+    const type = await fileTypeFromFile(file.path);
+    if (!type) throw new ServiceError('Cannot determine file type');
+
+    if (!type.mime.startsWith('image/')) {
+        try {
+            await fs.promises.unlink(file.path);
+        } catch (err) {
+            const e = err as NodeJS.ErrnoException;
+            if (e.code !== 'ENOENT') throw e;
+        }
+
+        throw new ServiceError('File type not allowed', ErrorCode.NOT_ALLOWED);
+    }
+
+    if (!canModify(post_id, actor)) throw new ServiceError('Unauthorized request');
+
+    const userDir = path.posix.join('images', createHash('sha256').update(post_id).digest('hex').slice(0, 24));
+    const destDir = path.resolve(process.env.USERCONTENT_DIR!, userDir);
+    if (!fs.existsSync(destDir)) {
+        fs.mkdirSync(destDir, { recursive: true });
+    }
+
+    const dimensions = type.mime.startsWith('image/') ? await imageSizeFromFile(`${file.path}`) : null;
+
+    //compress uploaded file
+    //console.log({ file });
+    const parsed = path.parse(file.path);
+    const compressed = await compress(file.path, { format: 'webp' });
+    const compressedFilename = `${parsed.name}.webp`;
+    const compressedFilePath = path.posix.join(destDir, compressedFilename);
+    //console.log({ parsed: path.parse(compressedFilePath) });
+    fs.writeFileSync(compressedFilePath, compressed);
+    fs.unlinkSync(file.path);
+
+    const newFile: FileInitializer = {
+        user_id: actor.type == 'user' ? actor.id : '',
+        filename: path.basename(compressedFilePath),
+        orig_filename: file.originalname,
+        mime_type: type.mime,
+        path: path.posix.join(userDir, compressedFilename),
+        size: file.size,
+        expires_at: new Date(Date.now() + (60 * 60 * 1000)),
+        ...(dimensions ? { width: dimensions.width, height: dimensions.height } : {})
+    };
+    const createdFile = await fileService.createFile(newFile);
+
+    return createdFile;
+}
+
+export const canModify = async (post_id: PostId, actor: Actor) => {
+    checkRequiredParameter({ post_id, actor });
+    const repo = new PostRepository();
+    const post = await repo.findById(post_id);
+    if (!post) return false;
+
+    if (actor.type == 'user' && actor.id == post.user_id) return true;
+    if (actor.type == 'system') return true;
+    if (actor.roles.includes('admin')) return true;
     return false;
 }
