@@ -54,7 +54,13 @@ type Context = {
 
 export const isValidCredentials = async (username: string, password: string): Promise<boolean> => {
     const user = await findByUsernameOrEmail(username);
-    return bcrypt.compare(password, user?.password || '');
+    if (!user || !user.password) {
+        const dummyPw = '$2b$12$6w0EVGd5ym.snFXuONzcZunBbXWR7A4cwmUugFGLfJnn23viNTPnK';
+        bcrypt.compare(password, dummyPw);
+        return false;
+    }
+
+    return bcrypt.compare(password, user.password);
 }
 
 export const getTokenData = async ({ user_id, username, email }: { user_id?: string; username?: string; email?: string }): Promise<PayloadData> => {
