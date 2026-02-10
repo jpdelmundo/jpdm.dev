@@ -26,7 +26,7 @@ jobs:
 
             #check if repo already checked out
             if [ ! -d ".git" ]; then
-              echo "Cloning repo..."
+              echo "Cloning repo: $REPO_URL..."
               git clone -b master "$REPO_URL"
               echo "Repo cloned."
             else
