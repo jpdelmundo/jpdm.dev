@@ -1,19 +1,18 @@
-import { Reader } from "@maxmind/geoip2-node";
-import fs from 'fs';
-import path from "path";
+import * as geolite2 from 'geolite2-redist';
+import maxmind, { type CityResponse } from 'maxmind';
 
 export const ipGeoLookup = async (ip: string) => {
     let location = {};
+
     if (!ip) return location;
     try {
         if (ip) {
-            const dbPath = path.join(process.cwd(), process.env.GEOIP_DB_PATH!);
-            const dbBuffer = fs.readFileSync(dbPath);
-            const reader = await Reader.openBuffer(dbBuffer);
-            const result = reader.city(ip);
+            const reader = await geolite2.open(geolite2.GeoIpDbName.City, path => maxmind.open<CityResponse>(path));
+            const lookup = reader.get(ip);
+            if (!lookup) return location;
             location = {
-                country: result.country?.names.en || null,
-                city: result.city?.names.en || null
+                country: lookup.country?.names.en || null,
+                city: lookup.city?.names.en || null
             };
         }
     } catch (err) {
