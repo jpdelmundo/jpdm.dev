@@ -36,6 +36,7 @@ jobs:
               echo "Pulling latest changes..."
               git fetch origin
               git checkout master
+              git reset --hard origin/master
               echo "Code updated."
             fi
 
