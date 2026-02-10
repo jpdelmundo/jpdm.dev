@@ -29,7 +29,6 @@ dist-ssr
 db/backup
 /prisma/db/generated/prisma
 
-shared/**/generated
 certs/
 uploads/
 usercontent/
