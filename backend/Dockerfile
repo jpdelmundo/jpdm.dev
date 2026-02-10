@@ -34,7 +34,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/backend/node_modules ./backend/node_modules
 #COPY --from=deps /app/shared/node_modules ./shared/node_modules
 COPY --from=builder /app/backend/dist ./backend/dist
-COPY --from=builder /app/backend/certs ./backend/certs
+#COPY --from=builder /app/backend/certs ./backend/certs
 #COPY --from=builder /app/backend/db ./backend/db
 COPY --from=builder /app/shared/dist ./shared/dist
 WORKDIR /app/backend
