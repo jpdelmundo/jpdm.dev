@@ -1,6 +1,6 @@
 import { getErrorMessage } from '@/utils/helper';
 import { type ApiResult } from '@shared/types/ApiResult';
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import TextField from './TextField';
 
@@ -22,7 +22,7 @@ type Props = {
 
 export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed, email }: Props) {
     console.log('UpdateEmailForm render');
-    const { register, handleSubmit, setError, formState: { errors }, setValue } = useForm<EmailFormInput>({
+    const { register, handleSubmit, setError, formState: { errors } } = useForm<EmailFormInput>({
         defaultValues: {
             email: email || ''
         }
@@ -112,6 +112,7 @@ export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed,
                             error={!!errors.code}
                             helperText={errors.code?.message}
                             inputTextAlign="center"
+                            type="number"
                             slotProps={{
                                 htmlInput: {
                                     inputMode: 'numeric',
@@ -127,9 +128,6 @@ export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed,
                                         letterSpacing: 5
                                     }
                                 }
-                            }}
-                            onInput={(e: ChangeEvent<HTMLInputElement>) => {
-                                e.target.value = e.target.value.replace(/[^0-9]/g, '');
                             }}
                             sx={{
                                 alignSelf: 'center'

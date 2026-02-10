@@ -1,12 +1,13 @@
 import { apiPost } from '@/api/apiClient';
 import { SignUpForm, type FormInput, type FormSubmitResult as SignUpFormSubmitResult } from '@/components/SignUpForm';
-import { UpdateEmailForm, type FormInput as EmailFormInput } from '@/components/UpdateEmailForm';
+import { UpdateEmailForm } from '@/components/UpdateEmailForm';
 import { useAuthStore } from '@/store/useAuthStore';
 import { getFingerprint } from '@/utils/device';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import type { ApiResult } from '@shared/types/ApiResult';
+import type { EmailFormInput } from '@shared/types/EmailFormInput';
 import { jsonBase64Encode } from '@shared/utils/encoding';
 import { useState } from 'react';
 import { GoogleReCaptchaProvider, useGoogleReCaptcha } from 'react-google-recaptcha-v3';

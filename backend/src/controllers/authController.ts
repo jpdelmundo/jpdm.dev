@@ -1,16 +1,17 @@
-import type { User } from '@shared/models/generated/User';
-import type { DeviceFingerprint } from '@shared/types/DeviceFingerprint';
-import { ErrorCode } from '@shared/types/ErrorCode';
-import { jsonBase64Decode, jsonBase64Encode } from '@shared/utils/encoding';
+import type { AuthorizedRequest } from '@/types/AuthorizedRequest.js';
+import type { User } from '@shared/models/generated/User.js';
+import type { DeviceFingerprint } from '@shared/types/DeviceFingerprint.js';
+import { ErrorCode } from '@shared/types/ErrorCode.js';
+import { jsonBase64Decode, jsonBase64Encode } from '@shared/utils/encoding.js';
 import type { Request, Response } from 'express';
 import type { NextFunction } from 'express-serve-static-core';
 import passport from 'passport';
-import { UnexpectedError } from 'src/errors/UnexpectedError';
-import type { AuthorizedRequest } from 'src/types/AuthorizedRequest';
-import { clearRefreshTokenCookie, createRefreshTokenCookie } from '../services/authService';
-import * as userService from '../services/userService';
-import { fail, ok } from '../utils/apiHelper';
-import { generateJwt } from '../utils/auth';
+
+import { UnexpectedError } from '@/errors/UnexpectedError.js';
+import { clearRefreshTokenCookie, createRefreshTokenCookie } from '../services/authService.js';
+import * as userService from '../services/userService.js';
+import { fail, ok } from '../utils/apiHelper.js';
+import { generateJwt } from '../utils/auth.js';
 
 interface LoginParams {
     username: string;
@@ -162,7 +163,7 @@ export const googleAuth = async (req: Request, res: Response, next: NextFunction
 
 export const googleAuthCallback = async (req: Request, res: Response, next: NextFunction) => {
     const { state } = req.query;
-    const redirectUrl = new URL(`${process.env.SITE_URL}/auth/callback`);
+    const redirectUrl = new URL(`${process.env.FRONTEND_BASE_URL}/auth/callback`);
     let intent: string | undefined, customData;
     passport.authenticate('google', { session: false }, async (err: Error, user: User, info: unknown) => {
         try {
@@ -183,14 +184,14 @@ export const googleAuthCallback = async (req: Request, res: Response, next: Next
                     res.send(`<script>
                         window.opener.postMessage({
                             token: '${token}'
-                        }, '${process.env.SITE_URL}');
+                        }, '${process.env.FRONTEND_BASE_URL}');
                         window.close();
                     </script>`);
                 } catch (error) {
                     res.send(`<script>
                         window.opener.postMessage({
                             error: '${(error as Error).message}'
-                        }, '${process.env.SITE_URL}');
+                        }, '${process.env.FRONTEND_BASE_URL}');
                         window.close();
                     </script>`);
                 }
@@ -251,14 +252,14 @@ export const facebookAuthCallback = async (req: Request, res: Response, next: Ne
                     res.send(`<script>
                         window.opener.postMessage({
                             token: '${token}'
-                        }, '${process.env.SITE_URL}');
+                        }, '${process.env.FRONTEND_BASE_URL}');
                         window.close();
                     </script>`);
                 } catch (error) {
                     res.send(`<script>
                         window.opener.postMessage({
                             error: '${(error as Error).message}'
-                        }, '${process.env.SITE_URL}');
+                        }, '${process.env.FRONTEND_BASE_URL}');
                         window.close();
                     </script>`);
                 }

@@ -1,32 +1,34 @@
-import { ServiceError } from '@/errors/ServiceError';
-import { PasswordResetRepository } from '@/repositories/PasswordResetRepository';
-import * as userProfileService from '@/services/userProfileService';
-import type { FindParamsBase } from '@/types/FindParams';
-import { randomString } from '@/utils/helper';
-import type { MeDTO } from '@shared/models/dto/MeDTO';
-import type UserWithRoles from '@shared/models/extensions/UserWithRoles';
-import type { RefreshTokenInitializer } from '@shared/models/generated/RefreshToken';
-import type { User, UserId, UserInitializer, UserMutator } from '@shared/models/generated/User';
-import type { UserProfile } from '@shared/models/generated/UserProfile';
-import type { UserRole } from '@shared/models/generated/UserRole';
-import { ErrorCode } from '@shared/types/ErrorCode';
-import type { Jwt, PayloadData } from '@shared/types/Jwt';
-import type { OrderDirection } from '@shared/types/OrderDirection';
-import type { UserIdentity } from '@shared/types/User';
-import { jsonBase64Decode } from '@shared/utils/encoding';
-import { generateRandomUsername, getEmailUsername } from '@shared/utils/username';
-import { isValidEmail, validatePassword } from '@shared/utils/validation';
+import { ServiceError } from '@/errors/ServiceError.js';
+import { PasswordResetRepository } from '@/repositories/PasswordResetRepository.js';
+import * as userProfileService from '@/services/userProfileService.js';
+import type { FindParamsBase } from '@/types/FindParams.js';
+import { checkRequiredParameter, randomString } from '@/utils/helper.js';
+import type { MeDTO } from '@shared/models/dto/MeDTO.js';
+import type UserWithRoles from '@shared/models/extensions/UserWithRoles.js';
+import type { RefreshToken, RefreshTokenInitializer } from '@shared/models/generated/RefreshToken.js';
+import type { User, UserId, UserInitializer, UserMutator } from '@shared/models/generated/User.js';
+import type { UserProfile } from '@shared/models/generated/UserProfile.js';
+import type { UserRole as UserRoleModel } from '@shared/models/generated/UserRole.js';
+import type { Actor } from '@shared/types/Actor.js';
+import { ErrorCode } from '@shared/types/ErrorCode.js';
+import type { Jwt, PayloadData } from '@shared/types/Jwt.js';
+import type { OrderDirection } from '@shared/types/OrderDirection.js';
+import type { UserIdentity } from '@shared/types/UserIdentity.js';
+import type { UserRole } from '@shared/types/UserRole.js';
+import { jsonBase64Decode } from '@shared/utils/encoding.js';
+import { generateRandomUsername, getEmailUsername } from '@shared/utils/username.js';
+import { isValidEmail, validatePassword } from '@shared/utils/validation.js';
 import * as bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import type { Profile as FacebookProfile } from 'passport-facebook';
 import type { Profile as GoogleProfile } from 'passport-google-oauth20';
 import { validate } from 'uuid';
-import { RefreshTokenRepository } from '../repositories/RefreshTokenRepository';
-import { UserProfileRepository } from '../repositories/UserProfileRepository';
-import { UserRepository } from '../repositories/UserRepository';
-import { UserRoleRepository } from '../repositories/UserRoleRepository';
-import { ApiError } from '../utils/apiHelper';
-import { mail } from '../utils/mailer';
+import { RefreshTokenRepository } from '../repositories/RefreshTokenRepository.js';
+import { UserProfileRepository } from '../repositories/UserProfileRepository.js';
+import { UserRepository } from '../repositories/UserRepository.js';
+import { UserRoleRepository } from '../repositories/UserRoleRepository.js';
+import { ApiError } from '../utils/apiHelper.js';
+import { mail } from '../utils/mailer.js';
 
 type GetParams = {
     current_user_id?: UserId;
@@ -80,7 +82,7 @@ export const getTokenData = async ({ user_id, username, email }: { user_id?: str
     }
 
     const userWithRoles = await getUserWithRoles(user.id);
-    return { id: userWithRoles.id, username: userWithRoles.username, email: userWithRoles.email, roles: userWithRoles.roles.map(v => v.role) };
+    return { id: userWithRoles.id, username: userWithRoles.username, email: userWithRoles.email, roles: userWithRoles.roles };
 }
 
 export const findByUsername = async (username: string): Promise<User | null> => {
@@ -114,8 +116,9 @@ export const getUserWithRoles = async (userId: string): Promise<UserWithRoles> =
 
 export const getRoles = async (userId: string): Promise<UserRole[]> => {
     const repo = new UserRoleRepository();
-    const result = await repo.find({ userId });
-    return result;
+    const result: UserRoleModel[] = await repo.find({ userId });
+    const roles = result.map(v => v.role as UserRole);
+    return roles;
 }
 
 export const getProfile = async (userId: string): Promise<UserProfile | null> => {
@@ -253,9 +256,8 @@ export const confirmEmailCode = async (userId: UserId, code: string) => {
 export const signOut = async (userId: UserId, deviceId: string) => {
     if (!deviceId) return;
     const repo = new RefreshTokenRepository();
-    const refreshTokens = await repo.find({ deviceId, userId });
+    const refreshTokens: RefreshToken[] = await repo.find({ deviceId, userId });
     refreshTokens.forEach(v => {
-        //repo.delete(v.id);
         if (!v.is_used) repo.query(`update refresh_tokens
                                     set revoked_at = now()
                                     where id = $1`, [v.id]);
@@ -303,7 +305,7 @@ export const recoverAccount = async (email: string, fingerprint: string) => {
         subject: 'Account Recovery',
         text: `Hi - You can reset your password using this link:
 
-${process.env.SITE_URL}/reset-password/${token_hash}
+${process.env.FRONTEND_BASE_URL}/reset-password/${token_hash}
 
 Please disregard if you did not make this request.`
     });
@@ -474,11 +476,10 @@ export const get = async <P extends FindParamsBase>(params: P) => {
     return findResult;
 }
 
-export const update = async (id: UserId, params: UpdateParams, context: Context) => {
+export const update = async (id: UserId, params: UpdateParams, actor: Actor) => {
     const { old_password, new_password, deleted, deleted_at } = params;
-    const { actor, isSystem } = context;
     if (!id) throw new ServiceError('Missing parameter: id');
-    if (!isSystem && !actor?.roles.includes('admin') && actor?.id != id) throw new ServiceError('Unauthorized request');
+    if (!canModify(id, actor)) throw new ServiceError('Unauthorized request');
 
     if (old_password && new_password) {
         const user = await findById(id);
@@ -505,14 +506,12 @@ export const update = async (id: UserId, params: UpdateParams, context: Context)
     return result;
 }
 
-export const del = async (id: UserId, params: DeleteParams, context: Context) => {
+export const del = async (id: UserId, params: DeleteParams, actor: Actor) => {
     const { password, token } = params;
-    const { actor, isSystem } = context;
-
-    if (!isSystem && !actor?.roles.includes('admin')) {
+    if (actor.type == 'user') {
         if (!password && !token) throw new ServiceError('Missing or empty require parameter: password or token');
-        if (actor?.id != id) throw new ServiceError('Unauthorized request');
     }
+    if (!canModify(id, actor)) throw new ServiceError('Unauthorized request');
 
     const user = await findById(id);
     if (!user) throw new Error(`User not found. id: ${id}`);
@@ -547,4 +546,16 @@ export const toMe = (user: User | null): MeDTO => {
     }
 
     return result;
+}
+
+const canModify = async (id: UserId, actor: Actor) => {
+    checkRequiredParameter({ id, actor });
+    const repo = new UserRepository();
+    const user = await repo.findById(id);
+    if (!user) return false;
+
+    if (actor.type == 'user' && actor.id == user.id) return true;
+    if (actor.type == 'system') return true;
+    if (actor.roles.includes('admin')) return true;
+    return false;
 }

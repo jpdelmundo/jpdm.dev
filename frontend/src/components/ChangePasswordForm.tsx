@@ -5,6 +5,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Collapse from '@mui/material/Collapse';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import type { ApiResult } from '@shared/types/ApiResult';
 import type { ChangePasswordFormInput } from '@shared/types/ChangePasswordFormInput';
 import { validatePassword as _validatePassword } from '@shared/utils/validation';
 import { useEffect, useState } from 'react';
@@ -18,7 +19,7 @@ type Props = {
 }
 
 export function ChangePasswordForm({ onSubmit, onCompleted }: Props) {
-    const { register, handleSubmit, setError, formState: { errors }, watch } = useForm<ChangePasswordFormInput>();
+    const { register, handleSubmit, formState: { errors }, watch } = useForm<ChangePasswordFormInput>();
     const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');

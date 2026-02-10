@@ -1,38 +1,33 @@
-import '@/env';
+import '@/env.js';
 //do not remove this comment to prevent auto organize on save (@/env should be the first import)
-import '@/config/passport';
-import { ErrorCode } from '@shared/types/ErrorCode';
+import '@/config/passport.js';
+import { ErrorCode } from '@shared/types/ErrorCode.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { type NextFunction, type Request, type Response } from 'express';
+import http from 'http';
 import https from 'https';
 import fs from 'node:fs';
 import path, { resolve } from 'node:path';
 import passport from 'passport';
-import { ServiceError } from './errors/ServiceError';
-import router from './router';
-import { router as passportRouter } from './routes/passportRouter';
-import { ApiError, error } from './utils/apiHelper';
-import './utils/logger';
+import { ServiceError } from './errors/ServiceError.js';
+import router from './router.js';
+import { ApiError, error } from './utils/apiHelper.js';
+import './utils/logger.js';
 
 const app = express();
-const port = process.env.API_PORT;
-const apiBasePath = String(process.env.API_BASE_PATH); // /api/<version> ex. /api/v1
+const port = process.env.BACKEND_PORT;
 
 app.set('trust proxy', 1); //for cloudflare/proxy
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://localhost:5173',
-    'http://localhost:4173',
-  ], credentials: true
+  origin: process.env.CORS_ORIGINS?.split(','),
+  credentials: true
 }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(passport.initialize());
-app.use('/auth', passportRouter);
 app.use('/usercontent', express.static(path.resolve(process.env.USERCONTENT_DIR!)));
-app.use(apiBasePath, router);
+app.use('/', router);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error('Server Error:', err);
@@ -46,16 +41,17 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-https.createServer({
-  key: fs.readFileSync(resolve(process.cwd(), process.env.SSL_KEY_PATH!)),
-  cert: fs.readFileSync(resolve(process.cwd(), process.env.SSL_CERT_PATH!)),
-}, app)
-  .listen(`4${port}`, () => {
-    console.log(`NODE_ENV is: ${process.env.NODE_ENV}`);
-    console.log(`Server is running at https://localhost:4${port}`);
-  });
+let server;
+if (process.env.NODE_ENV !== 'production') {
+  server = https.createServer({
+    key: fs.readFileSync(resolve(process.cwd(), process.env.SSL_KEY_PATH!)),
+    cert: fs.readFileSync(resolve(process.cwd(), process.env.SSL_CERT_PATH!)),
+  }, app);
+} else {
+  server = http.createServer(app);
+}
 
-// app.listen(port, () => {
-//   console.log(`NODE_ENV is: ${process.env.NODE_ENV}`);
-//   console.log(`Server is running at http://localhost:${port}`);
-// });
+server.listen(`${process.env.BACKEND_PORT}`, () => {
+  console.log(`NODE_ENV is: ${process.env.NODE_ENV}`);
+  console.log(`Server is running at https://localhost:${process.env.BACKEND_PORT}`);
+});

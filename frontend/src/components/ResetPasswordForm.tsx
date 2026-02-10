@@ -26,7 +26,7 @@ export function ResetPasswordForm({ onSubmit, onResetPasswordSuccess }: {
     onSubmit: (formInput: FormInput) => Promise<ApiResult<unknown>>,
     onResetPasswordSuccess: (result: ApiResult<unknown>) => void
 }) {
-    const { register, handleSubmit, setError, formState: { errors }, watch } = useForm<FormInput>();
+    const { register, handleSubmit, formState: { errors }, watch } = useForm<FormInput>();
     const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');

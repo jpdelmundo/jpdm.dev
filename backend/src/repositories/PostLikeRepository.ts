@@ -1,9 +1,9 @@
-import type { FindParamsBase } from '@/types/FindParams';
-import type { PostId } from '@shared/models/generated/Post';
-import type { PostLike, PostLikeId, PostLikeInitializer, PostLikeMutator } from '@shared/models/generated/PostLike';
-import type { UserId } from '@shared/models/generated/User';
-import { type OrderDirection } from '@shared/types/OrderDirection';
-import { BaseRepository } from './BaseRepository';
+import type { FindParamsBase } from '@/types/FindParams.js';
+import type { PostId } from '@shared/models/generated/Post.js';
+import type { PostLike, PostLikeId, PostLikeInitializer, PostLikeMutator } from '@shared/models/generated/PostLike.js';
+import type { UserId } from '@shared/models/generated/User.js';
+import { type OrderDirection } from '@shared/types/OrderDirection.js';
+import { BaseRepository } from './BaseRepository.js';
 
 type FindParams = {
     id?: PostLikeId;

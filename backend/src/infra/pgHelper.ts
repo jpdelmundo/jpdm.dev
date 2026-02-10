@@ -1,4 +1,4 @@
-import type { DateComparison } from "@shared/types/DateComparison";
+import type { DateComparison } from "@shared/types/DateComparison.js";
 
 export function escapeLiteral(val: unknown): string {
     if (val === null || val === undefined) return 'NULL';
@@ -62,4 +62,6 @@ export function getDateParamCondition(column: string, condition: DateComparison,
     if (key == 'isnull') {
         return `${column} is ${val ? 'null' : 'not null'}`;
     }
+
+    return '';
 }

@@ -1,6 +1,6 @@
-import * as fileService from '@/services/fileService';
-import { ok } from '@/utils/apiHelper';
-import { getActor } from '@/utils/auth';
+import * as fileService from '@/services/fileService.js';
+import { ok } from '@/utils/apiHelper.js';
+import { getActor } from '@/utils/auth.js';
 import type { Request, Response } from 'express';
 
 export const uploadImage = async (req: Request, res: Response): Promise<Response> => {

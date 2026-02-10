@@ -1,3 +1,4 @@
 import { Pool } from "pg";
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const connectionString = `postgres://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DB}`;
+export const pool = new Pool({ connectionString });

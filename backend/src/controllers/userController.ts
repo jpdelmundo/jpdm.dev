@@ -1,16 +1,17 @@
-import { ServiceError } from '@/errors/ServiceError';
-import { botCheck } from '@/services/captchaService';
-import * as postService from '@/services/postService';
-import { jsonBase64Decode } from '@shared/utils/encoding';
-import { validatePassword } from '@shared/utils/validation';
+import { ServiceError } from '@/errors/ServiceError.js';
+import { botCheck } from '@/services/captchaService.js';
+import * as postService from '@/services/postService.js';
+import type { AuthorizedRequest } from '@/types/AuthorizedRequest.js';
+import type { RouteParams } from '@/types/RouteParams.js';
+import { jsonBase64Decode } from '@shared/utils/encoding.js';
+import { validatePassword, validateUsername } from '@shared/utils/validation.js';
 import * as bcrypt from 'bcrypt';
 import type { Request, Response } from 'express';
-import type { AuthorizedRequest } from 'src/types/AuthorizedRequest';
 import { validate } from 'uuid';
-import { createRefreshTokenCookie } from '../services/authService';
-import * as userService from '../services/userService';
-import { fail, ok } from '../utils/apiHelper';
-import { generateJwt, getCurrentUser } from '../utils/auth';
+import { createRefreshTokenCookie } from '../services/authService.js';
+import * as userService from '../services/userService.js';
+import { fail, ok } from '../utils/apiHelper.js';
+import { generateJwt, getCurrentUser } from '../utils/auth.js';
 
 export const me = async (req: Request, res: Response) => {
     const id = getCurrentUser(req)?.id;
@@ -32,6 +33,7 @@ export const create = async (req: Request, res: Response): Promise<Response> => 
 
     if (!password) return fail(res, 'Password required');
     if (validatePassword(password).length > 0) return fail(res, 'Password invalid');
+    if (validateUsername(username).length > 0) return fail(res, 'Username invalid');
 
     //create user
     const newUser = await userService.createUser({ username, password: await bcrypt.hash(password, 12) });
@@ -67,7 +69,7 @@ export const emailCodeConfirm = async (req: Request, res: Response): Promise<Res
     return ok(res);
 }
 
-export const posts = async (req: Request, res: Response): Promise<Response> => {
+export const posts = async (req: Request<RouteParams>, res: Response): Promise<Response> => {
     const { page_num } = req.query;
     const { id } = req.params;
     if (!id) return fail(res, 'Cannot fetch posts. Missing user id.');
@@ -77,9 +79,6 @@ export const posts = async (req: Request, res: Response): Promise<Response> => {
         : await userService.findByVanityId(id);
     if (!user) return fail(res, 'Cannot fetch posts. User not found.');
     const user_id = user.id;
-
-    const current_user_id = getCurrentUser(req)?.id;
-    console.log({ current_user_id });
     const posts = await postService.get({
         user_id,
         visibility: 'public',
@@ -88,9 +87,8 @@ export const posts = async (req: Request, res: Response): Promise<Response> => {
         page_size: 30,
         order_by: 'created_at',
         order_dir: 'desc',
-        include: ['stats', 'images'],
-        current_user_id
-    });
+        include: ['stats', 'images']
+    }, req.user);
 
     return ok(res, posts);
 }
@@ -129,26 +127,22 @@ export const resetPassword = async (req: Request, res: Response): Promise<Respon
     return ok(res);
 }
 
-export const update = async (req: Request, res: Response): Promise<Response> => {
+export const update = async (req: Request<RouteParams>, res: Response): Promise<Response> => {
     const { id } = req.params;
-    const user = getCurrentUser(req);
     const { old_password, new_password } = req.body;
 
-    const result = await userService.update(id!, {
+    const result = await userService.update(id, {
         old_password,
         new_password
-    }, {
-        actor: user
-    });
+    }, req.user!);
 
     return result ? ok(res) : fail(res);
 }
 
-export const del = async (req: Request, res: Response): Promise<Response> => {
+export const del = async (req: Request<RouteParams>, res: Response): Promise<Response> => {
     const { id } = req.params;
     const { password, token } = req.body;
-    const user = getCurrentUser(req);
-    const result = await userService.del(id!, { password, token }, { actor: user });
+    const result = await userService.del(id, { password, token }, req.user!);
 
     return result.id ? ok(res) : fail(res);
 }

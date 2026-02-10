@@ -20,7 +20,7 @@ export type FormInput = {
 export function ForgotPasswordForm({ onEmailSubmit }: {
     onEmailSubmit: (formInput: FormInput) => Promise<ApiResult<{ code: ErrorCode }>>
 }) {
-    const { register, handleSubmit, setError, formState: { errors } } = useForm<FormInput>();
+    const { register, handleSubmit, formState: { errors } } = useForm<FormInput>();
     const [errorMessage, setErrorMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [step, setStep] = useState<'email' | 'sent'>('email');

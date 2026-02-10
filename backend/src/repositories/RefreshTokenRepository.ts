@@ -1,6 +1,6 @@
-import { RefreshTokenColumns, type RefreshToken, type RefreshTokenId, type RefreshTokenInitializer, type RefreshTokenMutator } from '@shared/models/generated/RefreshToken';
-import type { UserId } from '@shared/models/generated/User';
-import { BaseRepository } from './BaseRepository';
+import { RefreshTokenColumns, type RefreshToken, type RefreshTokenId, type RefreshTokenInitializer, type RefreshTokenMutator } from '@shared/models/generated/RefreshToken.js';
+import type { UserId } from '@shared/models/generated/User.js';
+import { BaseRepository } from './BaseRepository.js';
 
 interface FindParams {
     id?: string;

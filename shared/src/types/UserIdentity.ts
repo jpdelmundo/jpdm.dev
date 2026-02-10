@@ -1,10 +1,10 @@
-import { UserId } from "../models/generated/User";
-import { UserRoleEnum } from "../models/generated/UserRoleEnum";
+import { type UserId } from "../models/generated/User.js";
+import { type UserRole } from "./UserRole.js";
 
 export interface UserIdentity {
     id: UserId;
     username: string;
     email: string | null;
-    roles: UserRoleEnum[];
-    type: 'user'
+    roles: UserRole[];
+    type: 'user';
 }

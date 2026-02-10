@@ -1,5 +1,5 @@
-import * as userProfileService from '@/services/userProfileService';
-import * as userService from '@/services/userService';
+import * as userProfileService from '@/services/userProfileService.js';
+import * as userService from '@/services/userService.js';
 import passport from 'passport';
 import { Strategy as FacebookStrategy, type Profile as FacebookProfile } from 'passport-facebook';
 import { Strategy as GoogleStrategy, type Profile as GoogleProfile, type VerifyCallback as GoogleVerifyCallback } from 'passport-google-oauth20';
@@ -25,7 +25,7 @@ passport.use(new GoogleStrategy({
         if (!user) {
             user = await userService.createUserFromSocialLogin(email, profile);
         } else {
-            userService.update(user.id, { deleted: null, deleted_at: null }, { isSystem: true });
+            userService.update(user.id, { deleted: null, deleted_at: null }, { type: 'system' });
 
             const userProfile = (await userProfileService.get({ user_id: user.id }))[0];
             const avatar_url = profile.photos?.[0]?.value;
@@ -49,7 +49,7 @@ passport.use(new GoogleStrategy({
             }
         }
 
-        done(null, { id: user.id });
+        done(null, { id: user.id, username: user.username, email: user.email, roles: await userService.getRoles(user.id), type: 'user' });
     } catch (error) {
         done(error);
     }

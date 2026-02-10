@@ -1,6 +1,6 @@
-import { verifyToken } from '@/utils/auth';
+import { verifyToken } from '@/utils/auth.js';
 import { Router } from 'express';
-import * as controller from '../controllers/userController';
+import * as controller from '../controllers/userController.js';
 
 export const router = Router();
 

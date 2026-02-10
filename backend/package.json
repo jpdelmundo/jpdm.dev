@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/app.ts",
     "debug": "tsx watch --inspect src/app.ts",
+    "build": "rm -rf dist && tsc -b tsconfig.build.json && tsc-alias -p tsconfig.alias.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -46,6 +47,7 @@
     "@types/passport": "^1.0.17",
     "@types/passport-facebook": "^3.0.4",
     "@types/passport-google-oauth20": "^2.0.17",
-    "@types/pg": "^8.15.5"
+    "@types/pg": "^8.15.5",
+    "tsc-alias": "^1.8.16"
   }
 }

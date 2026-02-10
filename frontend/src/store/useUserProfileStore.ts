@@ -8,7 +8,7 @@ interface StoreState {
     fetchProfile: (id: UserId) => void;
 }
 
-export const useUserProfileStore = create<StoreState>()((set, get) => ({
+export const useUserProfileStore = create<StoreState>()((set) => ({
     userProfile: null,
     fetchProfile: async (id: UserId) => {
         const result = await apiGet<UserProfile>(`/profile/${id}`);

@@ -1,14 +1,14 @@
 {
   "references": [
     {
+      "path": "./shared"
+    },
+    {
       "path": "./frontend"
     },
     {
       "path": "./backend"
     },
-    {
-      "path": "./shared"
-    }
   ],
   "files": [],
   "include": []

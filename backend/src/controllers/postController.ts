@@ -1,14 +1,16 @@
-import type { AppContext } from '@/infra/appContext';
-import * as commentService from '@/services/commentService';
-import * as postLikeService from '@/services/postLikeService';
-import * as postService from '@/services/postService';
-import * as postViewService from '@/services/postViewService';
-import { fail, ok } from '@/utils/apiHelper';
-import { getActor, getCurrentUser } from '@/utils/auth';
-import type { PostId } from '@shared/models/generated/Post';
-import type { PostViewInitializer } from '@shared/models/generated/PostView';
-import type { DeviceFingerprint } from '@shared/types/DeviceFingerprint';
-import { jsonBase64Decode } from '@shared/utils/encoding';
+import type { AppContext } from '@/infra/appContext.js';
+import * as commentService from '@/services/commentService.js';
+import * as postLikeService from '@/services/postLikeService.js';
+import * as postService from '@/services/postService.js';
+import * as postViewService from '@/services/postViewService.js';
+import type { AuthorizedRequest } from '@/types/AuthorizedRequest.js';
+import type { RouteParams } from '@/types/RouteParams.js';
+import { fail, ok } from '@/utils/apiHelper.js';
+import { getActor, getCurrentUser } from '@/utils/auth.js';
+import type { PostId } from '@shared/models/generated/Post.js';
+import type { PostViewInitializer } from '@shared/models/generated/PostView.js';
+import type { DeviceFingerprint } from '@shared/types/DeviceFingerprint.js';
+import { jsonBase64Decode } from '@shared/utils/encoding.js';
 import type { Request, Response } from 'express';
 
 export const createPostController = (app: AppContext) => ({
@@ -22,26 +24,20 @@ export const createPostController = (app: AppContext) => ({
         return ok(res);
     },
 
-    get: async (req: Request, res: Response): Promise<Response> => {
+    get: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
         const { id } = req.params;
-        const current_user_id = getCurrentUser(req)?.id;
-        const post = await postService.getById(id!, {
-            include: ['stats', 'images'],
-            ...(current_user_id && { current_user_id })
-        });
-
+        const post = await postService.getById(id!, { include: ['stats', 'images'], }, req.user!);
         return ok(res, post);
     },
 
-    createComment: async (req: Request, res: Response): Promise<Response> => {
+    createComment: async (req: AuthorizedRequest<RouteParams>, res: Response): Promise<Response> => {
         const { id } = req.params;
         const { comment } = req.body;
-        const current_user_id = getCurrentUser(req)?.id;
 
         const result = await commentService.create({
             post_id: id!,
-            user_id: current_user_id!,
-            comment: String(comment).trim().replace(/\n{3,}/g, '\n\n')
+            user_id: req.user.id,
+            comment
         });
         if (!result.id) return fail(res);
 
@@ -89,38 +85,32 @@ export const createPostController = (app: AppContext) => ({
         return ok(res);
     },
 
-    like: async (req: Request, res: Response): Promise<Response> => {
+    like: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
         const { id } = req.params;
-        const current_user_id = getCurrentUser(req)?.id;
-        await postLikeService.like(id!, current_user_id!);
+        await postLikeService.like(id, req.user!);
         return ok(res);
     },
 
-    unlike: async (req: Request, res: Response): Promise<Response> => {
+    unlike: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
         const { id } = req.params;
-        const current_user_id = getCurrentUser(req)?.id;
-        await postLikeService.unlike(id!, current_user_id!);
+        await postLikeService.unlike(id, req.user!);
         return ok(res);
     },
 
-    del: async (req: Request, res: Response): Promise<Response> => {
+    del: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
         const { id } = req.params;
-        const current_user_id = getCurrentUser(req)?.id;
-        const deleted = await postService.del(id!, { current_user_id: current_user_id! });
+        const deleted = await postService.del(id, req.user!);
         return ok(res, deleted);
     },
 
-    update: async (req: Request, res: Response): Promise<Response> => {
+    update: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
         const { id } = req.params;
         const { title, content, files } = req.body;
-        const current_user_id = getCurrentUser(req)?.id;
-
-        const result = await postService.update(id!, {
-            current_user_id: current_user_id!,
+        const result = await postService.update(id, {
             title,
             content,
             files
-        });
+        }, req.user!);
         if (!result.id) return fail(res);
 
         return ok(res, result);

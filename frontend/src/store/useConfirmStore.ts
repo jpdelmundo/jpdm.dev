@@ -1,5 +1,5 @@
 // stores/useConfirmStore.ts
-import { create } from "zustand";
+import { create } from 'zustand';
 
 type ConfirmOptions = {
     title?: string;

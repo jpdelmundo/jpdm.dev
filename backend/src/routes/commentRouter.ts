@@ -1,7 +1,7 @@
-import { apiRateLimit } from '@/middleware/apiRateLimit';
-import { verifyToken } from '@/utils/auth';
+import { apiRateLimit } from '@/middleware/apiRateLimit.js';
+import { verifyToken } from '@/utils/auth.js';
 import { Router } from 'express';
-import * as controller from '../controllers/commentController';
+import * as controller from '../controllers/commentController.js';
 
 export const router = Router();
 //router.get('/get', controller.get);

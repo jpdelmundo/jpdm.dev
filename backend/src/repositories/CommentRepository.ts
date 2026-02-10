@@ -1,9 +1,9 @@
-import type { FindParamsBase } from '@/types/FindParams';
-import type { Comment, CommentId, CommentInitializer, CommentMutator } from '@shared/models/generated/Comment';
-import type { PostId } from '@shared/models/generated/Post';
-import type { UserId } from '@shared/models/generated/User';
-import { type OrderDirection } from '@shared/types/OrderDirection';
-import { BaseRepository } from './BaseRepository';
+import type { FindParamsBase } from '@/types/FindParams.js';
+import type { Comment, CommentId, CommentInitializer, CommentMutator } from '@shared/models/generated/Comment.js';
+import type { PostId } from '@shared/models/generated/Post.js';
+import type { UserId } from '@shared/models/generated/User.js';
+import { type OrderDirection } from '@shared/types/OrderDirection.js';
+import { BaseRepository } from './BaseRepository.js';
 
 type FindParams = {
     id?: CommentId;

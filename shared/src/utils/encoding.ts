@@ -13,9 +13,8 @@ export const jsonBase64Encode = (obj: unknown) => {
     //browser
     const bytes = new TextEncoder().encode(json);
     let binary = '';
-    const len = bytes.length;
-    for (let i = 0; i < len; i++) {
-        binary += String.fromCharCode(bytes[i]);
+    for (const byte of bytes) {
+        binary += String.fromCharCode(byte);
     }
     return btoa(binary);
 };

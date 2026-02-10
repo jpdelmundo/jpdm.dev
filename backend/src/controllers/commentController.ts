@@ -1,6 +1,6 @@
-import * as commentService from '@/services/commentService';
-import { fail, ok } from '@/utils/apiHelper';
-import { getCurrentUser } from '@/utils/auth';
+import * as commentService from '@/services/commentService.js';
+import { fail, ok } from '@/utils/apiHelper.js';
+import { getCurrentUser } from '@/utils/auth.js';
 import type { Request, Response } from 'express';
 
 export const create = async (req: Request, res: Response): Promise<Response> => {
@@ -21,8 +21,7 @@ export const get = async (req: Request, res: Response): Promise<Response> => {
     const { page_num, post_id } = req.query;
     const current_user_id = getCurrentUser(req)?.id;
     const result = await commentService.get({
-        ...(current_user_id && { current_user_id }),
-        // ...(id && { id }),
+        current_user_id,
         post_id,
         page_num: page_num ? parseInt(String(page_num)) : 1,
         page_size: 10,
@@ -32,7 +31,7 @@ export const get = async (req: Request, res: Response): Promise<Response> => {
     return ok(res, result);
 }
 
-export const update = async (req: Request, res: Response): Promise<Response> => {
+export const update = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
     const { id } = req.params;
     const { comment } = req.body;
     const current_user_id = getCurrentUser(req)?.id;
@@ -43,7 +42,7 @@ export const update = async (req: Request, res: Response): Promise<Response> => 
     return ok(res, result);
 }
 
-export const del = async (req: Request, res: Response): Promise<Response> => {
+export const del = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
     const { id } = req.params;
     const current_user_id = getCurrentUser(req)?.id;
 

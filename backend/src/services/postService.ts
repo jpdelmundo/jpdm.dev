@@ -1,35 +1,35 @@
-import { ServiceError } from '@/errors/ServiceError';
-import { withTransaction } from '@/infra/withTransaction';
-import { CommentRepository } from '@/repositories/CommentRepository';
-import { FileRepository } from '@/repositories/FileRepository';
-import { ImageRepository } from '@/repositories/ImageRepository';
-import { PostRepository } from '@/repositories/PostRepository';
-import { UserRepository } from '@/repositories/UserRepository';
-import type { Deps } from '@/types/Deps';
-import type { FindParamsBase } from '@/types/FindParams';
-import type { UserContext } from '@/types/UserContext';
-import { checkRequiredParameter } from '@/utils/helper';
-import { compress } from '@/utils/image';
-import type ImageExtended from '@shared/models/extensions/ImageExtended';
-import type PostDTO from '@shared/models/extensions/PostExtended';
-import { type File, type FileInitializer } from '@shared/models/generated/File';
-import type { ImageId } from '@shared/models/generated/Image';
-import type { PostId, PostInitializer, PostMutator } from '@shared/models/generated/Post';
-import type { UserId } from '@shared/models/generated/User';
-import type { VisibilityEnum } from '@shared/models/generated/VisibilityEnum';
-import type { Actor } from '@shared/types/Actor';
-import { ErrorCode } from '@shared/types/ErrorCode';
-import type { OrderDirection } from '@shared/types/OrderDirection';
+import { ServiceError } from '@/errors/ServiceError.js';
+import { withTransaction } from '@/infra/withTransaction.js';
+import { CommentRepository } from '@/repositories/CommentRepository.js';
+import { FileRepository } from '@/repositories/FileRepository.js';
+import { ImageRepository } from '@/repositories/ImageRepository.js';
+import { PostRepository } from '@/repositories/PostRepository.js';
+import { UserRepository } from '@/repositories/UserRepository.js';
+import type { Deps } from '@/types/Deps.js';
+import type { FindParamsBase } from '@/types/FindParams.js';
+import type { UserContext } from '@/types/UserContext.js';
+import { checkRequiredParameter } from '@/utils/helper.js';
+import { compress } from '@/utils/image.js';
+import type ImageExtended from '@shared/models/extensions/ImageExtended.js';
+import type PostDTO from '@shared/models/extensions/PostExtended.js';
+import { type File, type FileInitializer } from '@shared/models/generated/File.js';
+import type { ImageId } from '@shared/models/generated/Image.js';
+import type { PostId, PostInitializer, PostMutator } from '@shared/models/generated/Post.js';
+import type { UserId } from '@shared/models/generated/User.js';
+import type { VisibilityEnum } from '@shared/models/generated/VisibilityEnum.js';
+import type { Actor } from '@shared/types/Actor.js';
+import { ErrorCode } from '@shared/types/ErrorCode.js';
+import type { OrderDirection } from '@shared/types/OrderDirection.js';
 import { createHash } from 'crypto';
 import { fileTypeFromFile } from 'file-type';
 import fs from 'fs';
 import { imageSizeFromFile } from 'image-size/fromFile';
 import path from 'path';
 import { validate } from 'uuid';
-import * as commentService from './commentService';
-import * as fileService from './fileService';
-import * as imageService from './imageService';
-import * as postLikeService from './postLikeService';
+import * as commentService from './commentService.js';
+import * as fileService from './fileService.js';
+import * as imageService from './imageService.js';
+import * as postLikeService from './postLikeService.js';
 
 type GetParams = {
     current_user_id?: UserId;
@@ -46,7 +46,6 @@ type GetParams = {
 
 type CreateInput = PostInitializer & { files?: { file_id: string; sort: number }[]; }
 type UpdateInput = PostMutator & { is_admin?: boolean; current_user_id?: UserId; files?: { id: string; file_id: string; sort: number }[]; };
-type DeleteInput = { is_admin?: boolean; current_user_id?: UserId };
 
 const getDisplayName = async (id: UserId): Promise<string> => {
     const repo = new UserRepository();
@@ -55,8 +54,8 @@ const getDisplayName = async (id: UserId): Promise<string> => {
     return result;
 }
 
-export const get = async <P extends FindParamsBase>(params: P) => {
-    const { current_user_id, id, user_id, visibility, is_published, page_num, page_size, order_by, order_dir, include } = params as GetParams;
+export const get = async <P extends FindParamsBase>(params: P, actor?: Actor) => {
+    const { id, user_id, visibility, is_published, page_num, page_size, order_by, order_dir, include } = params as GetParams;
     const repo = new PostRepository();
 
     const findParams = {
@@ -76,22 +75,22 @@ export const get = async <P extends FindParamsBase>(params: P) => {
     for (const post of items) {
         const { id: post_id, user_id } = post;
         post.display_name = await getDisplayName(user_id);
-        post.is_liked = await postLikeService.isLiked(post.id, current_user_id);
+        post.is_liked = await postLikeService.isLiked(post.id, actor?.type == 'user' ? actor.id : undefined);
         include?.includes('stats') && (post.comments_count = await getCommentsCount(post_id));
-        include?.includes('images') && (post.images = (await imageService.get({ post_id })) as ImageExtended[]);
+        include?.includes('images') && (post.images = (await imageService.get({ post_id }, actor)) as ImageExtended[]);
     }
 
     return findResult;
 }
 
-export const getById = async (id: PostId, params: { include?: string[], current_user_id?: UserId }) => {
+export const getById = async (id: PostId, params: { include?: string[] }, actor: Actor) => {
     if (!id) throw new ServiceError('Missing parameter: id');
     if (!validate(id)) throw new ServiceError('Invalid post id', ErrorCode.INVALID_ID);
-    const { current_user_id, include } = params;
+    const { include } = params;
 
-    if (!canRead(id, { current_user_id: current_user_id! })) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
+    if (!canRead(id, actor)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
-    const result = await get({ id, current_user_id, include });
+    const result = await get({ id, include }, actor);
     if (!result[0]) throw new ServiceError('Post not found', ErrorCode.NOT_FOUND);
     return result[0];
 }
@@ -143,7 +142,7 @@ export const create = async (data: CreateInput, deps: Deps, actor: Actor): Promi
         return newPost;
     });
 
-    const result = (await get({ id: txResult.id, include: ['images'] }) as PostDTO[])[0];
+    const result = (await get({ id: txResult.id, include: ['images'] }, actor) as PostDTO[])[0];
     if (!result) throw new Error(`Post created but not found: ${txResult.id}`);
 
     return result;
@@ -156,17 +155,13 @@ export const getCommentsCount = async (post_id: PostId) => {
     return count;
 }
 
-export const del = async (id: PostId, params: DeleteInput) => {
-    const { is_admin, current_user_id } = params;
+export const del = async (id: PostId, actor: Actor) => {
     if (!id) throw new ServiceError('Missing parameter: id');
-    if (!is_admin && !current_user_id) throw new ServiceError('Missing parameter: current_user_id');
-
-    //check if admin or if has access (current_user_id)
-    if (!is_admin && !canDelete(id, { current_user_id: current_user_id! })) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
+    if (!canModify(id, actor)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
     const deleted = await withTransaction(async (tx) => {
         //get the post to get the images
-        const post = await getById(id, { include: ['images'] }) as PostDTO;
+        const post = await getById(id, { include: ['images'] }, actor) as PostDTO;
 
         //delete files, get list of files to unlink
         const fileRepo = new FileRepository(tx);
@@ -202,7 +197,7 @@ export const del = async (id: PostId, params: DeleteInput) => {
     return deleted.post;
 }
 
-export const update = async (id: PostId, params: UpdateInput) => {
+export const update = async (id: PostId, params: UpdateInput, actor: Actor) => {
     const { title, content, current_user_id, is_admin, files } = params;
     if (!id) throw new ServiceError('Missing parameter: id or post_id');
     if (!current_user_id) throw new ServiceError('Missing parameter: current_user_id');
@@ -211,7 +206,7 @@ export const update = async (id: PostId, params: UpdateInput) => {
 
     if (!is_admin && !canUpdate(id, { current_user_id: current_user_id! })) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
-    const post = (await getById(id, { include: ['images'] })) as PostDTO;
+    const post = (await getById(id, { include: ['images'] }, actor)) as PostDTO;
     const images = post.images;
     const updated = await withTransaction(async (tx) => {
         const fileRepo = new FileRepository(tx);
@@ -259,32 +254,37 @@ export const update = async (id: PostId, params: UpdateInput) => {
         }
     }
 
-    const result = (await get({ id, current_user_id, include: ['images'] }))[0];
+    const result = (await get({ id, include: ['images'] }, actor))[0];
     if (!result?.id) throw new ServiceError(`Post not found. id: ${id}`, ErrorCode.NOT_FOUND);
 
     return result;
 }
 
-export const canRead = async (id: PostId, userContext: UserContext) => {
-    const { current_user_id } = userContext;
+// export const canRead = async (id: PostId, actor: Actor) => {
+//     checkRequiredParameter({ id, actor });
+//     const { current_user_id } = actor;
+//     const repo = new PostRepository();
+//     const post = await repo.findById(id);
+//     if (!post) throw new ServiceError(`Post not found. id: ${id}`, ErrorCode.NOT_FOUND);
+//     if (post?.user_id === current_user_id) return true;
+//     if (post.is_published && post.visibility == 'public') return true;
+//     return false;
+// }
+
+export const canRead = async (id: PostId, actor: Actor) => {
+    checkRequiredParameter({ id, actor });
     const repo = new PostRepository();
     const post = await repo.findById(id);
-    if (!post) throw new ServiceError(`Post not found. id: ${id}`, ErrorCode.NOT_FOUND);
-    if (post?.user_id === current_user_id) return true;
+    if (!post) return false;
+
     if (post.is_published && post.visibility == 'public') return true;
+    if (actor.type == 'user' && actor.id == post.user_id) return true;
+    if (actor.type == 'system') return true;
+    if (actor.roles.includes('admin')) return true;
     return false;
 }
 
 export const canUpdate = async (id: PostId, userContext: UserContext) => {
-    const { current_user_id } = userContext;
-    if (!current_user_id) throw new ServiceError('Missing parameter: current_user_id');
-    const repo = new PostRepository();
-    const post = await repo.findById(id);
-    if (post?.user_id === current_user_id) return true;
-    return false;
-}
-
-export const canDelete = async (id: PostId, userContext: UserContext) => {
     const { current_user_id } = userContext;
     if (!current_user_id) throw new ServiceError('Missing parameter: current_user_id');
     const repo = new PostRepository();

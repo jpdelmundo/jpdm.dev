@@ -1,5 +1,5 @@
-import { ServiceError } from "@/errors/ServiceError";
-import { ErrorCode } from "@shared/types/ErrorCode";
+import { ServiceError } from "@/errors/ServiceError.js";
+import { ErrorCode } from "@shared/types/ErrorCode.js";
 
 export const botCheck = async (captchaToken: string) => {
     const captchaVerifyResult = await verifyCaptcha(captchaToken);
@@ -17,5 +17,8 @@ export const verifyCaptcha = async (token: string) => {
         }).toString()
     });
 
-    return await captchaVerifyResponse.json();
+    return await captchaVerifyResponse.json() as {
+        success: boolean;
+        score: number;
+    };
 }

@@ -1,0 +1,83 @@
+services:
+  frontend:
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "${FRONTEND_PORT}:5173"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - app-net
+  
+  backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    volumes:
+      - ./backend/usercontent:/app/backend/usercontent
+      - ./backend/logs:/app/backend/logs
+    env_file:
+      - .env
+    ports:
+      - "${BACKEND_PORT}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-net
+
+  db:
+    image: postgres:16-alpine
+    container_name: db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    # ports: #expose if necessary, otherwise just remove
+    #   - "${POSTGRES_PORT}:5432"
+    expose:
+      - "${POSTGRES_PORT}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    networks:
+      - app-net
+    restart: unless-stopped
+
+  litellm:
+    image: ghcr.io/berriai/litellm:v1.80.15-stable
+    container_name: litellm
+    ports:
+      - "4000:4000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/litellm
+      LITELLM_LOG: INFO
+    command: >
+      --config /app/config.yml
+      --port 4000
+    volumes:
+      - ./litellm.yml:/app/config.yml
+    networks:
+      - app-net
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+
+networks:
+  app-net:
+
+volumes:
+  db_data:

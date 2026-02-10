@@ -1,10 +1,10 @@
-import { pool as sharedPool } from '@/infra/db';
-import { getFullQuery } from '@/infra/pgHelper';
-import type { Db } from '@/types/Db';
-import type { FindParamsBase, FindParamsPaginated } from '@/types/FindParams';
-import type { InferFindResultType } from '@/types/InferFindResultType';
-import { OrderDirections, type OrderDirection } from '@shared/types/OrderDirection';
-import { isNumber } from '@shared/utils/validation';
+import { pool as sharedPool } from '@/infra/db.js';
+import { getFullQuery } from '@/infra/pgHelper.js';
+import type { Db } from '@/types/Db.js';
+import type { FindParamsBase, FindParamsPaginated } from '@/types/FindParams.js';
+import type { InferFindResultType } from '@/types/InferFindResultType.js';
+import { OrderDirections, type OrderDirection } from '@shared/types/OrderDirection.js';
+import { isNumber } from '@shared/utils/validation.js';
 import { type QueryResultRow } from 'pg';
 
 export interface GetOrderByParams {
@@ -23,7 +23,7 @@ export abstract class BaseRepository<T extends QueryResultRow> {
 
     query<R extends QueryResultRow = T>(queryText: string, values?: unknown[]) {
         console.debug({ queryText, values });
-        if (process.env.SQL_LOG == '1') console.log('[SQL]', getFullQuery(queryText, values));
+        if (process.env.LOG_SQL == '1') console.log('[SQL]', getFullQuery(queryText, values));
         return this.db.query<R>(queryText, values);
     }
 

@@ -4,8 +4,10 @@ const dotenv = require('dotenv');
 const pluralize = require('pluralize');
 dotenv.config({ path: './db/.env' });
 
+//console.log({ env: process.env });
 const outputPath = './shared/src/models/generated';
 module.exports = {
+    tsModuleFormat: 'esm',
     connection: {
         user: process.env.POSTGRES_USER,
         password: process.env.POSTGRES_PASSWORD,
@@ -39,7 +41,7 @@ module.exports = {
             // Replace: import type { default as X } from './XEnum';
             // Only when the module is a .ts file ending with 'Enum'
             lines = lines.map(v => v.replace(
-                /import type \{ default as (\w+) \} from '\.\/([^']*Enum)';/g,
+                /import type \{ default as (\w+) \} from '\.\/([^']*Enum\.js)';/g,
                 "import type { $1 } from './$2';"
             ));
 

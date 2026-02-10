@@ -1,4 +1,4 @@
-import type { Image } from '../generated/Image';
+import type { Image } from '../generated/Image.js';
 
 export default interface ImageExtended extends Image {
     url: string;

@@ -1,6 +1,6 @@
-import type { ApiErrorDetail, ApiResult } from '@shared/types/ApiResult';
-import type { ErrorCode } from '@shared/types/ErrorCode';
-import type { NotPromise } from '@shared/types/NotPromise';
+import type { ApiErrorDetail, ApiResult } from '@shared/types/ApiResult.js';
+import type { ErrorCode } from '@shared/types/ErrorCode.js';
+import type { NotPromise } from '@shared/types/NotPromise.js';
 import type { Response } from 'express';
 
 export class ApiError extends Error {

@@ -43,7 +43,7 @@ type PostDialogProps = {
 
 export const PostDialog = ({ post, open, closeDialog, onCreated, onUpdated }: PostDialogProps) => {
     //console.log('PostDialog render', { post });
-    const { register, handleSubmit, reset, formState: { errors, isValid }, resetField, setFocus, setValue } = useForm<FormInput>({
+    const { register, handleSubmit, reset, formState: { errors, isValid }, setFocus, setValue } = useForm<FormInput>({
         defaultValues: {
             title: null
         },

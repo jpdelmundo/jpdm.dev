@@ -1,5 +1,5 @@
-import type { User } from '../models/generated/User';
-import type { UserRoleEnum } from '../models/generated/UserRoleEnum';
+import type { User } from '../models/generated/User.js';
+import type { UserRoleEnum } from '../models/generated/UserRoleEnum.js';
 
 export type PayloadData = Pick<User, 'id' | 'username' | 'email'> & { roles: UserRoleEnum[]; scope?: string; };
 

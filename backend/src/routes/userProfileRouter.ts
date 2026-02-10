@@ -1,6 +1,6 @@
-import { uploadHandler } from '@/config/multer';
-import * as controller from '@/controllers/userProfileController';
-import { verifyToken } from '@/utils/auth';
+import { uploadHandler } from '@/config/multer.js';
+import * as controller from '@/controllers/userProfileController.js';
+import { verifyToken } from '@/utils/auth.js';
 import { Router } from 'express';
 
 export const router = Router();

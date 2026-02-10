@@ -1,8 +1,8 @@
-import type { FindParamsBase } from '@/types/FindParams';
-import type { Post, PostId, PostInitializer, PostMutator } from '@shared/models/generated/Post';
-import type { VisibilityEnum } from '@shared/models/generated/VisibilityEnum';
-import { type OrderDirection } from '@shared/types/OrderDirection';
-import { BaseRepository } from './BaseRepository';
+import type { FindParamsBase } from '@/types/FindParams.js';
+import type { Post, PostId, PostInitializer, PostMutator } from '@shared/models/generated/Post.js';
+import type { VisibilityEnum } from '@shared/models/generated/VisibilityEnum.js';
+import { type OrderDirection } from '@shared/types/OrderDirection.js';
+import { BaseRepository } from './BaseRepository.js';
 
 type FindParams = {
     id?: PostId;

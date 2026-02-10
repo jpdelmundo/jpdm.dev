@@ -11,6 +11,16 @@ export const validatePassword = (value: string) => {
     return errors;
 }
 
+export const validateUsername = (value: string) => {
+    const errors = [];
+
+    if (value.length < 3) errors.push('Username length too short');
+    if (value.length > 64) errors.push('Username length too long');
+    if (!/^[a-zA-Z][a-zA-Z0-9]*(-[a-zA-Z0-9]+)?$/i.test(value)) errors.push('Usernames may contain letters and numbers, and may include a single optional dash (-).');
+
+    return errors;
+}
+
 export const isValidEmail = (email: string) => {
     return /^[a-zA-Z0-9_%+-]+(?:\.[a-zA-Z0-9_%+-]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/.test(email);
 }

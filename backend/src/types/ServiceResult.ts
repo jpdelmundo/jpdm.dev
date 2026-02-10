@@ -1,4 +1,4 @@
-import type { ErrorCode } from '@shared/types/ErrorCode';
+import type { ErrorCode } from '@shared/types/ErrorCode.js';
 
 export interface ServiceErrorDetail {
     message: string;

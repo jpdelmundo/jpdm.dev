@@ -1,18 +1,16 @@
-import { ServiceError } from '@/errors/ServiceError';
-import { FileRepository } from '@/repositories/FileRepository';
-import * as fileService from '@/services/fileService';
-import { checkRequiredParameter } from '@/utils/helper';
-import { compress } from '@/utils/image';
-import type { FileId, FileInitializer } from '@shared/models/generated/File';
-import type { Actor } from '@shared/types/Actor';
-import { ErrorCode } from '@shared/types/ErrorCode';
+import { ServiceError } from '@/errors/ServiceError.js';
+import { FileRepository } from '@/repositories/FileRepository.js';
+import * as fileService from '@/services/fileService.js';
+import { checkRequiredParameter } from '@/utils/helper.js';
+import { compress } from '@/utils/image.js';
+import type { FileId, FileInitializer } from '@shared/models/generated/File.js';
+import type { Actor } from '@shared/types/Actor.js';
+import { ErrorCode } from '@shared/types/ErrorCode.js';
 import { createHash } from 'crypto';
 import { fileTypeFromFile } from 'file-type';
 import fs from 'fs';
 import { imageSizeFromFile } from 'image-size/fromFile';
 import path from 'path';
-
-type DeleteParams = { is_admin?: boolean; current_user_id?: UserId };
 
 export const createFile = async (data: FileInitializer) => {
     const repo = new FileRepository();
@@ -22,7 +20,7 @@ export const createFile = async (data: FileInitializer) => {
     return result;
 }
 
-export const del = async (id: FileId, params?: DeleteParams) => {
+export const del = async (id: FileId) => {
     //const { is_admin, current_user_id } = params;
     if (!id) throw new ServiceError('Missing parameter: id');
     const repo = new FileRepository();

@@ -1,10 +1,10 @@
-import { getDateParamCondition } from '@/infra/pgHelper';
-import type { FindParamsBase } from '@/types/FindParams';
-import type { PasswordReset, PasswordResetId, PasswordResetInitializer, PasswordResetMutator } from '@shared/models/generated/PasswordReset';
-import type { UserId } from '@shared/models/generated/User';
-import type { DateComparison } from '@shared/types/DateComparison';
-import { type OrderDirection } from '@shared/types/OrderDirection';
-import { BaseRepository } from './BaseRepository';
+import { getDateParamCondition } from '@/infra/pgHelper.js';
+import type { FindParamsBase } from '@/types/FindParams.js';
+import type { PasswordReset, PasswordResetId, PasswordResetInitializer, PasswordResetMutator } from '@shared/models/generated/PasswordReset.js';
+import type { UserId } from '@shared/models/generated/User.js';
+import type { DateComparison } from '@shared/types/DateComparison.js';
+import { type OrderDirection } from '@shared/types/OrderDirection.js';
+import { BaseRepository } from './BaseRepository.js';
 
 type FindParams = {
     token_hash?: PasswordResetId;

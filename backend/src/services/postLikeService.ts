@@ -1,10 +1,11 @@
-import { ServiceError } from '@/errors/ServiceError';
-import { PostLikeRepository } from '@/repositories/PostLikeRepository';
-import { PostRepository } from '@/repositories/PostRepository';
-import type { PostId } from '@shared/models/generated/Post';
-import type { PostLikeId, PostLikeInitializer, PostLikeMutator } from '@shared/models/generated/PostLike';
-import type { UserId } from '@shared/models/generated/User';
-import type { OrderDirection } from '@shared/types/OrderDirection';
+import { ServiceError } from '@/errors/ServiceError.js';
+import { PostLikeRepository } from '@/repositories/PostLikeRepository.js';
+import { PostRepository } from '@/repositories/PostRepository.js';
+import type { PostId } from '@shared/models/generated/Post.js';
+import type { PostLikeId } from '@shared/models/generated/PostLike.js';
+import type { UserId } from '@shared/models/generated/User.js';
+import type { Actor } from '@shared/types/Actor.js';
+import type { OrderDirection } from '@shared/types/OrderDirection.js';
 
 type GetParams = {
     current_user_id?: UserId;
@@ -17,16 +18,16 @@ type GetParams = {
     order_dir?: OrderDirection;
 }
 
-type CreateParams = PostLikeInitializer;
-type UpdateParams = PostLikeMutator & { current_user_id?: UserId };
-type DeleteParams = PostLikeMutator;
+// type CreateParams = PostLikeInitializer;
+// type UpdateParams = PostLikeMutator & { current_user_id?: UserId };
+// type DeleteParams = PostLikeMutator;
 
-export const like = async (post_id: PostId, user_id: UserId) => {
+export const like = async (post_id: PostId, actor: Actor) => {
     if (!post_id) throw new ServiceError('Missing parameter: post_id');
-    if (!user_id) throw new ServiceError('Missing parameter: user_id');
+    if (actor.type != 'user') throw new ServiceError('Missing parameter: user_id');
 
     const repo = new PostLikeRepository();
-    const newPostLike = await repo.create({ user_id, post_id });
+    const newPostLike = await repo.create({ user_id: actor.id, post_id });
     if (!newPostLike) throw new Error('Failed creating like');
 
     const postRepo = new PostRepository();
@@ -36,12 +37,12 @@ export const like = async (post_id: PostId, user_id: UserId) => {
     return { likes };
 }
 
-export const unlike = async (post_id: PostId, user_id: UserId) => {
+export const unlike = async (post_id: PostId, actor: Actor) => {
     if (!post_id) throw new ServiceError('Missing parameter: post_id');
-    if (!user_id) throw new ServiceError('Missing parameter: user_id');
+    if (actor.type != 'user') throw new ServiceError('Missing parameter: user_id');
 
     const repo = new PostLikeRepository();
-    const newPostLike = await repo.deleteLike(post_id, user_id);
+    const newPostLike = await repo.deleteLike(post_id, actor.id);
     if (!newPostLike) throw new Error('Failed deleting like');
 
     const postRepo = new PostRepository();

@@ -1,8 +1,8 @@
-import type { FileId } from '@shared/models/generated/File';
-import type { Image, ImageId, ImageInitializer, ImageMutator } from '@shared/models/generated/Image';
-import type { PostId } from '@shared/models/generated/Post';
-import { type OrderDirection } from '@shared/types/OrderDirection';
-import { BaseRepository } from './BaseRepository';
+import type { FileId } from '@shared/models/generated/File.js';
+import type { Image, ImageId, ImageInitializer, ImageMutator } from '@shared/models/generated/Image.js';
+import type { PostId } from '@shared/models/generated/Post.js';
+import { type OrderDirection } from '@shared/types/OrderDirection.js';
+import { BaseRepository } from './BaseRepository.js';
 
 type FindParams = {
     id?: ImageId;

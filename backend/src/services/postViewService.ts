@@ -1,12 +1,12 @@
-import { ServiceError } from '@/errors/ServiceError';
-import { PostRepository } from '@/repositories/PostRepository';
-import { PostViewRepository } from '@/repositories/PostViewRepository';
-import type { FindParamsBase } from '@/types/FindParams';
-import { ipGeoLookup } from '@/utils/ipLookup';
-import type { PostId } from '@shared/models/generated/Post';
-import type { PostView, PostViewId, PostViewInitializer, PostViewMutator } from '@shared/models/generated/PostView';
-import type { UserId } from '@shared/models/generated/User';
-import type { OrderDirection } from '@shared/types/OrderDirection';
+import { ServiceError } from '@/errors/ServiceError.js';
+import { PostRepository } from '@/repositories/PostRepository.js';
+import { PostViewRepository } from '@/repositories/PostViewRepository.js';
+import type { FindParamsBase } from '@/types/FindParams.js';
+import { ipGeoLookup } from '@/utils/ipLookup.js';
+import type { PostId } from '@shared/models/generated/Post.js';
+import type { PostView, PostViewId, PostViewInitializer, PostViewMutator } from '@shared/models/generated/PostView.js';
+import type { UserId } from '@shared/models/generated/User.js';
+import type { OrderDirection } from '@shared/types/OrderDirection.js';
 
 type GetParams = {
     current_user_id?: UserId;

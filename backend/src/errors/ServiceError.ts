@@ -1,4 +1,4 @@
-import type { ErrorCode } from '@shared/types/ErrorCode';
+import type { ErrorCode } from '@shared/types/ErrorCode.js';
 
 export class ServiceError extends Error {
     public code?: ErrorCode;

@@ -1,0 +1,15 @@
+// tsconfig.alias.json
+{
+    "extends": "./tsconfig.build.json",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@shared/*": [
+                "../../shared/dist/*"
+            ],
+            "@/*": [
+                "./*"
+            ],
+        }
+    }
+}

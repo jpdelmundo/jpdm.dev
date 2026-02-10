@@ -1,13 +1,21 @@
 import { apiGet } from '@/api/apiClient';
 import { Error } from '@/components/Error';
+import { ImageDialog } from '@/components/ImageDialog';
 import { Post } from '@/components/Post';
 import { PostSkeleton } from '@/components/skeleton/PostSkeleton';
 import { useAuthStore } from '@/store/useAuthStore';
 import Box from '@mui/material/Box';
+import type ImageExtended from '@shared/models/extensions/ImageExtended';
 import type PostDTO from '@shared/models/extensions/PostExtended';
+import type { ImageId } from '@shared/models/generated/Image';
 import type { ApiErrorDetail } from '@shared/types/ApiResult';
-import { useEffect, useState } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
+
+type ImageDialogState = {
+    imageId: ImageId;
+    images: ImageExtended[];
+} | null;
 
 export function PostPage() {
     const ready = useAuthStore(s => s.ready);
@@ -15,6 +23,9 @@ export function PostPage() {
     const [post, setPost] = useState<PostDTO | null>(null);
     const [error, setError] = useState<ApiErrorDetail | null>(null);
     const { id } = useParams();
+    const navigate = useNavigate();
+    const origLocation = useRef<Location | null>(null);
+    const [viewer, setViewer] = useState<ImageDialogState>(null);
 
     const getData = async () => {
         // try {
@@ -40,6 +51,25 @@ export function PostPage() {
         }
     };
 
+    const handlePostDeleted = () => {
+        navigate('/');
+    };
+
+    const handlePostUpdated = (post: PostDTO) => {
+        setPost(post);
+    };
+
+    const handlePostImageClick = (imageId: ImageId, images: ImageExtended[]) => {
+        setViewer({ imageId, images });
+        origLocation.current = location;
+        window.history.pushState({}, '', `/images/${imageId}`);
+    };
+
+    const closeImageDialog = () => {
+        setViewer(null);
+        navigate(origLocation.current ? (origLocation.current.pathname + origLocation.current.search) : '/', { replace: true });
+    };
+
     useEffect(() => {
         ready && getData();
     }, [ready]);
@@ -47,6 +77,20 @@ export function PostPage() {
     if (!id) return <Navigate to="/" replace />;
     if (error) return <Error error={error} />;
     return (<Box mt={1}>
-        {!post || isLoading ? <PostSkeleton /> : <Post post={post} />}
+        {!post || isLoading
+            ? <PostSkeleton />
+            : <Post
+                post={post}
+                onDeleted={handlePostDeleted}
+                onUpdated={handlePostUpdated}
+                onImageClick={handlePostImageClick}
+            />}
+
+        {viewer && <ImageDialog
+            open
+            imageId={viewer.imageId}
+            images={viewer.images}
+            closeDialog={closeImageDialog}
+        />}
     </Box>)
 }

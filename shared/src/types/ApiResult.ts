@@ -1,5 +1,5 @@
-import { ErrorCode } from './ErrorCode';
-import type { NotPromise } from './NotPromise';
+import { ErrorCode } from './ErrorCode.js';
+import type { NotPromise } from './NotPromise.js';
 
 export interface ApiErrorDetail {
     message: string;

@@ -1,7 +1,8 @@
-import * as userProfileService from '@/services/userProfileService';
-import { ok } from '@/utils/apiHelper';
-import { getActor } from '@/utils/auth';
-import type { UserId } from '@shared/models/generated/User';
+import * as userProfileService from '@/services/userProfileService.js';
+import type { RouteParams } from '@/types/RouteParams.js';
+import { ok } from '@/utils/apiHelper.js';
+import { getActor } from '@/utils/auth.js';
+import type { UserId } from '@shared/models/generated/User.js';
 import type { Request, Response } from 'express';
 
 // export const create = async (req: Request, res: Response): Promise<Response> => {
@@ -23,11 +24,10 @@ export const get = async (req: Request, res: Response): Promise<Response> => {
     return ok(res, result);
 }
 
-export const update = async (req: Request, res: Response): Promise<Response> => {
+export const update = async (req: Request<RouteParams>, res: Response): Promise<Response> => {
     const { first_name, last_name, gender, phone_number, date_of_birth, bio } = req.body;
-    const actor = getActor(req);
     const { id } = req.params;
-    const result = await userProfileService.updateByUserId(id!, { first_name, last_name, gender, phone_number, date_of_birth, bio }, actor!);
+    const result = await userProfileService.updateByUserId(id, { first_name, last_name, gender, phone_number, date_of_birth, bio }, req.user!);
 
     return ok(res, result);
 }

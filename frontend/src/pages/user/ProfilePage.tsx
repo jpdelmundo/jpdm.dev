@@ -60,7 +60,7 @@ export const ProfilePage = () => {
     const fetchProfile = useUserProfileStore(s => s.fetchProfile);
     const avatarProps = useAvatarProps();
     const [dialogOpen, setDialogOpen] = useState(false);
-    const { register, handleSubmit, formState: { errors }, control, reset, setFocus } = useForm<FormInput>();
+    const { register, handleSubmit, control, reset, setFocus } = useForm<FormInput>();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const inputFileRef = useRef<HTMLInputElement>(null);
     const [errorMessage, setErrorMessage] = useState('');

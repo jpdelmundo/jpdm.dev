@@ -1,13 +1,13 @@
 import { Router } from 'express';
-import { createAppContext } from './infra/appContext';
-import { pool } from './infra/db';
-import { router as authRouter } from './routes/authRouter';
-import { router as commentRouter } from './routes/commentRouter';
-import { router as fileRouter } from './routes/fileRouter';
-import { router as imageRouter } from './routes/imageRouter';
-import { createPostRouter } from './routes/postRouter';
-import { router as profileRouter } from './routes/userProfileRouter';
-import { router as userRouter } from './routes/userRouter';
+import { createAppContext } from './infra/appContext.js';
+import { pool } from './infra/db.js';
+import { router as authRouter } from './routes/authRouter.js';
+import { router as commentRouter } from './routes/commentRouter.js';
+import { router as fileRouter } from './routes/fileRouter.js';
+import { router as imageRouter } from './routes/imageRouter.js';
+import { createPostRouter } from './routes/postRouter.js';
+import { router as profileRouter } from './routes/userProfileRouter.js';
+import { router as userRouter } from './routes/userRouter.js';
 
 const appCtx = createAppContext(pool);
 const router = Router();

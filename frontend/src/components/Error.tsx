@@ -12,7 +12,7 @@ export function Error({ error }: ErrorProps) {
     let message = 'Unknown error';
     let subMessage = null;
     let code: string | undefined;
-    let name: string | undefined;
+    //let name: string | undefined;
 
     if ('code' in error) {
         code = error.code;
@@ -25,7 +25,7 @@ export function Error({ error }: ErrorProps) {
     } else {
         const e = (error as Error);
         message = e.message;
-        name = e.name;
+        //name = e.name;
     }
 
     return (<Stack justifyContent={'center'} sx={{ height: 'calc(90vh - 60px)' }}>

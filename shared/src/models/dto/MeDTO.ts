@@ -1,4 +1,4 @@
-import { UserId } from "../generated/User";
+import { type UserId } from "../generated/User.js";
 
 export interface MeDTO {
     id: UserId;

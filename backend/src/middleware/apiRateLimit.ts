@@ -1,4 +1,4 @@
-import { getCurrentUser } from '@/utils/auth';
+import { getCurrentUser } from '@/utils/auth.js';
 import type { Request, Response } from 'express';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 

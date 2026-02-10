@@ -1,4 +1,4 @@
-import type { Paginated } from '@shared/types/Paginated';
+import type { Paginated } from '@shared/types/Paginated.js';
 
 export type InferFindResultType<P, T> =
     P extends { page_num: number }

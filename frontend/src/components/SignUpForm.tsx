@@ -11,7 +11,7 @@ import type { UserId } from '@shared/models/generated/User';
 import type { AccessToken } from '@shared/types/AccessToken';
 import { type ApiResult } from '@shared/types/ApiResult';
 import { ErrorCode } from '@shared/types/ErrorCode';
-import { validatePassword as _validatePassword } from '@shared/utils/validation';
+import { validatePassword as _validatePassword, validateUsername } from '@shared/utils/validation';
 import { useEffect, useState } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { Link as RouterLink } from 'react-router-dom';
@@ -74,12 +74,7 @@ export function SignUpForm({ onSubmit, onSignUpSuccess }: {
                     <TextField label="Username"
                         {...register('username', {
                             required: 'Username is required',
-                            pattern: {
-                                value: /^[a-zA-Z][a-zA-Z0-9]*(-[a-zA-Z0-9]+)?$/i,
-                                message: 'Usernames may contain letters and numbers, and may include a single optional dash (-).'
-                            },
-                            minLength: { value: 2, message: 'Username length too short' },
-                            maxLength: { value: 100, message: 'Username length too long' }
+                            validate: validateUsername
                         })}
                         placeholder=""
                         error={!!errors.username}

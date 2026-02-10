@@ -23,7 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 .env
-*.env
+*.env*
+!.env.example
 
 db/backup
 /prisma/db/generated/prisma
@@ -35,3 +36,4 @@ usercontent/
 *.tsbuildinfo
 *.cpuprofile
 backend/db
+docker-compose.dev.yml

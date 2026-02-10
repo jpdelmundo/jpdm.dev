@@ -12,7 +12,9 @@ export const DatePicker = <T extends FieldValues>(props: Props<T>) => {
         <Controller
             name={name}
             control={control}
-            render={({ field, fieldState: { error } }) => (
+            render={({ field,
+                // fieldState: { error }
+            }) => (
                 <>
                     <MuiDatePicker
                         {...datePickerProps}

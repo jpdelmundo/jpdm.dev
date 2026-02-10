@@ -1,6 +1,6 @@
-import type { FindParamsBase } from '@/types/FindParams';
-import { UserColumns, type User, type UserId, type UserInitializer, type UserMutator } from '@shared/models/generated/User';
-import { BaseRepository } from './BaseRepository';
+import type { FindParamsBase } from '@/types/FindParams.js';
+import { UserColumns, type User, type UserId, type UserInitializer, type UserMutator } from '@shared/models/generated/User.js';
+import { BaseRepository } from './BaseRepository.js';
 
 type FindParams = {
     id?: string;

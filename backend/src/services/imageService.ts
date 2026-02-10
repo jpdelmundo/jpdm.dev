@@ -1,16 +1,17 @@
-import { ServiceError } from "@/errors/ServiceError";
-import { FileRepository } from "@/repositories/FileRepository";
-import { ImageRepository } from "@/repositories/ImageRepository";
-import type { FindParamsBase } from "@/types/FindParams";
-import type { UserContext } from "@/types/UserContext";
-import type ImageExtended from "@shared/models/extensions/ImageExtended";
-import type { ImageId } from "@shared/models/generated/Image";
-import type { PostId } from "@shared/models/generated/Post";
-import type { UserId } from "@shared/models/generated/User";
-import { ErrorCode } from "@shared/types/ErrorCode";
+import { ServiceError } from "@/errors/ServiceError.js";
+import { FileRepository } from "@/repositories/FileRepository.js";
+import { ImageRepository } from "@/repositories/ImageRepository.js";
+import type { FindParamsBase } from "@/types/FindParams.js";
+import { checkRequiredParameter } from "@/utils/helper.js";
+import type ImageExtended from "@shared/models/extensions/ImageExtended.js";
+import type { ImageId } from "@shared/models/generated/Image.js";
+import type { PostId } from "@shared/models/generated/Post.js";
+import type { UserId } from "@shared/models/generated/User.js";
+import type { Actor } from "@shared/types/Actor.js";
+import { ErrorCode } from "@shared/types/ErrorCode.js";
 import path from 'path';
-import * as fileService from './fileService';
-import * as postService from './postService';
+import * as fileService from './fileService.js';
+import * as postService from './postService.js';
 
 type GetParams = {
     current_user_id?: UserId;
@@ -24,10 +25,8 @@ type GetParams = {
     //skip_access_check?: boolean;
 }
 
-type DeleteParams = { is_admin?: boolean; current_user_id?: UserId };
-
-export const get = async <P extends FindParamsBase>(params: P) => {
-    const { current_user_id, id, post_id } = params as GetParams;
+export const get = async <P extends FindParamsBase>(params: P, actor?: Actor) => {
+    const { id, post_id } = params as GetParams;
     const repo = new ImageRepository();
 
     let postId = post_id;
@@ -39,7 +38,7 @@ export const get = async <P extends FindParamsBase>(params: P) => {
         postId = image.post_id;
     }
 
-    const post = (await postService.get({ id: postId, current_user_id }))[0];
+    const post = (await postService.get({ id: postId }, actor))[0];
     if (!post?.id) throw new ServiceError('Post not found', ErrorCode.NOT_FOUND);
 
     const findParams = {
@@ -62,21 +61,15 @@ export const get = async <P extends FindParamsBase>(params: P) => {
     return findResult;
 }
 
-export const getById = async (id: ImageId, context: { current_user_id?: UserId }) => {
-    const { current_user_id } = context;
-    return (await get({
-        id,
-        ...(current_user_id && { current_user_id }),
-    }))[0];
+export const getById = async (id: ImageId, actor?: Actor) => {
+    return (await get({ id }, actor))[0];
 }
 
-export const del = async (id: ImageId, params: DeleteParams) => {
-    const { is_admin, current_user_id } = params;
+export const del = async (id: ImageId, actor: Actor) => {
     if (!id) throw new ServiceError('Missing parameter: id');
-    if (!is_admin && !current_user_id) throw new ServiceError('Missing parameter: current_user_id');
 
     //check if admin or if has access (current_user_id)
-    if (!is_admin && !canDelete(id, { current_user_id: current_user_id! })) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
+    if (!canDelete(id, actor)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
     const repo = new ImageRepository();
     const image = await repo.findById(id);
@@ -89,14 +82,12 @@ export const del = async (id: ImageId, params: DeleteParams) => {
     repo.delete(id);
 }
 
-const canDelete = async (id: ImageId, userContext: UserContext) => {
-    const { current_user_id } = userContext;
-    if (!current_user_id) throw new ServiceError('Missing parameter: current_user_id');
+const canDelete = async (id: ImageId, actor: Actor) => {
+    checkRequiredParameter({ id, actor });
     const repo = new ImageRepository();
     const image = await repo.findById(id);
     if (!image) return false;
 
-    const canDelete = await postService.canDelete(image.post_id, { current_user_id });
-
+    const canDelete = await postService.canModify(image.post_id, actor);
     return canDelete;
 }

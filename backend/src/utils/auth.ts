@@ -1,12 +1,11 @@
-import * as userService from '@/services/userService';
-import type { Actor } from '@shared/types/Actor';
-import { ErrorCode } from '@shared/types/ErrorCode';
-import type { Jwt, PayloadData } from '@shared/types/Jwt';
+import * as userService from '@/services/userService.js';
+import type { AuthorizedRequest } from '@/types/AuthorizedRequest.js';
+import type { Actor } from '@shared/types/Actor.js';
+import { ErrorCode } from '@shared/types/ErrorCode.js';
+import type { Jwt, PayloadData } from '@shared/types/Jwt.js';
 import type { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import type { AuthorizedRequest } from 'src/types/AuthorizedRequest';
-import { ApiError } from './apiHelper';
-
+import { ApiError } from './apiHelper.js';
 
 const { JsonWebTokenError } = jwt;
 
@@ -29,11 +28,12 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
     if (!user) throw new Error('Cannot find user using payload data');
     if (user.password_updated_at && (payload.iat * 1000) < user.password_updated_at.getTime()) throw new ApiError('Invalid token. User has change password.', 401, ErrorCode.TOKEN_INVALID);
 
-    (req as AuthorizedRequest).user = {
+    req.user = {
         id: payload.id,
         email: payload.email,
         username: payload.username,
-        roles: payload.roles
+        roles: payload.roles,
+        type: 'user'
     };
     next();
 }

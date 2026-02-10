@@ -1,6 +1,6 @@
-import { createPostController } from '@/controllers/postController';
-import type { AppContext } from '@/infra/appContext';
-import { verifyToken } from '@/utils/auth';
+import { createPostController } from '@/controllers/postController.js';
+import type { AppContext } from '@/infra/appContext.js';
+import { verifyToken } from '@/utils/auth.js';
 import { Router } from 'express';
 
 export const createPostRouter = (appCtx: AppContext) => {

@@ -1,12 +1,12 @@
-import { CommentRepository } from "@/repositories/CommentRepository";
-import { FileRepository } from "@/repositories/FileRepository";
-import { ImageRepository } from "@/repositories/ImageRepository";
-import { PostRepository } from "@/repositories/PostRepository";
-import { UserRepository } from "@/repositories/UserRepository";
-import type { Db } from "@/types/Db";
-import type { Deps } from "@/types/Deps";
+import { CommentRepository } from "@/repositories/CommentRepository.js";
+import { FileRepository } from "@/repositories/FileRepository.js";
+import { ImageRepository } from "@/repositories/ImageRepository.js";
+import { PostRepository } from "@/repositories/PostRepository.js";
+import { UserRepository } from "@/repositories/UserRepository.js";
+import type { Db } from "@/types/Db.js";
+import type { Deps } from "@/types/Deps.js";
 import type { Pool } from "pg";
-import { withTransaction } from "./withTransaction";
+import { withTransaction } from "./withTransaction.js";
 
 export const makeDeps = (db: Db): Deps => {
     const isPool = 'connect' in db;

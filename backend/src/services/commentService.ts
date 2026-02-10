@@ -1,15 +1,15 @@
-import { ServiceError } from '@/errors/ServiceError';
-import { CommentRepository } from '@/repositories/CommentRepository';
-import { PostRepository } from '@/repositories/PostRepository';
-import { UserRepository } from '@/repositories/UserRepository';
-import type { FindParamsBase } from '@/types/FindParams';
-import type { UserContext } from '@/types/UserContext';
-import type { CommentDTO } from '@shared/models/dto/CommentDTO';
-import type { CommentId, CommentInitializer, CommentMutator } from '@shared/models/generated/Comment';
-import type { PostId } from '@shared/models/generated/Post';
-import type { UserId } from '@shared/models/generated/User';
-import { ErrorCode } from '@shared/types/ErrorCode';
-import type { OrderDirection } from '@shared/types/OrderDirection';
+import { ServiceError } from '@/errors/ServiceError.js';
+import { CommentRepository } from '@/repositories/CommentRepository.js';
+import { PostRepository } from '@/repositories/PostRepository.js';
+import { UserRepository } from '@/repositories/UserRepository.js';
+import type { FindParamsBase } from '@/types/FindParams.js';
+import type { UserContext } from '@/types/UserContext.js';
+import type { CommentDTO } from '@shared/models/dto/CommentDTO.js';
+import type { CommentId, CommentInitializer, CommentMutator } from '@shared/models/generated/Comment.js';
+import type { PostId } from '@shared/models/generated/Post.js';
+import type { UserId } from '@shared/models/generated/User.js';
+import { ErrorCode } from '@shared/types/ErrorCode.js';
+import type { OrderDirection } from '@shared/types/OrderDirection.js';
 import OpenAI from 'openai';
 
 type GetParams = {

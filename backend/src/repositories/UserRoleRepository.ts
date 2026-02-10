@@ -1,5 +1,5 @@
-import type { UserRole, UserRoleId } from '@shared/models/generated/UserRole';
-import { BaseRepository } from './BaseRepository';
+import type { UserRole, UserRoleId } from '@shared/models/generated/UserRole.js';
+import { BaseRepository } from './BaseRepository.js';
 
 export class UserRoleRepository extends BaseRepository<UserRole> {
     async find({ id, userId }: { id?: string, userId?: string }): Promise<UserRole[]> {

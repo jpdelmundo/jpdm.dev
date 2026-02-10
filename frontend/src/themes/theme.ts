@@ -34,7 +34,7 @@ export const theme = createTheme({
     },
     components: { //no MuiBox under createTheme components (for MuiBox classes add it here)
         MuiCssBaseline: {
-            styleOverrides: (theme) => ({
+            styleOverrides: () => ({
                 html: {
                     '&.modal-dialog-open': {
                         overflow: 'hidden',
@@ -66,7 +66,7 @@ export const theme = createTheme({
         },
         MuiOutlinedInput: {
             styleOverrides: {
-                root: ({ theme }) => ({
+                root: () => ({
                     '& .MuiOutlinedInput-notchedOutline': {
                         //boxShadow: '0 1px 2px 0px rgba(0,0,0,.1)',
                         borderColor: '#e5e5e5'
@@ -115,7 +115,7 @@ export const theme = createTheme({
                 },
             },
             styleOverrides: {
-                root: ({ theme }) => ({
+                root: () => ({
                     '& .MuiInputBase-multiline': {
                         boxSizing: 'border-box',
                         lineHeight: '20px',
@@ -137,7 +137,7 @@ export const theme = createTheme({
                         backgroundColor: '#2e70ffff'
                     }
                 },
-                root: ({ theme }) => ({
+                root: () => ({
                     fontSize: 15,
                     textTransform: 'none',
                     boxShadow: 'none',
@@ -457,7 +457,7 @@ export const theme = createTheme({
         },
         MuiContainer: {
             styleOverrides: {
-                root: ({ theme }) => ({
+                root: () => ({
                     '&.header-container': {
                         padding: '10px',
                         backgroundColor: '#f3f3f3',
@@ -511,7 +511,7 @@ export const theme = createTheme({
         },
         MuiPickersOutlinedInput: {
             styleOverrides: {
-                root: ({ theme }) => ({
+                root: () => ({
                     '& .MuiPickersOutlinedInput-notchedOutline': {
                         //boxShadow: '0 1px 2px 0px rgba(0,0,0,.1)',
                         borderColor: '#e5e5e5'

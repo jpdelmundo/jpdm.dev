@@ -6,7 +6,7 @@ type Props = {
 }
 
 export const CountdownTimer = ({ endTimeMs, onComplete }: Props) => {
-    const [mSecondsLeft, setMSecondsLeft] = useState(endTimeMs);
+    //const [mSecondsLeft, setMSecondsLeft] = useState(endTimeMs);
     const [secondsLeft, setSecondsLeft] = useState(Math.max(0, Math.ceil(endTimeMs / 1000)));
     // const intervalId = useRef<NodeJS.Timeout | number | undefined>(undefined);
 
