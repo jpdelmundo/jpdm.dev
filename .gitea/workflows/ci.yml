@@ -17,7 +17,9 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             APP_DIR="/home/deploy/jpdm.dev"
-            REPO_URL="${{ github.server_url }}/${{ github.repository }}.git"
+            GITEA_TOKEN="${{ secrets.__GITEA_TOKEN }}"
+            GITEA_USERNAME="${{ secrets.__GITEA_USERNAME }}"            
+            REPO_URL="https://$GITEA_USERNAME:$GITEA_TOKEN@git.jpdm.dev/jp/jpdm.dev.git"
 
             echo "Starting..."
 
@@ -26,7 +28,7 @@ jobs:
 
             #check if repo already checked out
             if [ ! -d ".git" ]; then
-              echo "Cloning repo: $REPO_URL..."
+              echo "Cloning repo..."
               git clone -b master "$REPO_URL"
               echo "Repo cloned."
             else
