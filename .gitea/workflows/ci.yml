@@ -14,8 +14,7 @@ jobs:
           username: deploy
           host: ${{ vars.SSH_HOST }}
           port: ${{ vars.SSH_PORT }}
-          #key: ${{ secrets.SSH_KEY }}
-          key_path: /root/.ssh/id_ed25519
+          key: ${{ secrets.SSH_KEY }}
           script: |
             APP_DIR="/home/deploy/jpdm.dev"
             REPO_URL="${{ github.server_url }}/${{ github.repository }}.git"
