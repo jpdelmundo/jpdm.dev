@@ -20,16 +20,20 @@ jobs:
             GITEA_TOKEN="${{ secrets.__GITEA_TOKEN }}"
             GITEA_USERNAME="${{ secrets.__GITEA_USERNAME }}"            
             REPO_URL="https://$GITEA_USERNAME:$GITEA_TOKEN@git.jpdm.dev/jp/jpdm.dev.git"
+            ENV_CONTENT="${{ secrets.ENV_CONTENT_PROD }}"
 
             echo "Starting..."
-
             mkdir -p "$APP_DIR"
             cd "$APP_DIR"
+
+            echo "$ENV_CONTENT" > .env
+            chmod 600 .env
+            chown deploy:deploy .env
 
             #check if repo already checked out
             if [ ! -d ".git" ]; then
               echo "Cloning repo..."
-              git clone -b master "$REPO_URL"
+              git clone -b master "$REPO_URL" .
               echo "Repo cloned."
             else
               #repo exists
