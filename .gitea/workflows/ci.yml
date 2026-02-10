@@ -26,10 +26,6 @@ jobs:
             mkdir -p "$APP_DIR"
             cd "$APP_DIR"
 
-            echo "$ENV_CONTENT" > .env
-            chmod 600 .env
-            chown deploy:deploy .env
-
             #check if repo already checked out
             if [ ! -d ".git" ]; then
               echo "Cloning repo..."
@@ -41,6 +37,12 @@ jobs:
               git fetch origin
               git checkout master
               echo "Code updated."
+            fi
+
+            if [ ! -f ".env" ]; then
+              echo "$ENV_CONTENT" > .env
+              chmod 600 .env
+              chown deploy:deploy .env
             fi
 
             echo "Building and starting containers..."
