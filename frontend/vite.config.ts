@@ -1,5 +1,5 @@
 import react from '@vitejs/plugin-react-swc';
-import path from 'path';
+import { fileURLToPath } from 'url';
 import { defineConfig } from 'vite';
 import mkcert from 'vite-plugin-mkcert';
 
@@ -14,20 +14,30 @@ export default defineConfig(({ command }) => {
     ].filter(Boolean),
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, 'src'),
-        '@shared': path.resolve(__dirname, '../shared/src')
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+        '@shared': fileURLToPath(new URL('../shared/src', import.meta.url))
       }
     },
     build: {
       rollupOptions: {
         output: {
           manualChunks: (id) => {
-            if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
-              return 'vendor';
+            if (
+              id.includes('node_modules/react') ||
+              id.includes('node_modules/react-dom') ||
+              id.includes('node_modules/react-router')
+            ) {
+              return 'vendor-react';
+            }
+
+            if (id.includes('node_modules/react-hook-form')) {
+              return 'vendor-rhf';
             }
           }
         }
-      }
+      },
+      reportCompressedSize: true,
+      sourcemap: isDev
     }
   }
 });

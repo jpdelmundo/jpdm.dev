@@ -1,14 +1,15 @@
-name: Deploy
+name: Prod Release
 on:
   push:
-    branches:
-      - master
+    tags:
+      - 'v*'
 
 jobs:
   deploy:
+    if: "!endsWith(gitea.ref_name, '-dev')"
     runs-on: ubuntu-latest
     steps:
-      - name: Bootstrap app dir and deploy
+      - name: Clone/pull then build
         uses: appleboy/ssh-action@v1.2.5
         with:
           username: deploy
@@ -16,6 +17,8 @@ jobs:
           port: ${{ vars.SSH_PORT }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            set -e
+
             APP_DIR="/home/deploy/jpdm.dev"
             GITEA_TOKEN="${{ secrets.__GITEA_TOKEN }}"
             GITEA_USERNAME="${{ secrets.__GITEA_USERNAME }}"            

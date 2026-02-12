@@ -1,6 +1,4 @@
-const isNode = typeof process !== 'undefined' &&
-    process.versions &&
-    process.versions.node;
+const isNode = process && typeof process !== 'undefined' && process.versions && process.versions.node;
 
 export const jsonBase64Encode = (obj: unknown) => {
     const json = JSON.stringify(obj);
