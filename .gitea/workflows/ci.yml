@@ -24,6 +24,7 @@ jobs:
             GITEA_USERNAME="${{ secrets.__GITEA_USERNAME }}"            
             REPO_URL="https://$GITEA_USERNAME:$GITEA_TOKEN@git.jpdm.dev/jp/jpdm.dev.git"
             ENV_CONTENT="${{ secrets.ENV_CONTENT_PROD }}"
+            VITE_CONTENT="${{ vars.VITE_CONTENT_PROD }}"
 
             echo "Starting..."
             mkdir -p "$APP_DIR"
@@ -43,11 +44,13 @@ jobs:
               echo "Code updated."
             fi
 
-            if [ ! -f ".env" ]; then
-              echo "$ENV_CONTENT" > .env
-              chmod 600 .env
-              chown deploy:deploy .env
-            fi
+            echo "$VITE_CONTENT" > ./frontend/.env
+            chmod 600 ./frontend/.env
+            chown deploy:deploy ./frontend/.env
+            
+            echo "$ENV_CONTENT" > .env
+            chmod 600 .env
+            chown deploy:deploy .env            
 
             echo "Building and starting containers..."
             docker compose up -d --build
