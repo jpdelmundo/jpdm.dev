@@ -57,8 +57,8 @@ services:
   litellm:
     image: ghcr.io/berriai/litellm:v1.80.15-stable
     container_name: litellm
-    ports:
-      - "4000:4000"
+    expose:
+      - "4000"
     env_file:
       - .env
     environment:
