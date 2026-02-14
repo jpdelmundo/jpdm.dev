@@ -10,7 +10,7 @@ export const mail = async ({ from, to, subject, text }: { from: string, to: stri
             tls: {
                 // key: fs.readFileSync(String(process.env.SMTP_CLIENT_KEY)),
                 // cert: fs.readFileSync(String(process.env.SMTP_CLIENT_CERT)),
-                rejectUnauthorized: false //false on dev only, true makes sure the "host" param matches the host in the mail server cert
+                rejectUnauthorized: process.env.NODE_ENV === 'production' //false on dev only, true makes sure the "host" param matches the host in the mail server cert
             }
         });
 

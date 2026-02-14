@@ -3,6 +3,7 @@ import type { AuthorizedRequest } from '@/types/AuthorizedRequest.js';
 import type { Actor } from '@shared/types/Actor.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
 import type { Jwt, PayloadData } from '@shared/types/Jwt.js';
+import crypto from 'crypto';
 import type { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { ApiError } from './apiHelper.js';
@@ -70,4 +71,21 @@ export const getActor = (req: Request) => {
         id: payload?.id,
         roles: payload?.roles
     } as Actor : null;
+}
+
+export const verifySignature = (req: Request, res: Response, next: NextFunction) => {
+    const { expires, signature } = req.query;
+    const path = req.path;
+
+    if (!expires || !signature) throw new Error('Missing signature');
+    if (Date.now() / 1000 > Number(expires)) throw new Error('URL expired');
+
+    const expected = sign(`${path}:${expires}`);
+    if (!crypto.timingSafeEqual(Buffer.from(String(signature)), Buffer.from(expected))) throw new Error('Invalid signature')
+
+    next();
+}
+
+export const sign = (data: string) => {
+    return crypto.createHmac('sha256', process.env.SIGNED_URL_SECRET!).update(data).digest('hex');
 }

@@ -2,6 +2,7 @@ import { ServiceError } from "@/errors/ServiceError.js";
 import { FileRepository } from "@/repositories/FileRepository.js";
 import { ImageRepository } from "@/repositories/ImageRepository.js";
 import type { FindParamsBase } from "@/types/FindParams.js";
+import { sign } from "@/utils/auth.js";
 import { checkRequiredParameter } from "@/utils/helper.js";
 import type ImageExtended from "@shared/models/extensions/ImageExtended.js";
 import type { ImageId } from "@shared/models/generated/Image.js";
@@ -53,6 +54,10 @@ export const get = async <P extends FindParamsBase>(params: P, actor?: Actor) =>
     for (const item of items) {
         const file = await fileRepo.findById(item.file_id);
         const url = new URL(path.posix.join(process.env.USERCONTENT_DIR!, file?.path || ''), process.env.STATIC_SERVER);
+        const expires = Date.now() + 3600 * 1000;
+        const signature = sign(`${url.pathname}:${expires}`);
+        url.searchParams.append('expires', expires.toString());
+        url.searchParams.append('signature', signature);
         item.url = url.toString();
         item.width = file?.width || 0;
         item.height = file?.height || 0;

@@ -182,6 +182,7 @@ export const googleAuthCallback = async (req: Request, res: Response, next: Next
                     const payload = await userService.getTokenData({ user_id: user.id });
                     const token = generateJwt({ ...payload, scope: 'delete_account' });
                     res.send(`<script>
+                        console.log({opener: window.opener});
                         window.opener.postMessage({
                             token: '${token}'
                         }, '${process.env.FRONTEND_BASE_URL}');
@@ -189,6 +190,7 @@ export const googleAuthCallback = async (req: Request, res: Response, next: Next
                     </script>`);
                 } catch (error) {
                     res.send(`<script>
+                        console.log({opener: window.opener});
                         window.opener.postMessage({
                             error: '${(error as Error).message}'
                         }, '${process.env.FRONTEND_BASE_URL}');
@@ -250,6 +252,7 @@ export const facebookAuthCallback = async (req: Request, res: Response, next: Ne
                     const payload = await userService.getTokenData({ user_id: user.id });
                     const token = generateJwt({ ...payload, scope: 'delete_account' });
                     res.send(`<script>
+                        console.log({opener: window.opener});
                         window.opener.postMessage({
                             token: '${token}'
                         }, '${process.env.FRONTEND_BASE_URL}');
@@ -257,6 +260,7 @@ export const facebookAuthCallback = async (req: Request, res: Response, next: Ne
                     </script>`);
                 } catch (error) {
                     res.send(`<script>
+                        console.log({opener: window.opener});
                         window.opener.postMessage({
                             error: '${(error as Error).message}'
                         }, '${process.env.FRONTEND_BASE_URL}');
