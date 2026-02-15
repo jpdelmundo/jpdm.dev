@@ -54,6 +54,7 @@ jobs:
 
             echo "Building images..."
             docker compose build
+            echo "Build completed"
 
             echo "Starting up db for migrations..."
             docker compose up -d db
@@ -64,7 +65,7 @@ jobs:
             done
 
             echo "Running database migrations..."
-            docker compose run --rm backend npm run migrate:prod
+            docker compose run --rm backend node dist/migrate.js
 
             echo "Starting containers..."
             docker compose up -d
