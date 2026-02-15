@@ -34,6 +34,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/backend/node_modules ./backend/node_modules
 COPY --from=builder /app/backend/dist ./backend/dist
 COPY --from=builder /app/shared/dist ./shared/dist
+COPY ./backend/migrations ./backend/migrations
 WORKDIR /app/backend
 EXPOSE 3000
 CMD ["node", "dist/app.js"]
