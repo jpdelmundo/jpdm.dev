@@ -53,7 +53,7 @@ jobs:
             chown deploy:deploy .env            
 
             echo "Building images..."
-            docker compose build
+            docker compose build --no-cache
             echo "Build completed"
 
             echo "Starting up db for migrations..."
