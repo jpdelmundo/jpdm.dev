@@ -21,7 +21,7 @@ jobs:
 
             APP_DIR="/home/deploy/jpdm.dev"
             GITEA_TOKEN="${{ secrets.__GITEA_TOKEN }}"
-            GITEA_USERNAME="${{ secrets.__GITEA_USERNAME }}"            
+            GITEA_USERNAME="${{ secrets.__GITEA_USERNAME }}"
             REPO_URL="https://$GITEA_USERNAME:$GITEA_TOKEN@git.jpdm.dev/jp/jpdm.dev.git"
             ENV_CONTENT="${{ secrets.ENV_CONTENT_PROD }}"
             VITE_CONTENT="${{ vars.VITE_CONTENT_PROD }}"
@@ -52,8 +52,22 @@ jobs:
             chmod 600 .env
             chown deploy:deploy .env            
 
-            echo "Building and starting containers..."
-            docker compose up -d --build
+            echo "Building images..."
+            docker compose build
+
+            echo "Starting up db for migrations..."
+            docker compose up -d db
+
+            until docker compose exec db pg_isready -U postgres -d jpdm > /dev/null 2>&1; do
+              echo "Waiting for database..."
+              sleep 1
+            done
+
+            echo "Running database migrations..."
+            docker compose run --rm backend npm run migrate:prod
+
+            echo "Starting containers..."
+            docker compose up -d
 
             echo "Checking status..."
             sleep 3

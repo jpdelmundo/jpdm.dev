@@ -22,7 +22,9 @@
     "lint:fe": "eslint frontend",
     "lint:be": "eslint backend",
     "lint:sh": "eslint shared",
-    "smtp": "ssh -fNT -L 587:localhost:587 root@mail"
+    "smtp": "ssh -fNT -L 587:localhost:587 root@mail",
+    "migrate": "npm run migrate -w backend",
+    "migrate:prod": "npm run migrate:prod -w backend"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",
