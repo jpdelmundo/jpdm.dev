@@ -2,7 +2,6 @@
 -- PostgreSQL database dump
 --
 
-\restrict aYlEygCM8Aej0fsoNUe3RSOgUShoA51ewxNQy1hIEFkDmhznz39G33QsKChsEJS
 
 -- Dumped from database version 16.11
 -- Dumped by pg_dump version 16.11
@@ -26,24 +25,10 @@ CREATE EXTENSION IF NOT EXISTS citext WITH SCHEMA public;
 
 
 --
--- Name: EXTENSION citext; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON EXTENSION citext IS 'data type for case-insensitive character strings';
-
-
---
 -- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
 --
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
-
-
---
--- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
 
 
 --
@@ -118,6 +103,37 @@ CREATE TABLE public.images (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone
 );
+
+
+--
+-- Name: migrations; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.migrations (
+    id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    applied_at timestamp with time zone DEFAULT now()
+);
+
+
+--
+-- Name: migrations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.migrations_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: migrations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.migrations_id_seq OWNED BY public.migrations.id;
 
 
 --
@@ -272,6 +288,13 @@ CREATE TABLE public.users (
 
 
 --
+-- Name: migrations id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.migrations ALTER COLUMN id SET DEFAULT nextval('public.migrations_id_seq'::regclass);
+
+
+--
 -- Name: files files_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -285,6 +308,22 @@ ALTER TABLE ONLY public.files
 
 ALTER TABLE public.user_profiles
     ADD CONSTRAINT gender CHECK (((gender)::text = ANY ((ARRAY['male'::character varying, 'female'::character varying, 'non-binary'::character varying, 'unknown'::character varying])::text[]))) NOT VALID;
+
+
+--
+-- Name: migrations migrations_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.migrations
+    ADD CONSTRAINT migrations_name_key UNIQUE (name);
+
+
+--
+-- Name: migrations migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.migrations
+    ADD CONSTRAINT migrations_pkey PRIMARY KEY (id);
 
 
 --
@@ -419,5 +458,4 @@ ALTER TABLE ONLY public.users
 -- PostgreSQL database dump complete
 --
 
-\unrestrict aYlEygCM8Aej0fsoNUe3RSOgUShoA51ewxNQy1hIEFkDmhznz39G33QsKChsEJS
 
