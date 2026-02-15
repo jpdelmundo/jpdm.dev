@@ -1,4 +1,3 @@
-WARNING:  database "jpdm" has no actual collation version, but a version was recorded
 --
 -- PostgreSQL database dump
 --
