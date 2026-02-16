@@ -415,8 +415,16 @@ export const createUserFromSocialLogin = async (email: string, profile: GooglePr
 
 export const createUserFromFacebookLogin = async (id: string, profile: FacebookProfile) => {
     if (!id) throw new Error('Missing or empty parameter: id');
+    const email = profile.emails?.[0]?.value.trim();
 
-    let newUsername = profile.name?.givenName && profile.name.givenName.length >= 2 ? profile.name.givenName : generateRandomUsername({ numberPart: false });
+    let baseUsername;
+    if (email) {
+        baseUsername = getEmailUsername(email).replace(/[^A-Za-z0-9]/g, '').trim();
+    } else {
+        baseUsername = profile.name?.givenName && profile.name.givenName.length >= 2 ? profile.name.givenName : generateRandomUsername({ numberPart: false });
+    }
+
+    let newUsername = baseUsername;
     let findUsername = await findByUsername(newUsername);
 
     let attempt = 0;
@@ -424,7 +432,7 @@ export const createUserFromFacebookLogin = async (id: string, profile: FacebookP
     while (findUsername && attempt < maxAttempts) {
         attempt++;
         const rand4Digits = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-        newUsername = `${newUsername}${rand4Digits}`;
+        newUsername = `${baseUsername}${rand4Digits}`;
         findUsername = await findByUsername(newUsername);
     }
 
@@ -432,7 +440,8 @@ export const createUserFromFacebookLogin = async (id: string, profile: FacebookP
 
     const newUser = await createUser({
         username: newUsername,
-        facebook_id: profile.id
+        facebook_id: profile.id,
+        ...(email && { email })
     });
 
     const avatar_url = profile.photos?.[0]?.value;

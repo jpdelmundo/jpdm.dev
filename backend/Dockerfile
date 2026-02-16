@@ -25,6 +25,7 @@ COPY package*.json ./
 COPY backend/package*.json ./backend/
 COPY shared/package*.json ./shared/
 RUN npm ci --omit=dev
+RUN npm run preload -w backend
 
 #production
 FROM node:24.13-alpine AS production

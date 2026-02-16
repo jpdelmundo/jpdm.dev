@@ -8,6 +8,7 @@ import type { NextFunction } from 'express-serve-static-core';
 import passport from 'passport';
 
 import { UnexpectedError } from '@/errors/UnexpectedError.js';
+import { type AuthenticateOptions as FacebookAuthenticateOptions } from 'passport-facebook';
 import { clearRefreshTokenCookie, createRefreshTokenCookie } from '../services/authService.js';
 import * as userService from '../services/userService.js';
 import { fail, ok } from '../utils/apiHelper.js';
@@ -224,11 +225,11 @@ export const facebookAuth = async (req: Request, res: Response, next: NextFuncti
     const state = jsonBase64Encode(customData);
 
     passport.authenticate('facebook', {
-        scope: ['public_profile'],
+        scope: ['public_profile', 'email'],
         prompt: 'select_account',
         session: false,
         state
-    })(req, res, next);
+    } as FacebookAuthenticateOptions)(req, res, next);
 }
 
 export const facebookAuthCallback = async (req: Request, res: Response, next: NextFunction) => {

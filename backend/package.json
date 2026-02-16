@@ -9,6 +9,7 @@
     "build": "rm -rf dist && tsc -b tsconfig.build.json && tsc-alias -p tsconfig.alias.json",
     "migrate": "tsx src/migrate.ts",
     "migrate:prod": "node dist/migrate.js",
+    "preload": "node -e \"import('geolite2-redist').then(geolite => geolite.downloadDbs())\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

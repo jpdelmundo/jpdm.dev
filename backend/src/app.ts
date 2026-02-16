@@ -13,7 +13,7 @@ import passport from 'passport';
 import { ServiceError } from './errors/ServiceError.js';
 import router from './router.js';
 import { ApiError, error } from './utils/apiHelper.js';
-import { verifySignature } from './utils/auth.js';
+import { verifySignedUrl } from './utils/auth.js';
 import './utils/logger.js';
 
 const app = express();
@@ -27,7 +27,7 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 app.use(passport.initialize());
-app.use('/usercontent', verifySignature, express.static(path.resolve(process.env.USERCONTENT_DIR!)));
+app.use('/usercontent', verifySignedUrl, express.static(path.resolve(process.env.USERCONTENT_DIR!)));
 app.use('/', router);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

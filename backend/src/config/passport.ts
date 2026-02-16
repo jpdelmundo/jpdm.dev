@@ -59,7 +59,7 @@ passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID!,
     clientSecret: process.env.FACEBOOK_APP_SECRET!,
     callbackURL: '/auth/facebook/callback',
-    profileFields: ['id', 'emails', 'name', 'picture']
+    profileFields: ['id', 'email', 'name', 'picture']
 }, async (accessToken: string, refreshToken: string, profile: FacebookProfile, done) => {
     try {
         console.log({ profile, emails: profile.emails, photos: profile.photos });
@@ -70,9 +70,9 @@ passport.use(new FacebookStrategy({
             throw new Error(message);
         }
 
-        //const email = profile.emails[0].value.trim();
+        const email = profile.emails?.[0]?.value.trim();
         const id = profile.id;
-        let user = await userService.findByFacebookId(id);
+        let user = email ? await userService.findByEmail(email) : await userService.findByFacebookId(id);
 
         //create new user
         if (!user) {

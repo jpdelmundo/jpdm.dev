@@ -6,6 +6,7 @@ import type { Jwt, PayloadData } from '@shared/types/Jwt.js';
 import crypto from 'crypto';
 import type { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import path from 'path';
 import { ApiError } from './apiHelper.js';
 
 const { JsonWebTokenError } = jwt;
@@ -73,14 +74,14 @@ export const getActor = (req: Request) => {
     } as Actor : null;
 }
 
-export const verifySignature = (req: Request, res: Response, next: NextFunction) => {
+export const verifySignedUrl = (req: Request, res: Response, next: NextFunction) => {
     const { expires, signature } = req.query;
-    const path = req.path;
+    const fullPath = path.posix.join(req.baseUrl, req.path);
 
     if (!expires || !signature) throw new Error('Missing signature');
     if (Date.now() / 1000 > Number(expires)) throw new Error('URL expired');
 
-    const expected = sign(`${path}:${expires}`);
+    const expected = sign(`${fullPath}:${expires}`);
     if (!crypto.timingSafeEqual(Buffer.from(String(signature)), Buffer.from(expected))) throw new Error('Invalid signature')
 
     next();

@@ -14,8 +14,6 @@ import { UserProfileInitializer } from './components/UserProfileInitializer';
 import { AppRoutes } from './routes';
 import { theme } from './themes/theme';
 
-console.log({ env: import.meta.env });
-
 function App() {
   return (<>
     <GradientBg />
