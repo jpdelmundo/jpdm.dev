@@ -233,7 +233,7 @@ export const facebookAuth = async (req: Request, res: Response, next: NextFuncti
 
 export const facebookAuthCallback = async (req: Request, res: Response, next: NextFunction) => {
     const { state } = req.query;
-    const redirectUrl = new URL(`${process.env.SITE_URL}/auth/callback`);
+    const redirectUrl = new URL(`${process.env.FRONTEND_BASE_URL}/auth/callback`);
     let intent: string | undefined, customData;
     passport.authenticate('facebook', { session: false }, async (err: Error, user: User, info: unknown) => {
         try {
