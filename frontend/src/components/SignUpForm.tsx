@@ -74,7 +74,10 @@ export function SignUpForm({ onSubmit, onSignUpSuccess }: {
                     <TextField label="Username"
                         {...register('username', {
                             required: 'Username is required',
-                            validate: validateUsername
+                            validate: (value) => {
+                                const errors = validateUsername(value);
+                                return errors.length == 0 || errors[0];
+                            }
                         })}
                         placeholder=""
                         error={!!errors.username}
