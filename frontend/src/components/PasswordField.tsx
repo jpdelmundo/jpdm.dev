@@ -19,7 +19,7 @@ export default function PasswordField(props: TextFieldProps) {
                     ...props.slotProps?.input,
                     endAdornment: (
                         <InputAdornment position="end">
-                            <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                            <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" tabIndex={-1}>
                                 {showPassword ? <VisibilityOff /> : <Visibility />}
                             </IconButton>
                         </InputAdornment>

@@ -14,7 +14,7 @@ export const apiRateLimit = (windowSecs: number, maxReq: number, keyPrefixCallba
         keyGenerator: (req: Request, res: Response) => {
             const keyPrefix = keyPrefixCallback?.(req) || '';
             const safePrefix = keyPrefix ? `:${keyPrefix}` : '';
-            console.log({ keyPrefix });
+            //console.log({ keyPrefix });
             const user = getCurrentUser(req);
             if (user.id) return `user_${user.id}${safePrefix}`;
             const ip = req.ip || req.socket.remoteAddress || 'unknown';

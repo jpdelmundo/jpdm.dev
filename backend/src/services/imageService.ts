@@ -54,7 +54,7 @@ export const get = async <P extends FindParamsBase>(params: P, actor?: Actor) =>
     for (const item of items) {
         const file = await fileRepo.findById(item.file_id);
         const url = new URL(path.posix.join(process.env.USERCONTENT_DIR!, file?.path || ''), process.env.STATIC_SERVER);
-        const expires = Date.now() + 3600 * 1000;
+        const expires = Math.floor((Date.now() / 1000) + 900); //15min expiration
         const signature = sign(`${url.pathname}:${expires}`);
         url.searchParams.append('expires', expires.toString());
         url.searchParams.append('signature', signature);

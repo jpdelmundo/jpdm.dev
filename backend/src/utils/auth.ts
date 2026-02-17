@@ -79,7 +79,7 @@ export const verifySignedUrl = (req: Request, res: Response, next: NextFunction)
     const fullPath = path.posix.join(req.baseUrl, req.path);
 
     if (!expires || !signature) throw new Error('Missing signature');
-    if (Date.now() / 1000 > Number(expires)) throw new Error('URL expired');
+    if (Math.floor(Date.now() / 1000) > Number(expires)) throw new Error('URL expired');
 
     const expected = sign(`${fullPath}:${expires}`);
     if (!crypto.timingSafeEqual(Buffer.from(String(signature)), Buffer.from(expected))) throw new Error('Invalid signature')

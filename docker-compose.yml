@@ -55,7 +55,9 @@ services:
     restart: unless-stopped
 
   litellm:
-    image: ghcr.io/berriai/litellm:v1.80.15-stable
+    build:
+      context: .
+      dockerfile: Dockerfile.litellm
     container_name: litellm
     expose:
       - "4000"
@@ -64,11 +66,15 @@ services:
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/litellm
       LITELLM_LOG: INFO
-    command: >
-      --config /app/config.yml
-      --port 4000
     volumes:
+      - ./litellm-init.sh:/app/litellm-init.sh
       - ./litellm.yml:/app/config.yml
+    entrypoint: sh
+    command: >
+      -c "docker/prod_entrypoint.sh --config /app/config.yml --port 4000 &
+          sleep 10 &&
+          sh /app/litellm-init.sh &&
+          wait"
     networks:
       - app-net
     restart: unless-stopped

@@ -27,7 +27,7 @@ function SignUpContent() {
         }
 
         const token = await executeRecaptcha('sign_up');
-        const res = await apiPost<SignUpFormSubmitResult>('/users/create', { ...formInput, fp: jsonBase64Encode(getFingerprint()), token });
+        const res = await apiPost<SignUpFormSubmitResult>('/users', { ...formInput, fp: jsonBase64Encode(getFingerprint()), token });
         return res; //return to show error message on form
     };
 
@@ -61,8 +61,9 @@ function SignUpContent() {
         {step == 'create_user' && <SignUpForm onSubmit={submit} onSignUpSuccess={signUpSuccess} />}
 
         {step == 'update_email' && <>
-            <Typography variant="h5" fontWeight="bold" mb={1}>Secure your account?</Typography>
-            <Typography mb={1}>In case you forgot your password, we can send a recovery link to your email address.</Typography>
+            <Typography variant="h5" fontWeight="bold" mb={1}>✅ Account created!</Typography>
+            <Typography variant="h6" fontWeight="bold" mb={1}>Secure your account now?</Typography>
+            <Typography mb={1}>Where can we contact you in case you forgot your password?</Typography>
             <UpdateEmailForm onEmailSubmit={emailSubmit} onCodeSubmit={codeSubmit} onEmailConfirmed={emailConfirmed} />
             <Box textAlign="center" mt={2}><Link to="/">I'll do this later.</Link></Box>
         </>}
