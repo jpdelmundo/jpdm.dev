@@ -54,7 +54,7 @@ const getDisplayName = async (id: UserId): Promise<string> => {
     return result;
 }
 
-export const get = async <P extends FindParamsBase>(params: P, actor: Actor) => {
+export const get = async <P extends FindParamsBase>(params: P, actor?: Actor) => {
     const { id, user_id, visibility, is_published, page_num, page_size, order_by, order_dir, include } = params as GetParams;
     const repo = new PostRepository();
 
@@ -148,7 +148,7 @@ export const create = async (data: CreateInput, deps: Deps, actor: Actor): Promi
     return result;
 }
 
-export const getCommentsCount = async (post_id: PostId, actor: Actor) => {
+export const getCommentsCount = async (post_id: PostId, actor?: Actor) => {
     let count = 0;
     const result = await commentService.get({ post_id, page_num: 1, page_size: 1 }, actor);
     count = result.total;
