@@ -1,6 +1,6 @@
 import { createPostController } from '@/controllers/postController.js';
 import type { AppContext } from '@/infra/appContext.js';
-import { verifyToken } from '@/utils/auth.js';
+import { authRequired } from '@/utils/auth.js';
 import { Router } from 'express';
 
 export const createPostRouter = (appCtx: AppContext) => {
@@ -12,7 +12,7 @@ export const createPostRouter = (appCtx: AppContext) => {
     //router.get('/:id/comments', controller.getComments);
 
     //private
-    router.use(verifyToken);
+    router.use(authRequired);
     router.post('/', controller.create);
     router.post('/:id/like', controller.like);
     router.post('/:id/unlike', controller.unlike);

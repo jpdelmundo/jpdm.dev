@@ -1,4 +1,4 @@
-import { verifyToken } from '@/utils/auth.js';
+import { authRequired } from '@/utils/auth.js';
 import { Router } from 'express';
 import * as controller from '../controllers/userController.js';
 
@@ -13,7 +13,7 @@ router.post('/recover-account', controller.recoverAccount);
 router.post('/reset-password', controller.resetPassword);
 
 //private
-router.use(verifyToken);
+router.use(authRequired);
 router.get('/me', controller.me);
 router.get('/profile', controller.profile);
 

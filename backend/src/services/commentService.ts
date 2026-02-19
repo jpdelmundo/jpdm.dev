@@ -2,12 +2,14 @@ import { ServiceError } from '@/errors/ServiceError.js';
 import { CommentRepository } from '@/repositories/CommentRepository.js';
 import { PostRepository } from '@/repositories/PostRepository.js';
 import { UserRepository } from '@/repositories/UserRepository.js';
+import * as userProfileService from '@/services/userProfileService.js';
 import type { FindParamsBase } from '@/types/FindParams.js';
 import type { UserContext } from '@/types/UserContext.js';
 import type { CommentDTO } from '@shared/models/dto/CommentDTO.js';
 import type { CommentId, CommentInitializer, CommentMutator } from '@shared/models/generated/Comment.js';
 import type { PostId } from '@shared/models/generated/Post.js';
 import type { UserId } from '@shared/models/generated/User.js';
+import type { Actor } from '@shared/types/Actor.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
 import type { OrderDirection } from '@shared/types/OrderDirection.js';
 import OpenAI from 'openai';
@@ -28,7 +30,7 @@ type UpdateParams = CommentMutator;
 type DeleteParams = { is_admin?: boolean; current_user_id?: UserId };
 type Moderation = { is_allowed: boolean; reason: string; }
 
-export const create = async (params: CreateParams): Promise<CommentDTO> => {
+export const create = async (params: CreateParams, actor: Actor): Promise<CommentDTO> => {
     const { comment, post_id } = params;
     if (!post_id) throw new ServiceError('Missing parameter: post_id');
     if (!comment || comment.trim().length == 0) throw new ServiceError('Content cannot be empty', ErrorCode.MISSING_PARAMETER, { param: 'comment' });
@@ -43,14 +45,14 @@ export const create = async (params: CreateParams): Promise<CommentDTO> => {
     const newComment = await repo.create({ ...params, comment: String(comment).trim().replace(/\n{3,}/g, '\n\n') });
     if (!newComment) throw new Error('Failed creating comment');
 
-    const result = (await get({ id: newComment.id })) as CommentDTO[];
+    const result = (await get({ id: newComment.id }, actor)) as CommentDTO[];
     if (!result[0]) throw new Error(`Comment created but not found: ${newComment.id}`);
 
     return result[0];
 }
 
-export const get = async <P extends FindParamsBase>(params: P) => {
-    const { current_user_id, id, post_id, user_id, page_num, page_size, order_by, order_dir } = params as GetParams;
+export const get = async <P extends FindParamsBase>(params: P, actor?: Actor) => {
+    const { id, post_id, user_id, page_num, page_size, order_by, order_dir } = params as GetParams;
     const repo = new CommentRepository();
 
     // let postId = post_id;
@@ -74,14 +76,16 @@ export const get = async <P extends FindParamsBase>(params: P) => {
         ...(page_size && { page_size }),
         ...(order_by && { order_by }),
         ...(order_dir && { order_dir }),
-        ...(current_user_id && { prioritize_user_id: current_user_id }),
+        ...(actor?.type == 'user' && { prioritize_user_id: actor.id }),
     } as P;
 
     const findResult = await repo.find(findParams);
 
     const items = ('page_items' in findResult ? findResult.page_items : findResult) as CommentDTO[];
     for (const item of items) {
+        const userProfile = (await userProfileService.get({ user_id: item.user_id }))[0];
         item.display_name = await getDisplayName(item.user_id);
+        item.avatar_url = userProfile?.avatar_url || '';
     }
 
     return findResult;
@@ -90,7 +94,9 @@ export const get = async <P extends FindParamsBase>(params: P) => {
 const getDisplayName = async (id: UserId): Promise<string> => {
     const repo = new UserRepository();
     const user = await repo.findById(id);
-    const result = !user ? '[not found]' : user.username;
+    const userProfile = (await userProfileService.get({ user_id: id }))[0];
+    const name = `${userProfile?.first_name} ${userProfile?.last_name}`.trim();
+    const result = !user ? '[not found]' : (name || user.username || '');
     return result;
 }
 

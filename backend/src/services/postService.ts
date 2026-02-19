@@ -54,7 +54,7 @@ const getDisplayName = async (id: UserId): Promise<string> => {
     return result;
 }
 
-export const get = async <P extends FindParamsBase>(params: P, actor?: Actor) => {
+export const get = async <P extends FindParamsBase>(params: P, actor: Actor) => {
     const { id, user_id, visibility, is_published, page_num, page_size, order_by, order_dir, include } = params as GetParams;
     const repo = new PostRepository();
 
@@ -76,7 +76,7 @@ export const get = async <P extends FindParamsBase>(params: P, actor?: Actor) =>
         const { id: post_id, user_id } = post;
         post.display_name = await getDisplayName(user_id);
         post.is_liked = await postLikeService.isLiked(post.id, actor?.type == 'user' ? actor.id : undefined);
-        include?.includes('stats') && (post.comments_count = await getCommentsCount(post_id));
+        include?.includes('stats') && (post.comments_count = await getCommentsCount(post_id, actor));
         include?.includes('images') && (post.images = (await imageService.get({ post_id }, actor)) as ImageExtended[]);
     }
 
@@ -88,7 +88,7 @@ export const getById = async (id: PostId, params: { include?: string[] }, actor:
     if (!validate(id)) throw new ServiceError('Invalid post id', ErrorCode.INVALID_ID);
     const { include } = params;
 
-    if (!canRead(id, actor)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
+    if (!await canRead(id, actor)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
     const result = await get({ id, include }, actor);
     if (!result[0]) throw new ServiceError('Post not found', ErrorCode.NOT_FOUND);
@@ -148,9 +148,9 @@ export const create = async (data: CreateInput, deps: Deps, actor: Actor): Promi
     return result;
 }
 
-export const getCommentsCount = async (post_id: PostId) => {
+export const getCommentsCount = async (post_id: PostId, actor: Actor) => {
     let count = 0;
-    const result = await commentService.get({ post_id, page_num: 1, page_size: 1 });
+    const result = await commentService.get({ post_id, page_num: 1, page_size: 1 }, actor);
     count = result.total;
     return count;
 }

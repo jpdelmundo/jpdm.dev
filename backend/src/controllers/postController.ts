@@ -26,6 +26,7 @@ export const createPostController = (app: AppContext) => ({
 
     get: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
         const { id } = req.params;
+        console.log({ user: req.user });
         const post = await postService.getById(id!, { include: ['stats', 'images'], }, req.user!);
         return ok(res, post);
     },
@@ -38,7 +39,7 @@ export const createPostController = (app: AppContext) => ({
             post_id: id!,
             user_id: req.user.id,
             comment
-        });
+        }, req.user);
         if (!result.id) return fail(res);
 
         return ok(res, result);

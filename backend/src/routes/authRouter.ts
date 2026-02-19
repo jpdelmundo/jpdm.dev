@@ -1,4 +1,4 @@
-import { verifyToken } from '@/utils/auth.js';
+import { authRequired } from '@/utils/auth.js';
 import { Router } from 'express';
 import * as controller from '../controllers/authController.js';
 
@@ -15,4 +15,4 @@ router.get('/facebook', controller.facebookAuth);
 router.get('/facebook/callback', controller.facebookAuthCallback);
 
 //private
-router.post('/signout', verifyToken, controller.signOut);
+router.post('/signout', authRequired, controller.signOut);

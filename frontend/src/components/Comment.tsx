@@ -1,13 +1,12 @@
 import { apiDelete, apiPut } from '@/api/apiClient';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useConfirmStore } from '@/store/useConfirmStore';
-import { getErrorMessage, getRelativeTime, stringToHslColor } from '@/utils/helper';
+import { getErrorMessage, getRelativeTime } from '@/utils/helper';
 import { formatLineBreaks } from '@/utils/tsxHelper';
 import ClearRounded from '@mui/icons-material/ClearRounded';
 import SendRounded from '@mui/icons-material/SendRounded';
 import SmartToyOutlined from '@mui/icons-material/SmartToyOutlined';
 import WarningRounded from '@mui/icons-material/WarningRounded';
-import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -18,6 +17,7 @@ import Typography from '@mui/material/Typography';
 import type { CommentDTO } from '@shared/models/dto/CommentDTO';
 import { useState, type KeyboardEvent } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
+import { Avatar } from './Avatar.tsx';
 import TextField from './TextField';
 
 type CommentProps = {
@@ -32,7 +32,7 @@ type FormInput = {
 }
 
 export function Comment({ comment, index, onDeleted, onUpdated }: CommentProps) {
-    const { created_at, display_name, comment: post_comment } = comment;
+    const { created_at, display_name, comment: post_comment, avatar_url } = comment;
     const { handleSubmit, register, setFocus, reset } = useForm<FormInput>({
         defaultValues: {
             comment: post_comment
@@ -100,7 +100,10 @@ export function Comment({ comment, index, onDeleted, onUpdated }: CommentProps) 
         }}
     >
         <Stack direction={'row'} gap={1}>
-            <Avatar sx={{ bgcolor: `${stringToHslColor(display_name)}`, width: '32px', height: '32px' }}>{display_name.charAt(0).toUpperCase()}</Avatar>
+            <Avatar
+                sx={{ width: '32px', height: '32px' }}
+                {...{ avatar_url, display_name }}
+            />
             {editMode
                 ? <Box flexGrow={1}>
                     <Box className="edit-comment">
