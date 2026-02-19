@@ -5,6 +5,7 @@ import { FileRepository } from '@/repositories/FileRepository.js';
 import { ImageRepository } from '@/repositories/ImageRepository.js';
 import { PostRepository } from '@/repositories/PostRepository.js';
 import { UserRepository } from '@/repositories/UserRepository.js';
+import * as userProfileService from '@/services/userProfileService.js';
 import type { Deps } from '@/types/Deps.js';
 import type { FindParamsBase } from '@/types/FindParams.js';
 import type { UserContext } from '@/types/UserContext.js';
@@ -49,8 +50,10 @@ type UpdateInput = PostMutator & { is_admin?: boolean; current_user_id?: UserId;
 
 const getDisplayName = async (id: UserId): Promise<string> => {
     const repo = new UserRepository();
-    const postUser = await repo.findById(id);
-    const result = !postUser ? '[not found]' : postUser.username;
+    const user = await repo.findById(id);
+    const userProfile = (await userProfileService.get({ user_id: id }))[0];
+    const name = `${userProfile?.first_name} ${userProfile?.last_name}`.trim();
+    const result = !user ? '[not found]' : (name || user.username || '');
     return result;
 }
 
