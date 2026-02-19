@@ -98,7 +98,7 @@ export const getActor = (req: Request) => {
 export const verifySignedUrl = (req: Request, res: Response, next: NextFunction) => {
     const { expires, signature } = req.query;
     const fullPath = path.posix.join(req.baseUrl, req.path);
-
+    console.log({ fullPath });
     if (!expires || !signature) throw new Error('Missing signature');
     if (Math.floor(Date.now() / 1000) > Number(expires)) throw new Error('URL expired');
 

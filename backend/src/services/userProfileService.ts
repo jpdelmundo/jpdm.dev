@@ -2,7 +2,9 @@ import { ServiceError } from "@/errors/ServiceError.js";
 import { UserProfileRepository } from "@/repositories/UserProfileRepository.js";
 import * as fileService from '@/services/fileService.js';
 import type { FindParamsBase } from "@/types/FindParams.js";
+import { sign } from "@/utils/auth.js";
 import { compress } from "@/utils/image.js";
+import type { UserProfileDTO } from "@shared/models/dto/ProfileDTO.js";
 import type { FileInitializer } from "@shared/models/generated/File.js";
 import type { UserId } from "@shared/models/generated/User.js";
 import type { UserProfileId, UserProfileInitializer, UserProfileMutator } from "@shared/models/generated/UserProfile.js";
@@ -44,6 +46,17 @@ export const get = async <P extends FindParamsBase>(params: P) => {
     } as P;
 
     const findResult = await repo.find(findParams);
+    const items = ('page_items' in findResult ? findResult.page_items : findResult) as UserProfileDTO[];
+    for (const item of items) {
+        if (item.avatar_url?.includes(path.posix.join(process.env.USERCONTENT_DIR!, 'avatars'))) {
+            const url = new URL(item.avatar_url);
+            const expires = Math.floor((Date.now() / 1000) + 900); //15min expiration
+            const signature = sign(`${url.pathname}:${expires}`);
+            url.searchParams.append('expires', expires.toString());
+            url.searchParams.append('signature', signature);
+            item.avatar_url = url.toString();
+        }
+    }
 
     return findResult;
 }

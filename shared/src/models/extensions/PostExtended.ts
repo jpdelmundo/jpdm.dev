@@ -6,4 +6,5 @@ export default interface PostDTO extends Post {
     images: ImageExtended[];
     comments_count: number;
     is_liked: boolean;
+    avatar_url: string;
 }

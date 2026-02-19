@@ -1,3 +1,5 @@
 import { type UserProfile } from "../generated/UserProfile.js";
 
-export type ProfileDTO = UserProfile;
+export interface UserProfileDTO extends UserProfile {
+    avatar_signed_url: string | null;
+}

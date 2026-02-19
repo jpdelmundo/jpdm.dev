@@ -5,7 +5,7 @@ import { useConfirmStore } from '@/store/useConfirmStore';
 import { useSnackbarStore } from '@/store/useSnackbarStore';
 import type { CollageImage } from '@/types/CollageImage';
 import type { CommentsUpdatedParams } from '@/types/CommentsUpdatedParams';
-import { copyToClipboard, formatCounters, getDimensionOrientation, getRelativeTime, stringToHslColor } from '@/utils/helper';
+import { copyToClipboard, formatCounters, getDimensionOrientation, getRelativeTime } from '@/utils/helper';
 import ChatBubbleOutlineRounded from '@mui/icons-material/ChatBubbleOutlineRounded';
 import CheckCircleRounded from '@mui/icons-material/CheckCircleRounded';
 import EqualizerRounded from '@mui/icons-material/EqualizerRounded';
@@ -13,7 +13,6 @@ import FavoriteBorderRounded from '@mui/icons-material/FavoriteBorderRounded';
 import FavoriteRounded from '@mui/icons-material/FavoriteRounded';
 import MoreHorizRounded from '@mui/icons-material/MoreHorizRounded';
 import ShareRounded from '@mui/icons-material/ShareRounded';
-import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
@@ -26,6 +25,7 @@ import type PostDTO from '@shared/models/extensions/PostExtended';
 import type { ImageId } from '@shared/models/generated/Image';
 import type { ImageOrientation } from '@shared/types/ImageOrientation';
 import { memo, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
+import { Avatar } from './Avatar.tsx';
 import { Comments } from './Comments';
 import { ImageCollage } from './ImageCollage';
 import { PostDialog } from './PostDialog';
@@ -40,7 +40,7 @@ type PostProps = {
 
 export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProps) => {
     //console.log('Post render');
-    const { id, title, content, images, display_name, created_at, comments_count, views, likes, is_liked } = post;
+    const { id, title, content, images, display_name, created_at, comments_count, views, likes, is_liked, avatar_url } = post;
     const [commentsOpen, setCommentsOpen] = useState(false);
     const [commentsCount, setCommentsCount] = useState(comments_count);
     const [likesCount, setLikesCount] = useState(likes);
@@ -176,7 +176,7 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
                     {user?.id == post.user_id && <IconButton sx={{ marginLeft: 'auto', position: 'absolute', right: '25px', top: '20px', padding: '2px' }} onClick={postOptionsOnClick}><MoreHorizRounded /></IconButton>}
                 </Stack>
                 <Stack direction={'row'} className="header">
-                    <Avatar sx={{ bgcolor: `${stringToHslColor(display_name)}` }}>{display_name.charAt(0).toUpperCase()}</Avatar>
+                    <Avatar {...{ avatar_url, display_name }} />
                     <Box className="user-date-box">
                         <Typography className="user">{display_name}</Typography>
                         <Typography className="date">{getRelativeTime(String(created_at))}</Typography>

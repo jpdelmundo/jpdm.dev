@@ -77,8 +77,10 @@ export const get = async <P extends FindParamsBase>(params: P, actor?: Actor) =>
     const items = ('page_items' in findResult ? findResult.page_items : findResult) as PostDTO[];
     for (const post of items) {
         const { id: post_id, user_id } = post;
+        const userProfile = (await userProfileService.get({ user_id: post.user_id }))[0];
         post.display_name = await getDisplayName(user_id);
         post.is_liked = await postLikeService.isLiked(post.id, actor?.type == 'user' ? actor.id : undefined);
+        post.avatar_url = userProfile?.avatar_url || '';
         include?.includes('stats') && (post.comments_count = await getCommentsCount(post_id, actor));
         include?.includes('images') && (post.images = (await imageService.get({ post_id }, actor)) as ImageExtended[]);
     }
