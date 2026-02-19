@@ -13,7 +13,7 @@ export const useAvatarProps = (): AvatarProps | null => {
 
     if (!ready) return null;
 
-    const name = `${userProfile?.first_name} ${userProfile?.last_name}`.trim();
+    const name = userProfile ? `${userProfile?.first_name} ${userProfile?.last_name}`.trim() : '';
 
     return {
         display_name: name || user?.username || '',
