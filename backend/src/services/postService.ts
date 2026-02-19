@@ -52,7 +52,7 @@ const getDisplayName = async (id: UserId): Promise<string> => {
     const repo = new UserRepository();
     const user = await repo.findById(id);
     const userProfile = (await userProfileService.get({ user_id: id }))[0];
-    const name = `${userProfile?.first_name} ${userProfile?.last_name}`.trim();
+    const name = userProfile ? `${userProfile?.first_name} ${userProfile?.last_name}`.trim() : '';
     const result = !user ? '[not found]' : (name || user.username || '');
     return result;
 }
