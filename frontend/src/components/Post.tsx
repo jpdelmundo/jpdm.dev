@@ -25,6 +25,7 @@ import type PostDTO from '@shared/models/extensions/PostExtended';
 import type { ImageId } from '@shared/models/generated/Image';
 import type { ImageOrientation } from '@shared/types/ImageOrientation';
 import { memo, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Avatar } from './Avatar.tsx';
 import { Comments } from './Comments';
 import { ImageCollage } from './ImageCollage';
@@ -56,6 +57,7 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
     const [postDialogOpen, setPostDialogOpen] = useState(false);
     const [editPost, setEditPost] = useState<PostDTO | null>(null);
     const user = useAuthStore(s => s.user);
+    const navigate = useNavigate();
 
     const orientation = useMemo(() => {
         if (!images.length) return 'portrait';
@@ -80,9 +82,14 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
         //showMessage('Test');
     }
 
-    const likesButtonOnClick = () => {
+    const likesButtonOnClick = async () => {
         if (!isAuthenticated) {
-            return alert('show login');
+            const confirmed = await confirm({
+                message: 'To do that, you need to sign-in (or create an account)',
+                confirmText: 'Go to sign-in page'
+            });
+
+            return confirmed ? navigate('/signin') : null;
         };
         setPostLiked(prev => !prev);
         setLikesCount(prev => postLiked ? prev - 1 : prev + 1);

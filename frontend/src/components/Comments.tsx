@@ -1,5 +1,6 @@
 import { apiGet, apiPost } from '@/api/apiClient';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useConfirmStore } from '@/store/useConfirmStore.ts';
 import type { CommentsUpdatedParams } from '@/types/CommentsUpdatedParams';
 import { getErrorMessage, isTopInView, scrollIntoView } from '@/utils/helper';
 import SendRounded from '@mui/icons-material/SendRounded';
@@ -18,6 +19,7 @@ import type { PostId } from '@shared/models/generated/Post';
 import type { Paginated } from '@shared/types/Paginated';
 import { useRef, useState, type FocusEvent, type KeyboardEvent } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import { TransitionGroup } from 'react-transition-group';
 import { Comment } from './Comment';
 import TextField from './TextField';
@@ -50,6 +52,8 @@ export function Comments({ open, postId, onCommentsUpdated }: CommentsProps) {
     const [isLoading, setIsLoading] = useState(false);
     const isAuthenticated = useAuthStore(s => s.isAuthenticated);
     const commentsRef = useRef<HTMLDivElement | null>(null);
+    const navigate = useNavigate();
+    const confirm = useConfirmStore(s => s.confirm);
 
     const loadComments = async () => {
         setIsLoadMoreVisible(false);
@@ -97,10 +101,17 @@ export function Comments({ open, postId, onCommentsUpdated }: CommentsProps) {
         setIsLoadMoreLoading(false);
     }
 
-    const commentInputOnFocus = (e: FocusEvent<HTMLInputElement>) => {
+    const commentInputOnFocus = async (e: FocusEvent<HTMLInputElement>) => {
         if (!isAuthenticated) {
             e.target.blur();
-            alert('show login');
+            const confirmed = await confirm({
+                message: 'To do that, you need to sign-in (or create an account)',
+                confirmText: 'Go to sign-in page'
+            });
+
+            if (confirmed) {
+                navigate('/signin');
+            }
         };
     }
 
