@@ -12,14 +12,16 @@ import type { UserRole as UserRoleModel } from '@shared/models/generated/UserRol
 import type { Actor } from '@shared/types/Actor.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
 import type { Jwt, PayloadData } from '@shared/types/Jwt.js';
+import type { Moderation } from '@shared/types/Moderation.js';
 import type { OrderDirection } from '@shared/types/OrderDirection.js';
 import type { UserIdentity } from '@shared/types/UserIdentity.js';
 import type { UserRole } from '@shared/types/UserRole.js';
 import { jsonBase64Decode } from '@shared/utils/encoding.js';
 import { generateRandomUsername, getEmailUsername } from '@shared/utils/username.js';
-import { isValidEmail, validatePassword } from '@shared/utils/validation.js';
+import { isValidEmail, validatePassword, validateUsername } from '@shared/utils/validation.js';
 import * as bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import OpenAI from 'openai';
 import type { Profile as FacebookProfile } from 'passport-facebook';
 import type { Profile as GoogleProfile } from 'passport-google-oauth20';
 import { validate } from 'uuid';
@@ -144,6 +146,18 @@ export const createRefreshToken = async (data: RefreshTokenInitializer) => {
 
 export const createUser = async (data: UserInitializer): Promise<User> => {
     const repo = new UserRepository();
+    const username = (data.username || '').trim();
+    const password = (data.password || '').trim();
+
+    if (!data.google_id && !data.facebook_id) {
+        if (!password) throw new ServiceError('Password required');
+        if (validatePassword(password).length > 0) throw new ServiceError('Password invalid');
+        if (validateUsername(username).length > 0) throw new ServiceError('Username invalid');
+
+        const moderation = await moderate(username);
+        if (!moderation) throw new Error('Invalid AI moderation result');
+        if (!moderation.is_allowed) throw new ServiceError(`AI Moderation: ${moderation.reason}`);
+    }
 
     const checkUsername = await findByUsername(data.username);
     if (checkUsername?.id) throw new ServiceError('The username chosen is already in use by another account', ErrorCode.ALREADY_USED, { param: 'email' });
@@ -567,4 +581,46 @@ const canModify = async (id: UserId, actor: Actor) => {
     if (actor.type == 'system') return true;
     if (actor.roles.includes('admin')) return true;
     return false;
+}
+
+export const moderate = async (name: string): Promise<Moderation | null> => {
+
+    const llm = new OpenAI({
+        apiKey: process.env.LITELLM_VIRTUAL_KEY,
+        baseURL: process.env.LITELLM_API_BASE_URL
+    });
+
+    const result = await llm.chat.completions.create({
+        model: 'moderation-model',
+        messages: [
+            {
+                role: 'system',
+                content: `You are a name/username filtering system.
+    Respond ONLY with valid JSON with properties:
+    - is_allowed: boolean
+    - reason: string   
+    
+    Disallow:
+    - insults, bad words, anything about the face, mouth or looks
+    - spam messages
+    
+    Rules:
+    - If is_allowed = true, set "reason" to an empty string.
+    - If is_allowed = false, state clearly but concisely like talking to a human being why it's not allowed.
+    - Do NOT include the name/username in the reason value.
+    - Do NOT describe the person's physical traits.
+    - Do NOT mention the moderation rules in the output.`
+            },
+            {
+                role: 'user',
+                content: name
+            }
+        ],
+        temperature: 0.3,
+        response_format: { type: "json_object" }
+    });
+
+    const content = result.choices[0]?.message.content?.trim();
+    console.log({ name, content });
+    return content ? JSON.parse(content) : null;
 }

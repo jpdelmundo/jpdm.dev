@@ -11,6 +11,7 @@ import type { PostId } from '@shared/models/generated/Post.js';
 import type { UserId } from '@shared/models/generated/User.js';
 import type { Actor } from '@shared/types/Actor.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
+import type { Moderation } from '@shared/types/Moderation.js';
 import type { OrderDirection } from '@shared/types/OrderDirection.js';
 import OpenAI from 'openai';
 
@@ -28,7 +29,6 @@ type GetParams = {
 type CreateParams = CommentInitializer;
 type UpdateParams = CommentMutator;
 type DeleteParams = { is_admin?: boolean; current_user_id?: UserId };
-type Moderation = { is_allowed: boolean; reason: string; }
 
 export const create = async (params: CreateParams, actor: Actor): Promise<CommentDTO> => {
     const { comment, post_id } = params;
@@ -184,25 +184,26 @@ const moderate = async (comment: string): Promise<Moderation | null> => {
             {
                 role: 'system',
                 content: `You are a content moderation system.
-Respond ONLY with valid JSON:
-{
-  "is_allowed": boolean,
-  "reason": string
-}
+Respond ONLY with valid JSON with properties:
+- is_allowed: boolean
+- reason: string
 
-DO NOT:
-- include the comment in the reason value
-- allow insults, anything about the face, mouth or look
-- accept spam messages
+Disallow:
+- insults, anything about the face, mouth or looks
+- spam messages
 
-If is_allowed = true, set reason to empty string, otherwise state clearly but concisely like talking to a human being why it's not allowed.`
+Rules:
+- If is_allowed = true, set "reason" to an empty string.
+- If is_allowed = false, state clearly but concisely like talking to a human being why it's not allowed.
+- Do NOT include the name/username in the reason value.`
             },
             {
                 role: 'user',
                 content: comment
             }
         ],
-        temperature: 0
+        temperature: 0,
+        response_format: { type: "json_object" }
     });
 
     const content = result.choices[0]?.message.content;

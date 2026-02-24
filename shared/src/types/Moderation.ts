@@ -1,0 +1,1 @@
+export type Moderation = { is_allowed: boolean; reason: string; }

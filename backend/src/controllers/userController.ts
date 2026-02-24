@@ -4,7 +4,6 @@ import * as postService from '@/services/postService.js';
 import type { AuthorizedRequest } from '@/types/AuthorizedRequest.js';
 import type { RouteParams } from '@/types/RouteParams.js';
 import { jsonBase64Decode } from '@shared/utils/encoding.js';
-import { validatePassword, validateUsername } from '@shared/utils/validation.js';
 import * as bcrypt from 'bcrypt';
 import type { Request, Response } from 'express';
 import { validate } from 'uuid';
@@ -30,10 +29,6 @@ export const create = async (req: Request, res: Response): Promise<Response> => 
     const { username, password, fp, token } = req.body;
 
     await botCheck(token);
-
-    if (!password) return fail(res, 'Password required');
-    if (validatePassword(password).length > 0) return fail(res, 'Password invalid');
-    if (validateUsername(username).length > 0) return fail(res, 'Username invalid');
 
     //create user
     const newUser = await userService.createUser({ username, password: await bcrypt.hash(password, 12) });

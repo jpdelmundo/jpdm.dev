@@ -281,7 +281,7 @@ export const canRead = async (id: PostId, actor: Actor) => {
     const repo = new PostRepository();
     const post = await repo.findById(id);
     if (!post) return false;
-
+    console.log({ actor });
     if (post.is_published && post.visibility == 'public') return true;
     if (actor.type == 'user' && actor.id == post.user_id) return true;
     if (actor.type == 'system') return true;

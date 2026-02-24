@@ -1,8 +1,10 @@
 import * as userService from '@/services/userService.js';
 import type { AuthorizedRequest } from '@/types/AuthorizedRequest.js';
 import type { Actor } from '@shared/types/Actor.js';
+import type { AnonymousIdentity } from '@shared/types/AnonymousIdentity.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
 import type { Jwt, PayloadData } from '@shared/types/Jwt.js';
+import type { UserIdentity } from '@shared/types/UserIdentity.js';
 import crypto from 'crypto';
 import type { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
@@ -14,9 +16,10 @@ const { JsonWebTokenError } = jwt;
 export const currentUser = async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
     const token = authHeader?.split(' ')[1];
+    const anonUser: AnonymousIdentity = { type: 'anonymous', id: '00000000-0000-0000-0000-000000000000', username: 'anonymous', email: '', roles: [] };
 
     if (!token) {
-        req.user = undefined;
+        req.user = anonUser;
         return next();
     }
 
@@ -29,15 +32,15 @@ export const currentUser = async (req: Request, res: Response, next: NextFunctio
 
         req.user = user
             ? {
+                type: 'user',
                 id: payload.id,
                 email: payload.email,
                 username: payload.username,
-                roles: payload.roles,
-                type: 'user'
-            }
-            : undefined;
+                roles: payload.roles
+            } as UserIdentity
+            : anonUser;
     } catch (err) {
-        req.user = undefined;
+        req.user = anonUser;
     }
 
     next();

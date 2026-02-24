@@ -1,3 +1,3 @@
 export interface SystemIdentity {
-    type: 'system'
+    type: 'system';
 }

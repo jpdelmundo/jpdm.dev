@@ -16,7 +16,7 @@ RESPONSE=$(curl -s -X POST "$PROXY_URL/key/generate" \
   -H "Content-Type: application/json" \
   -d "{
     \"key\": \"$KEY_VALUE\",
-    \"models\": [\"moderation-model\"],
+    \"models\": [\"moderation-model\", \"vision-model\"],
     \"key_alias\": \"jpdm-key\"
   }")
 

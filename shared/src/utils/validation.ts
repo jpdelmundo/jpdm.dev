@@ -1,3 +1,5 @@
+import { RESERVED_USERNAME } from "../types/ReservedUsername.js";
+
 export const validatePassword = (value: string) => {
     const errors = [];
 
@@ -15,8 +17,9 @@ export const validateUsername = (value: string) => {
     const errors = [];
 
     if (value.length < 3) errors.push('Username length too short');
-    if (value.length > 64) errors.push('Username length too long');
-    if (!/^[a-zA-Z][a-zA-Z0-9]*(-[a-zA-Z0-9]+)?$/i.test(value)) errors.push('Usernames may contain letters and numbers, and may include a single optional dash (-).');
+    if (value.length > 30) errors.push('Username length too long');
+    if (!/^[a-zA-Z][a-zA-Z0-9]*(_[a-zA-Z0-9]+)?$/i.test(value)) errors.push('Usernames may contain letters and numbers, and may include a single optional underscore (_).');
+    if (RESERVED_USERNAME.includes(value.toLocaleLowerCase())) errors.push('Invalid username');
 
     return errors;
 }

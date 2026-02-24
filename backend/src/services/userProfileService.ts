@@ -10,11 +10,14 @@ import type { UserId } from "@shared/models/generated/User.js";
 import type { UserProfileId, UserProfileInitializer, UserProfileMutator } from "@shared/models/generated/UserProfile.js";
 import type { Actor } from "@shared/types/Actor.js";
 import { ErrorCode } from "@shared/types/ErrorCode.js";
+import type { Moderation } from "@shared/types/Moderation.js";
 import crypto from 'crypto';
 import { fileTypeFromFile } from "file-type";
 import fs from 'fs';
 import { imageSizeFromFile } from "image-size/fromFile";
+import OpenAI from "openai";
 import path from 'path';
+import { moderate } from "./userService.js";
 
 type GetParams = {
     id?: UserProfileId;
@@ -75,6 +78,15 @@ export const updateByUserId = async (user_id: UserId, param: UserProfileMutator,
     if (!canModify(user_id, actor)) throw new ServiceError('Unauthorized request');
     if (!user_id) throw new ServiceError('Missing parameter: user_id');
     const { avatar_url, bio, date_of_birth, first_name, last_name, gender, phone_number, avatar_file_id } = param;
+
+    if (first_name || last_name) {
+        const name = `${first_name} ${last_name}`;
+        const moderation = await moderate(name);
+        console.log({ moderation });
+        if (!moderation) throw new Error('Invalid AI moderation result');
+        if (!moderation.is_allowed) throw new ServiceError(`AI Moderation: ${moderation.reason}`);
+    }
+
     const params = {
         ...(avatar_url !== undefined && { avatar_url }),
         ...(avatar_file_id !== undefined && { avatar_file_id }),
@@ -137,6 +149,12 @@ export const updateAvatar = async (user_id: UserId, file: Express.Multer.File, a
     //console.log({ file });
     const parsed = path.parse(file.path);
     const compressed = await compress(file.path, { format: 'webp' });
+
+    const base64Image = compressed.toString('base64');
+    const moderation = await moderateImage(base64Image);
+    if (!moderation) throw new Error('Invalid AI moderation result');
+    if (!moderation.is_allowed) throw new ServiceError(`AI Moderation: ${moderation.reason}`);
+
     const compressedFilename = `${parsed.name}.webp`;
     const compressedFilePath = path.posix.join(destDir, compressedFilename);
     //console.log({ parsed: path.parse(compressedFilePath) });
@@ -174,4 +192,61 @@ export const canModify = (user_id: UserId, actor: Actor) => {
     if (actor.roles.includes('admin')) return true;
     //console.log({ actor, user_id });
     return false;
+}
+
+const moderateImage = async (base64Image: string): Promise<Moderation | null> => {
+    const llm = new OpenAI({
+        apiKey: process.env.LITELLM_VIRTUAL_KEY,
+        baseURL: process.env.LITELLM_API_BASE_URL
+    });
+
+    const result = await llm.chat.completions.create({
+        model: 'vision-model',
+        messages: [
+            {
+                role: 'system',
+                content: `You are an image moderation system for avatar uploads.
+
+Analyze the uploaded image and respond ONLY with valid JSON with properties:
+- is_allowed: boolean
+- reason: string
+
+Disallow:
+- Nudity or sexually explicit content
+- Violence or graphic content
+- Hate symbols or extremist content
+- Illegal activities
+- Harassment or offensive gestures
+- Shocking or disturbing imagery
+- Spam images (ads, QR codes, promotional graphics, contact info, URLs)
+
+Rules:
+- If is_allowed = true, set "reason" to an empty string.
+- If is_allowed = false, clearly and concisely explain why the image is not allowed.
+- Do NOT describe the person's physical traits.
+- Do NOT mention the moderation rules in the output.`
+            },
+            {
+                role: 'user',
+                content: [
+                    {
+                        type: 'text',
+                        text: ''
+                    },
+                    {
+                        type: 'image_url',
+                        image_url: {
+                            url: `data:image/webp;base64,${base64Image}`
+                        }
+                    }
+                ]
+            }
+        ],
+        temperature: 0,
+        response_format: { type: "json_object" }
+    });
+
+    const content = result.choices[0]?.message.content;
+
+    return content ? JSON.parse(content) : null;
 }

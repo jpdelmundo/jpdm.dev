@@ -105,7 +105,7 @@ export function Comments({ open, postId, onCommentsUpdated }: CommentsProps) {
         if (!isAuthenticated) {
             e.target.blur();
             const confirmed = await confirm({
-                message: 'To do that, you need to sign-in (or create an account)',
+                message: 'To continue, you need to sign in or create an account.',
                 confirmText: 'Go to sign-in page'
             });
 
