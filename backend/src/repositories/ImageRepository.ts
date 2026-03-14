@@ -7,6 +7,7 @@ import { BaseRepository } from './BaseRepository.js';
 type FindParams = {
     id?: ImageId;
     post_id?: PostId;
+    post_ids?: PostId[];
     file_id?: FileId;
     page_num?: number;
     page_size?: number;
@@ -16,13 +17,14 @@ type FindParams = {
 
 export class ImageRepository extends BaseRepository<Image> {
     async find<P extends FindParams>(params: P) {
-        const { id, file_id, post_id, order_by, order_dir } = params;
+        const { id, file_id, post_id, post_ids, order_by, order_dir } = params;
         const filters: string[] = [];
         const values: unknown[] = [];
 
         //where
         id && filters.push(`id = $${filters.length + 1}`) && values.push(id);
         post_id && filters.push(`post_id = $${filters.length + 1}`) && values.push(post_id);
+        post_ids && filters.push(`post_id = any($${filters.length + 1})`) && values.push(post_ids);
         file_id && filters.push(`file_id = $${filters.length + 1}`) && values.push(file_id);
 
         if (filters.length == 0) {

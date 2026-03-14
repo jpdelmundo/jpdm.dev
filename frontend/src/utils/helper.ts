@@ -45,9 +45,9 @@ export const getImageFileDetail = (file: File): Promise<ImageDetail> => {
     });
 }
 
-export const formatDateTime = (dateTime: Date | string, locale: string = navigator.language, options?: { date_only?: boolean; time_only?: boolean; }) => {
+export const formatDateTime = (dateTime: Date | string, locale: string = navigator.language, options?: { date_only?: boolean; time_only?: boolean; short_month?: boolean; }) => {
     const dateFormatter = new Intl.DateTimeFormat(locale, {
-        month: 'long',
+        month: options?.short_month ? 'short' : 'long',
         day: 'numeric',
         year: 'numeric'
     });
@@ -92,7 +92,7 @@ export const getRelativeTime = (dateTime: string, locale: string = navigator.lan
     return rtf.format(Math.round(diff), 'second');
 }
 
-export function hashString(str: string) {
+export function hashToInt(str: string) {
     // DJB2 hash algorithm
     let hash = 5381;
 
@@ -106,11 +106,11 @@ export function hashString(str: string) {
 }
 
 export function stringToHexColor(str: string) {
-    return '#' + hashString(str).toString(16).padStart(6, '0');
+    return '#' + hashToInt(str).toString(16).padStart(6, '0');
 }
 
 export function stringToHslColor(str: string) {
-    return `hsl(${hashString(str) % 360}, 70%, 60%)`;
+    return `hsl(${hashToInt(str) % 360}, 70%, 60%)`;
 }
 
 export function scrollIntoView(el: Element, offsetTop: number = 0) {
@@ -155,8 +155,10 @@ export function scrollbarWidthAware(apply: boolean) {
         }
     } else {
         const el = document.querySelector('.header-container') as HTMLElement;
-        el.style.width = '';
-        document.documentElement.classList.remove('modal-dialog-open');
+        if (el) {
+            el.style.width = '';
+            document.documentElement.classList.remove('modal-dialog-open');
+        }
         //document.body.classList.remove('modal-dialog-open');
         //document.documentElement.style.removeProperty('--scrollbar-width');
     }

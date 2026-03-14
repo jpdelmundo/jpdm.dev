@@ -1,24 +1,26 @@
-import type { FindParamsBase } from '@/types/FindParams.js';
+import type { KeyValue } from '@/types/KeyValue.js';
 import { UserColumns, type User, type UserId, type UserInitializer, type UserMutator } from '@shared/models/generated/User.js';
 import { BaseRepository } from './BaseRepository.js';
 
 type FindParams = {
-    id?: string;
+    id?: UserId;
+    ids?: UserId[];
     username?: string;
     email?: string;
     vanity_id?: string;
     email_confirmed?: boolean;
-    facebook_id: string;
+    facebook_id?: string;
 }
 
 export class UserRepository extends BaseRepository<User> {
-    async find<P extends FindParamsBase>(params: P): Promise<User[]> {
-        const { id, username, email, vanity_id, email_confirmed, facebook_id } = params;
+    async find<P extends KeyValue>(params: P): Promise<User[]> {
+        const { id, ids, username, email, vanity_id, email_confirmed, facebook_id } = params as FindParams;
         const filters: string[] = [];
         const values: unknown[] = [];
 
         //where
         id && filters.push(`id = $${filters.length + 1}`) && values.push(id);
+        ids && filters.push(`id = any($${filters.length + 1})`) && values.push(ids);
         username && filters.push(`username = $${filters.length + 1}`) && values.push(username);
         email && filters.push(`email = $${filters.length + 1}`) && values.push(email);
         vanity_id && filters.push(`vanity_id = $${filters.length + 1}`) && values.push(vanity_id);

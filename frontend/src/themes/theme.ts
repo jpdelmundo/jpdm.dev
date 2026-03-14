@@ -1,4 +1,5 @@
 import { createTheme } from '@mui/material/styles';
+import type { } from '@mui/x-data-grid/themeAugmentation';
 import type { } from '@mui/x-date-pickers/themeAugmentation';
 
 export const theme = createTheme({
@@ -116,6 +117,9 @@ export const theme = createTheme({
             },
             styleOverrides: {
                 root: () => ({
+                    '& .MuiOutlinedInput-root': {
+                        backgroundColor: '#ffffff'
+                    },
                     '& .MuiInputBase-multiline': {
                         boxSizing: 'border-box',
                         lineHeight: '20px',
@@ -512,9 +516,11 @@ export const theme = createTheme({
         MuiPickersOutlinedInput: {
             styleOverrides: {
                 root: () => ({
+                    backgroundColor: '#ffffff',
                     '& .MuiPickersOutlinedInput-notchedOutline': {
                         //boxShadow: '0 1px 2px 0px rgba(0,0,0,.1)',
-                        borderColor: '#e5e5e5'
+                        borderColor: '#e5e5e5',
+                        //backgroundColor: '#ffffff'
                     },
                     '&:hover .MuiPickersOutlinedInput-notchedOutline': {
                         borderColor: '#e5e5e5'
@@ -545,14 +551,13 @@ export const theme = createTheme({
                     boxSizing: 'border-box',
                     height: '36px',
                     lineHeight: '20px',
-                    padding: '4px 12px'
+                    padding: '4px 0'
                 }
             }
         },
         MuiPickersTextField: {
             defaultProps: {
                 FormHelperTextProps: {
-
                     sx: {
                         display: 'block',
                         color: 'error.main',
@@ -563,5 +568,38 @@ export const theme = createTheme({
                 }
             }
         },
+        MuiDataGrid: {
+            // defaultProps: {
+            //     rowHeight: 40,
+            //     columnHeaderHeight: 42
+            // },
+            styleOverrides: {
+                root: {
+                    fontSize: '15px',
+                    '& .MuiDataGrid-row': {
+                        minHeight: '52px !important'
+                    },
+                    '& .MuiDataGrid-cell': {
+                        display: 'flex',
+                        alignItems: 'center',
+                        '& .content': {
+                            margin: '8px 0',
+                            '& .double-break': {
+                                display: 'block',
+                                height: '5px'
+                            }
+                        },
+                        '&.MuiDataGrid-cell.MuiDataGrid-cell--editing': {
+                            boxShadow: 'none',
+                            padding: '1px 10px',
+                            // '&:focus, &:focus-within': {
+                            //     outline: 'none',
+                            //     outlineOffset: '0'
+                            // }
+                        }
+                    }
+                },
+            }
+        }
     }
 });

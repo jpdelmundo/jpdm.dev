@@ -1,4 +1,4 @@
-import type { FindParamsBase } from '@/types/FindParams.js';
+import type { KeyValue } from '@/types/KeyValue.js';
 import type { File, FileId, FileInitializer, FileMutator } from '@shared/models/generated/File.js';
 import type { PostId } from '@shared/models/generated/Post.js';
 import type { UserId } from '@shared/models/generated/User.js';
@@ -6,17 +6,19 @@ import { BaseRepository } from './BaseRepository.js';
 
 interface FindParams {
     id?: FileId;
+    ids?: FileId[];
     postId?: PostId;
     userId?: UserId;
 }
 
 export class FileRepository extends BaseRepository<File> {
-    async find<P extends FindParamsBase>(params: P) {
-        const { id, postId, userId } = params;
+    async find<P extends KeyValue>(params: P) {
+        const { id, ids, postId, userId } = params;
         const filters: string[] = [];
         const values: unknown[] = [];
 
         id && filters.push(`id = $${filters.length + 1}`) && values.push(id);
+        ids && filters.push(`id = any($${filters.length + 1})`) && values.push(ids);
         postId && filters.push(`post_id = $${filters.length + 1}`) && values.push(postId);
         userId && filters.push(`user_id = $${filters.length + 1}`) && values.push(userId);
 

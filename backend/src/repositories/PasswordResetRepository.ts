@@ -1,5 +1,5 @@
 import { getDateParamCondition } from '@/infra/pgHelper.js';
-import type { FindParamsBase } from '@/types/FindParams.js';
+import type { KeyValue } from '@/types/KeyValue.js';
 import type { PasswordReset, PasswordResetId, PasswordResetInitializer, PasswordResetMutator } from '@shared/models/generated/PasswordReset.js';
 import type { UserId } from '@shared/models/generated/User.js';
 import type { DateComparison } from '@shared/types/DateComparison.js';
@@ -19,7 +19,7 @@ type FindParams = {
 }
 
 export class PasswordResetRepository extends BaseRepository<PasswordReset> {
-    async find<P extends FindParamsBase>(params: P) {
+    async find<P extends KeyValue>(params: P) {
         const { token_hash, user_id, used_at, order_by, order_dir } = params as FindParams;
         const filters: string[] = [];
         const values: unknown[] = [];

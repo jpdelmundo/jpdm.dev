@@ -1,4 +1,7 @@
-import * as userService from '@/services/userService.js';
+import { pool } from '@/infra/db.js';
+import { makeDeps } from '@/infra/makeDeps.js';
+import type { ServiceContext } from '@/infra/serviceContext.js';
+import { createUserService } from '@/services/userService.js';
 import type { AuthorizedRequest } from '@/types/AuthorizedRequest.js';
 import type { Actor } from '@shared/types/Actor.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
@@ -11,6 +14,12 @@ import path from 'path';
 import { ApiError } from './apiHelper.js';
 
 const { JsonWebTokenError } = jwt;
+
+// Create system context for auth middleware
+const systemContext: ServiceContext = {
+    deps: makeDeps(pool),
+    actor: { type: 'system' }
+};
 
 export const currentUser = async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
@@ -25,9 +34,7 @@ export const currentUser = async (req: Request, res: Response, next: NextFunctio
     try {
         const payload = getJwtPayload(req);
         if (!payload) throw new JsonWebTokenError('Problem decoding payload');
-
-        //check if password changed, consider jwt invalid (use redis if it becomes a performance issue)
-        const user = await userService.findById(payload.id);
+        const user = await createUserService(systemContext).findById(payload.id);
 
         req.user = user
             ? {
@@ -56,8 +63,10 @@ export const authRequired = async (req: Request, res: Response, next: NextFuncti
     const payload = getJwtPayload(req);
     if (!payload) throw new JsonWebTokenError('Problem decoding payload');
 
-    const user = await userService.findById(authUser.id);
+    const user = await createUserService(systemContext).findById(authUser.id);
     if (!user) throw new Error('Cannot find user using payload data');
+
+    //check if password changed, consider jwt invalid (use redis if it becomes a performance issue)
     if (user.password_updated_at && (payload.iat * 1000) < user.password_updated_at.getTime()) throw new ApiError('Invalid token. User has change password.', 401, ErrorCode.TOKEN_INVALID);
 
     next();
@@ -105,7 +114,7 @@ export const verifySignedUrl = (req: Request, res: Response, next: NextFunction)
     if (Math.floor(Date.now() / 1000) > Number(expires)) throw new Error('URL expired');
 
     const expected = sign(`${fullPath}:${expires}`);
-    if (!crypto.timingSafeEqual(Buffer.from(String(signature)), Buffer.from(expected))) throw new Error('Invalid signature')
+    if (!crypto.timingSafeEqual(Buffer.from(String(signature)), Buffer.from(expected))) throw new Error('Invalid signature');
 
     next();
 }

@@ -60,7 +60,7 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
     const navigate = useNavigate();
 
     const orientation = useMemo(() => {
-        if (!images.length) return 'portrait';
+        if (!images?.length) return 'portrait';
 
         const img = images[0];
         if (images.length < 4) {

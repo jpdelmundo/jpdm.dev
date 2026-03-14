@@ -1,6 +1,7 @@
 import { UserPanel } from '@/components/UserPanel';
 import { Outlet, Link as RLink } from "react-router-dom";
 
+import { GradientBg } from '@/components/GradientBg.tsx';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Link from '@mui/material/Link';
@@ -9,6 +10,7 @@ import Stack from '@mui/material/Stack';
 export const Layout = () => {
     return (
         <>
+            <GradientBg />
             <Container component="header" className="header-container" sx={{ height: '60px', zIndex: 1000 }}>
                 <Stack direction="row" alignItems="center" maxWidth="md" sx={{ margin: '0 auto' }}>
                     <Box flex={1}>

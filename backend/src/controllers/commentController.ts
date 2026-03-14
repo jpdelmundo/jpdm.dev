@@ -1,47 +1,56 @@
-import * as commentService from '@/services/commentService.js';
-import { fail, ok } from '@/utils/apiHelper.js';
-import { getCurrentUser } from '@/utils/auth.js';
+import type { AppContext } from '@/infra/appContext.js';
+import { bindContext } from '@/infra/bindContext.js';
+import { createCommentService } from '@/services/commentService.js';
+import type { RouteParams } from '@/types/RouteParams.js';
+import { ok } from '@/utils/apiHelper.js';
 import type { Request, Response } from 'express';
 
-export const create = async (req: Request, res: Response): Promise<Response> => {
-    const { comment, post_id } = req.body;
+export const createCommentController = (app: AppContext) => {
+    const makeCtx = bindContext(app);
 
-    const result = await commentService.create({ post_id, comment, user_id: req.user!.id }, req.user!);
-    if (!result.id) return fail(res);
+    return {
+        create: async (req: Request, res: Response): Promise<Response> => {
+            const { comment, post_id } = req.body;
 
-    return ok(res, result);
-}
+            const result = await createCommentService(makeCtx(req)).create({
+                user_id: req.user!.id,
+                post_id, comment
+            });
 
-export const get = async (req: Request, res: Response): Promise<Response> => {
-    const { page_num, post_id } = req.query;
-    const result = await commentService.get({
-        post_id,
-        page_num: page_num ? parseInt(String(page_num)) : 1,
-        page_size: 10,
-        order_by: 'created_at',
-        order_dir: 'desc'
-    }, req.user);
-    return ok(res, result);
-}
+            return ok(res, result);
+        },
 
-export const update = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
-    const { id } = req.params;
-    const { comment } = req.body;
-    const current_user_id = getCurrentUser(req)?.id;
+        get: async (req: Request, res: Response): Promise<Response> => {
+            const { page_num, post_id } = req.query;
+            const commentSvc = createCommentService(makeCtx(req));
+            const result = await commentSvc.get({
+                post_id,
+                page_num: page_num ? parseInt(String(page_num)) : 1,
+                page_size: 10,
+                order_by: 'created_at',
+                order_dir: 'desc'
+            });
+            const enriched = await commentSvc.enrich(result.page_items, { include: ['post'] });
+            result.page_items = enriched;
 
-    const result = await commentService.update(id!, { comment }, { current_user_id });
-    if (!result.id) return fail(res);
+            return ok(res, result);
+        },
 
-    return ok(res, result);
-}
+        update: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
+            const { id } = req.params;
+            const { comment } = req.body;
 
-export const del = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
-    const { id } = req.params;
-    const current_user_id = getCurrentUser(req)?.id;
+            const result = await createCommentService(makeCtx(req)).update(id, { comment });
 
-    const result = await commentService.del(id!, {
-        current_user_id: current_user_id!
-    });
+            return ok(res, result);
+        },
 
-    return result.id ? ok(res) : fail(res);
+        del: async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
+            const { id } = req.params;
+
+            const result = await createCommentService(makeCtx(req)).delete(id);
+
+            return ok(res, result);
+        }
+    }
 }

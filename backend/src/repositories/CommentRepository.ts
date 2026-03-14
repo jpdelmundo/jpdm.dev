@@ -1,13 +1,18 @@
-import type { FindParamsBase } from '@/types/FindParams.js';
+import { getDateParamCondition } from '@/infra/pgHelper.js';
+import type { KeyValue } from '@/types/KeyValue.js';
 import type { Comment, CommentId, CommentInitializer, CommentMutator } from '@shared/models/generated/Comment.js';
 import type { PostId } from '@shared/models/generated/Post.js';
 import type { UserId } from '@shared/models/generated/User.js';
+import type { DateComparison } from '@shared/types/DateComparison.js';
 import { type OrderDirection } from '@shared/types/OrderDirection.js';
 import { BaseRepository } from './BaseRepository.js';
 
 type FindParams = {
     id?: CommentId;
     post_id?: PostId;
+    comment?: string;
+    date_from?: DateComparison;
+    date_to?: DateComparison;
     user_id?: UserId;
     page_num?: number;
     page_size?: number;
@@ -17,16 +22,20 @@ type FindParams = {
 }
 
 export class CommentRepository extends BaseRepository<Comment> {
-    async find<P extends FindParamsBase>(params: P) {
-        const { id, post_id, order_by, order_dir, prioritize_user_id } = params as FindParams;
+    async find<P extends KeyValue>(params: P & FindParams) {
+        const { id, post_id, comment, date_from, date_to, user_id, order_by, order_dir, prioritize_user_id } = params as FindParams;
         const filters: string[] = [];
         const values: unknown[] = [];
 
         //where
-        id && filters.push(`id = $${filters.length + 1}`) && values.push(id);
-        post_id && filters.push(`post_id = $${filters.length + 1}`) && values.push(post_id);
+        id && filters.push(`id = $${values.length + 1}`) && values.push(id);
+        user_id && filters.push(`user_id = $${values.length + 1}`) && values.push(user_id);
+        post_id && filters.push(`post_id = $${values.length + 1}`) && values.push(post_id);
+        comment && filters.push(`comment ilike $${values.length + 1}`) && values.push(`%${comment}%`);
+        date_from && filters.push(getDateParamCondition('created_at', date_from, values));
+        date_to && filters.push(getDateParamCondition('created_at', date_to, values));
 
-        if (filters.length == 0) {
+        if (values.length == 0) {
             throw new Error('At least one filter must be provided');
         }
 
@@ -89,7 +98,7 @@ export class CommentRepository extends BaseRepository<Comment> {
         id.trim() && filters.push(`id = $${values.length + 1}`) && values.push(id.trim());
         user_id?.trim() && filters.push(`user_id = $${values.length + 1}`) && values.push(user_id.trim());
 
-        if (filters.length == 0) {
+        if (values.length == 0) {
             throw new Error('Update condition missing');
         }
 

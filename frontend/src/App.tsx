@@ -8,15 +8,14 @@ import { AuthInitializer } from './auth/AuthInitializer';
 import { ConfirmDialog } from './components/ConfirmDialog';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { GlobalErrorHandler } from './components/GlobalErrorHandler';
-import { GradientBg } from './components/GradientBg';
 import { Snackbar } from './components/Snackbar';
 import { UserProfileInitializer } from './components/UserProfileInitializer';
 import { AppRoutes } from './routes';
 import { theme } from './themes/theme';
 
 function App() {
+
   return (<>
-    <GradientBg />
     <ThemeProvider theme={theme}>
       <BrowserRouter>
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={dayjs.locale()}>

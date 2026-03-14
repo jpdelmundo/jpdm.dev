@@ -1,4 +1,4 @@
-import type { FindParamsBase } from '@/types/FindParams.js';
+import type { KeyValue } from '@/types/KeyValue.js';
 import type { Post, PostId, PostInitializer, PostMutator } from '@shared/models/generated/Post.js';
 import type { VisibilityEnum } from '@shared/models/generated/VisibilityEnum.js';
 import { type OrderDirection } from '@shared/types/OrderDirection.js';
@@ -6,6 +6,7 @@ import { BaseRepository } from './BaseRepository.js';
 
 type FindParams = {
     id?: PostId;
+    ids?: PostId[];
     user_id?: string;
     visibility?: VisibilityEnum;
     is_published?: boolean;
@@ -17,13 +18,14 @@ type FindParams = {
 }
 
 export class PostRepository extends BaseRepository<Post> {
-    async find<P extends FindParamsBase>(params: P) {
-        const { id, user_id, visibility, is_published, is_admin, order_by, order_dir } = params as FindParams;
+    async find<P extends KeyValue>(params: P) {
+        const { id, ids, user_id, visibility, is_published, is_admin, order_by, order_dir } = params as FindParams;
         const filters: string[] = [];
         const values: unknown[] = [];
 
         //where
         id && filters.push(`id = $${filters.length + 1}`) && values.push(id);
+        ids && filters.push(`id = any($${filters.length + 1})`) && values.push(ids);
         user_id && filters.push(`user_id = $${filters.length + 1}`) && values.push(user_id);
         visibility && filters.push(`visibility = $${filters.length + 1}`) && values.push(visibility);
         is_published && filters.push(`is_published = $${filters.length + 1}`) && values.push(is_published);
@@ -135,5 +137,34 @@ export class PostRepository extends BaseRepository<Post> {
         if (!result.rows[0]) throw new Error('Update failed');
 
         return result.rows[0];
+    }
+
+    async getCommentsCount(params: Record<string, unknown>) {
+        const { post_ids, post_id } = params;
+
+        if (!post_ids && !post_id) throw new Error('Missing parameter: id or ids');
+
+        const filters: string[] = [];
+        const values: unknown[] = [];
+
+        post_id && filters.push(`post_id = $${filters.length + 1}`) && values.push(post_id);
+        post_ids && filters.push(`post_id = any($${filters.length + 1})`) && values.push(post_ids);
+
+        if (filters.length == 0) {
+            throw new Error('At least one filter must be provided');
+        }
+
+        let filter = filters.join(' and ');
+        filter = filter ? `where ${filter}` : '';
+
+        type PostCommentCount = { post_id: PostId; count: number };
+
+        const sql = `select post_id, count(id) count
+                    from comments
+                    ${filter}
+                    group by post_id`;
+        const result = await this.query<PostCommentCount>(sql, values);
+
+        return result.rows;
     }
 }

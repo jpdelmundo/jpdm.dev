@@ -1,4 +1,4 @@
-import type { FindParamsBase } from '@/types/FindParams.js';
+import type { KeyValue } from '@/types/KeyValue.js';
 import type { PostId } from '@shared/models/generated/Post.js';
 import type { PostView, PostViewId, PostViewInitializer, PostViewMutator } from '@shared/models/generated/PostView.js';
 import type { UserId } from '@shared/models/generated/User.js';
@@ -27,7 +27,7 @@ type FindParams = {
 }
 
 export class PostViewRepository extends BaseRepository<PostView> {
-    async find<P extends FindParamsBase>(params: P) {
+    async find<P extends KeyValue>(params: P) {
         const { id, user_id, post_id, order_by, order_dir, prioritize_user_id } = params as FindParams;
         const filters: string[] = [];
         const values: unknown[] = [];

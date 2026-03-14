@@ -1,8 +1,17 @@
-import * as userProfileService from '@/services/userProfileService.js';
-import * as userService from '@/services/userService.js';
+import { makeDeps } from '@/infra/makeDeps.js';
+import type { ServiceContext } from '@/infra/serviceContext.js';
+import { pool } from '@/infra/db.js';
+import { createUserService } from '@/services/userService.js';
+import { createUserProfileService } from '@/services/userProfileService.js';
 import passport from 'passport';
 import { Strategy as FacebookStrategy, type Profile as FacebookProfile } from 'passport-facebook';
 import { Strategy as GoogleStrategy, type Profile as GoogleProfile, type VerifyCallback as GoogleVerifyCallback } from 'passport-google-oauth20';
+
+// Create system context for passport strategies
+const systemContext: ServiceContext = {
+    deps: makeDeps(pool),
+    actor: { type: 'system' }
+};
 
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID!,
@@ -19,21 +28,23 @@ passport.use(new GoogleStrategy({
         console.log({ profile, emails: profile.emails, photos: profile.photos });
 
         const email = profile.emails[0].value.trim();
-        let user = await userService.findByEmail(email);
+        const userSvc = createUserService(systemContext);
+        const userProfileSvc = createUserProfileService(systemContext);
+        let user = await userSvc.findByEmail(email);
 
         //create new user
         if (!user) {
-            user = await userService.createUserFromSocialLogin(email, profile);
+            user = await userSvc.createUserFromSocialLogin(email, profile);
         } else {
-            userService.update(user.id, { deleted: null, deleted_at: null }, { type: 'system' });
+            await userSvc.update(user.id, { deleted: null, deleted_at: null });
 
-            const userProfile = (await userProfileService.get({ user_id: user.id }))[0];
+            const userProfile = (await userProfileSvc.get({ user_id: user.id }))[0];
             const avatar_url = profile.photos?.[0]?.value;
             const first_name = profile.name?.givenName;
             const last_name = profile.name?.familyName;
             if (!userProfile) {
                 //create user profile
-                userProfileService.create({
+                await userProfileSvc.create({
                     user_id: user.id,
                     ...(first_name && { first_name }),
                     ...(last_name && { last_name }),
@@ -41,7 +52,7 @@ passport.use(new GoogleStrategy({
                 });
             } else {
                 //update user profile
-                userProfileService.update(userProfile.id, {
+                await userProfileSvc.update(userProfile.id, {
                     ...(first_name && { first_name }),
                     ...(last_name && { last_name }),
                     ...(avatar_url && { avatar_url })
@@ -49,7 +60,7 @@ passport.use(new GoogleStrategy({
             }
         }
 
-        done(null, { id: user.id, username: user.username, email: user.email, roles: await userService.getRoles(user.id), type: 'user' });
+        done(null, { id: user.id, username: user.username, email: user.email, roles: await userSvc.getRoles(user.id), type: 'user' });
     } catch (error) {
         done(error);
     }
@@ -72,19 +83,21 @@ passport.use(new FacebookStrategy({
 
         const email = profile.emails?.[0]?.value.trim();
         const id = profile.id;
-        let user = email ? await userService.findByEmail(email) : await userService.findByFacebookId(id);
+        const userSvc = createUserService(systemContext);
+        const userProfileSvc = createUserProfileService(systemContext);
+        let user = email ? await userSvc.findByEmail(email) : await userSvc.findByFacebookId(id);
 
         //create new user
         if (!user) {
-            user = await userService.createUserFromFacebookLogin(id, profile);
+            user = await userSvc.createUserFromFacebookLogin(id, profile);
         } else {
-            const userProfile = (await userProfileService.get({ user_id: user.id }))[0];
+            const userProfile = (await userProfileSvc.get({ user_id: user.id }))[0];
             const avatar_url = profile.photos?.[0]?.value;
             const first_name = profile.name?.givenName;
             const last_name = profile.name?.familyName;
             if (!userProfile) {
                 //create user profile
-                userProfileService.create({
+                await userProfileSvc.create({
                     user_id: user.id,
                     ...(first_name && { first_name }),
                     ...(last_name && { last_name }),
@@ -92,7 +105,7 @@ passport.use(new FacebookStrategy({
                 });
             } else {
                 //update user profile
-                userProfileService.update(userProfile.id, {
+                await userProfileSvc.update(userProfile.id, {
                     ...(first_name && { first_name }),
                     ...(last_name && { last_name }),
                     ...(avatar_url && { avatar_url })

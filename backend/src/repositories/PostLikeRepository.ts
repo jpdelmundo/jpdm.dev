@@ -1,4 +1,4 @@
-import type { FindParamsBase } from '@/types/FindParams.js';
+import type { KeyValue } from '@/types/KeyValue.js';
 import type { PostId } from '@shared/models/generated/Post.js';
 import type { PostLike, PostLikeId, PostLikeInitializer, PostLikeMutator } from '@shared/models/generated/PostLike.js';
 import type { UserId } from '@shared/models/generated/User.js';
@@ -8,6 +8,7 @@ import { BaseRepository } from './BaseRepository.js';
 type FindParams = {
     id?: PostLikeId;
     post_id?: PostId;
+    post_ids?: PostId[];
     user_id?: UserId;
     created_at?: Date;
     page_num?: number;
@@ -18,14 +19,15 @@ type FindParams = {
 }
 
 export class PostLikeRepository extends BaseRepository<PostLike> {
-    async find<P extends FindParamsBase>(params: P) {
-        const { id, user_id, post_id, order_by, order_dir } = params as FindParams;
+    async find<P extends KeyValue>(params: P) {
+        const { id, user_id, post_id, post_ids, order_by, order_dir } = params as FindParams;
         const filters: string[] = [];
         const values: unknown[] = [];
 
         //where
         id && filters.push(`id = $${filters.length + 1}`) && values.push(id);
         post_id && filters.push(`post_id = $${filters.length + 1}`) && values.push(post_id);
+        post_ids && filters.push(`post_id = any($${filters.length + 1})`) && values.push(post_ids);
         user_id && filters.push(`user_id = $${filters.length + 1}`) && values.push(user_id);
 
         if (filters.length == 0) {

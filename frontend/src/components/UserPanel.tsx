@@ -55,6 +55,11 @@ export const UserPanel = () => {
         navigate('/user/account');
     }
 
+    const dashboardClick = () => {
+        userMenuOnClose();
+        navigate('/dashboard');
+    }
+
     return (<>
         {
             [
@@ -112,6 +117,7 @@ export const UserPanel = () => {
                 >
                     <MenuItem onClick={profileOnClick}>Profile</MenuItem>
                     <MenuItem onClick={accountOnClick}>Account & Security</MenuItem>
+                    <MenuItem onClick={dashboardClick}>Dashboard</MenuItem>
                     <MenuItem onClick={signOut}>Sign Out</MenuItem>
                 </Menu>
             </Grid>

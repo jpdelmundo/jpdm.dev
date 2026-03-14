@@ -1,14 +1,19 @@
 import { uploadHandler } from '@/config/multer.js';
-import * as controller from '@/controllers/userProfileController.js';
+import { createUserProfileController } from '@/controllers/userProfileController.js';
+import type { AppContext } from '@/infra/appContext.js';
 import { authRequired } from '@/utils/auth.js';
 import { Router } from 'express';
 
-export const router = Router();
+export const createUserProfileRouter = (app: AppContext) => {
+    const router = Router();
+    const controller = createUserProfileController(app);
 
-//private
-router.use(authRequired);
-router.get('/:id', controller.get);
-router.post('/:id/avatar', uploadHandler.single('file'), controller.uploadAvatar);
-router.delete('/:id/avatar', controller.deleteAvatar);
-router.put('/:id', controller.update);
-// router.delete('/:id', controller.del);
+    //private
+    router.use(authRequired);
+    router.get('/:id', controller.get);
+    router.post('/:id/avatar', uploadHandler.single('file'), controller.uploadAvatar);
+    router.delete('/:id/avatar', controller.deleteAvatar);
+    router.put('/:id', controller.update);
+
+    return router;
+};

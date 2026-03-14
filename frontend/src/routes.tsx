@@ -1,8 +1,9 @@
 import { useRoutes } from 'react-router-dom';
 import { RequireAuth } from './components/RequireAuth';
-import { AdminHome } from './pages/admin/AdminHome';
-import { AdminLayout } from './pages/admin/AdminLayout';
-import { Users } from './pages/admin/Users';
+import { Comments } from './pages/dashboard/Comments.tsx';
+import { DashboardHome } from './pages/dashboard/DashboardHome.tsx';
+import { DashboardLayout } from './pages/dashboard/DashboardLayout.tsx';
+import { Users } from './pages/dashboard/Users';
 import { About } from './pages/public/About';
 import { AuthCallbackPage } from './pages/public/AuthCallback';
 import { ForgotPasswordPage } from './pages/public/ForgotPasswordPage';
@@ -58,13 +59,14 @@ const routes = [
         ],
     },
     {
-        path: 'admin',
+        path: 'dashboard',
         element: <RequireAuth />,
         children: [
             {
-                element: <AdminLayout />,
+                element: <DashboardLayout />,
                 children: [
-                    { index: true, element: <AdminHome /> },
+                    { index: true, element: <DashboardHome /> },
+                    { path: 'comments', element: <Comments /> },
                     { path: 'users', element: <Users /> },
                 ]
             }

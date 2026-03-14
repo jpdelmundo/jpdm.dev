@@ -5,8 +5,8 @@ import { Router } from 'express';
 
 export const createPostRouter = (appCtx: AppContext) => {
     const router = Router();
-
     const controller = createPostController(appCtx);
+
     router.get('/:id', controller.get);
     router.post('/:id/log-view', controller.logView);
     //router.get('/:id/comments', controller.getComments);

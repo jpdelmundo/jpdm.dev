@@ -3,7 +3,7 @@ import { type UserRole } from "./UserRole.js";
 
 export interface UserIdentity {
     type: 'user' | 'anonymous';
-    id: UserId | '00000000-0000-0000-0000-000000000000';
+    id: UserId | '';
     username: string;
     email: string | null;
     roles: UserRole[];

@@ -1,34 +1,40 @@
 import { CommentRepository } from "@/repositories/CommentRepository.js";
 import { FileRepository } from "@/repositories/FileRepository.js";
 import { ImageRepository } from "@/repositories/ImageRepository.js";
+import { PasswordResetRepository } from "@/repositories/PasswordResetRepository.js";
+import { PostLikeRepository } from "@/repositories/PostLikeRepository.js";
 import { PostRepository } from "@/repositories/PostRepository.js";
+import { PostViewRepository } from "@/repositories/PostViewRepository.js";
+import { RefreshTokenRepository } from "@/repositories/RefreshTokenRepository.js";
 import { UserRepository } from "@/repositories/UserRepository.js";
+import { UserProfileRepository } from "@/repositories/UserProfileRepository.js";
+import { UserRoleRepository } from "@/repositories/UserRoleRepository.js";
 import type { Db } from "@/types/Db.js";
 import type { Deps } from "@/types/Deps.js";
-import type { Pool } from "pg";
 import { withTransaction } from "./withTransaction.js";
 
-export const makeDeps = (db: Db): Deps => {
-    const isPool = 'connect' in db;
+const makeRepos = (db: Db) => ({
+    postRepo: new PostRepository(db),
+    postLikeRepo: new PostLikeRepository(db),
+    imageRepo: new ImageRepository(db),
+    fileRepo: new FileRepository(db),
+    commentRepo: new CommentRepository(db),
+    userRepo: new UserRepository(db),
+    userProfileRepo: new UserProfileRepository(db),
+    userRoleRepo: new UserRoleRepository(db),
+    refreshTokenRepo: new RefreshTokenRepository(db),
+    passwordResetRepo: new PasswordResetRepository(db),
+    postViewRepo: new PostViewRepository(db),
+});
 
-    return {
-        postRepo: new PostRepository(db),
-        imageRepo: new ImageRepository(db),
-        fileRepo: new FileRepository(db),
-        commentRepo: new CommentRepository(db),
-        userRepo: new UserRepository(db),
-
-        async withTransaction<T>(fn: (deps: Deps) => Promise<T>): Promise<T> {
-            // already in a tx
-            if (!isPool) {
-                return fn(makeDeps(db));
-            }
-
-            // else new tx
-            return withTransaction((txClient) => {
-                const txDeps = makeDeps(txClient);
-                return fn(txDeps);
-            }, db as Pool);
+export const makeDeps = (db: Db, inTransaction = false): Deps => {
+    const deps: Deps = {
+        ...makeRepos(db),
+        withTransaction: async <T>(fn: (deps: Deps) => Promise<T>): Promise<T> => {
+            if (inTransaction) return fn(deps); //already in tx, don't wrap in another tx, just call fn()
+            return withTransaction((txClient) => fn(makeDeps(txClient, true)), db);
         },
     };
+
+    return deps;
 };

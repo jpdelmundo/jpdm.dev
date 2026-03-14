@@ -1,8 +1,8 @@
 import { pool as sharedPool } from '@/infra/db.js';
 import { getFullQuery } from '@/infra/pgHelper.js';
 import type { Db } from '@/types/Db.js';
-import type { FindParamsBase, FindParamsPaginated } from '@/types/FindParams.js';
 import type { InferFindResultType } from '@/types/InferFindResultType.js';
+import type { KeyValue, KeyValueWithPagination } from '@/types/KeyValue.js';
 import { OrderDirections, type OrderDirection } from '@shared/types/OrderDirection.js';
 import { isNumber } from '@shared/utils/validation.js';
 import { type QueryResultRow } from 'pg';
@@ -27,13 +27,13 @@ export abstract class BaseRepository<T extends QueryResultRow> {
         return this.db.query<R>(queryText, values);
     }
 
-    protected async getFindResult<P extends FindParamsBase>(tableName: string, filter: string, orderByParams: GetOrderByParams | null, values: unknown[], params: P) {
+    protected async getFindResult<P extends KeyValue>(tableName: string, filter: string, orderByParams: GetOrderByParams | null, values: unknown[], params: P) {
         return ('page_num' in params || 'page_size' in params)
             ? this.getFindResultPaginated(tableName, filter, orderByParams, values, params)
             : this.getFindResultArray(tableName, filter, orderByParams, values, params);
     }
 
-    protected async getFindResultPaginated<P extends FindParamsBase>(tableName: string, filter: string, orderByParams: GetOrderByParams | null, values: unknown[], params: P) {
+    protected async getFindResultPaginated<P extends KeyValue>(tableName: string, filter: string, orderByParams: GetOrderByParams | null, values: unknown[], params: P) {
         const totalResult = await this.query<{ total: number }>(`select count(*) total
                                                                 from ${tableName}
                                                                 ${filter}`, values);
@@ -41,7 +41,7 @@ export abstract class BaseRepository<T extends QueryResultRow> {
         const order = orderByParams ? this.getOrderBy(orderByParams, values) : '';
 
         //limit (pagination)
-        const { page_num, page_size } = params as FindParamsPaginated;
+        const { page_num, page_size } = params as KeyValueWithPagination;
         const pageNum = Math.min(Math.abs(Number(page_num)) || 1, 1000);
         const pageSize = Math.min(Math.abs(Number(page_size)) || 30, 30);
         let limit = `limit $${values.length + 1}`;
@@ -63,7 +63,7 @@ export abstract class BaseRepository<T extends QueryResultRow> {
         } as InferFindResultType<P, T>;
     }
 
-    protected async getFindResultArray<P extends FindParamsBase>(tableName: string, filter: string, orderByParams: GetOrderByParams | null, values: unknown[], params?: P) { //params is needed here for TS to infer type
+    protected async getFindResultArray<P extends KeyValue>(tableName: string, filter: string, orderByParams: GetOrderByParams | null, values: unknown[], params?: P) { //params is needed here for TS to infer type
         const order = orderByParams ? this.getOrderBy(orderByParams, values) : '';
         const limit = params?.limit && isNumber(params.limit) ? `limit ${params.limit}` : '';
         const result = await this.query(`select *
@@ -89,7 +89,7 @@ export abstract class BaseRepository<T extends QueryResultRow> {
         return order;
     }
 
-    abstract find<P extends FindParamsBase>(params: P): Promise<InferFindResultType<P, T> | T[]>;
+    abstract find<P extends KeyValue>(params: P): Promise<InferFindResultType<P, T> | T[]>;
     abstract findById(id: string): Promise<T | null>;
     abstract create(data: T): Promise<T>;
     abstract update(id: string, data: Partial<T>, options?: Record<string, unknown>): Promise<T>;

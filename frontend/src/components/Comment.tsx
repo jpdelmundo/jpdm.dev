@@ -67,9 +67,8 @@ export function Comment({ comment, index, onDeleted, onUpdated }: CommentProps) 
 
     const handleDeleteClick = async () => {
         const confirmed = await confirm({ message: 'Are you sure you want to delete this comment?', confirmText: 'Delete' });
-        console.log({ confirmed });
-        //call delete api
 
+        //call delete api
         if (confirmed) {
             setIsProcessing(true);
             const result = await apiDelete(`/comments/${comment.id}`);

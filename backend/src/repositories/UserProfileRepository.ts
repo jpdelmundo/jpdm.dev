@@ -1,4 +1,4 @@
-import type { FindParamsBase } from '@/types/FindParams.js';
+import type { KeyValue } from '@/types/KeyValue.js';
 import type { PostId } from '@shared/models/generated/Post.js';
 import type { UserId } from '@shared/models/generated/User.js';
 import { UserProfileColumns, type UserProfile, type UserProfileId, type UserProfileInitializer, type UserProfileMutator } from '@shared/models/generated/UserProfile.js';
@@ -7,8 +7,10 @@ import { BaseRepository } from './BaseRepository.js';
 
 type FindParams = {
     id?: UserProfileId;
+    ids?: UserProfileId[];
     post_id?: PostId;
     user_id?: UserId;
+    user_ids?: UserId[];
     limit?: number;
     page_num?: number;
     page_size?: number;
@@ -17,14 +19,16 @@ type FindParams = {
 }
 
 export class UserProfileRepository extends BaseRepository<UserProfile> {
-    async find<P extends FindParamsBase>(params: P) {
-        const { id, user_id, order_by, order_dir, limit } = params as FindParams;
+    async find<P extends KeyValue>(params: P) {
+        const { id, ids, user_id, user_ids, order_by, order_dir, limit } = params as FindParams;
         const filters: string[] = [];
         const values: unknown[] = [];
 
         //where
         id && filters.push(`id = $${filters.length + 1}`) && values.push(id);
+        ids && filters.push(`id = any($${filters.length + 1})`) && values.push(ids);
         user_id && filters.push(`user_id = $${filters.length + 1}`) && values.push(user_id);
+        user_ids && filters.push(`user_id = any($${filters.length + 1})`) && values.push(user_ids);
 
         if (filters.length == 0) {
             throw new Error('At least one filter must be provided');

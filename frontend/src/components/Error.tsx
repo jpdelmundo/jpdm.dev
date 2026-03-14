@@ -19,8 +19,8 @@ export function Error({ error }: ErrorProps) {
         message = error.message;
         if (code == ErrorCode.INVALID_ID
             || code == ErrorCode.NOT_FOUND) {
-            message = '"Hmm... Di ko makita"';
-            subMessage = '(can\'t find it)';
+            message = '"Hmm...di ko nakita"';
+            subMessage = '(not found, 404)';
         }
     } else {
         const e = (error as Error);

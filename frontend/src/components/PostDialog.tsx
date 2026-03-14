@@ -116,7 +116,7 @@ export const PostDialog = ({ post, open, closeDialog, onCreated, onUpdated }: Po
                 }
             }
 
-            console.log({ imageFiles, postImages });
+            //console.log({ imageFiles, postImages });
 
             const payload = {
                 ...data,
@@ -133,7 +133,7 @@ export const PostDialog = ({ post, open, closeDialog, onCreated, onUpdated }: Po
                 setImageFiles([]);
                 setErrorMessage('');
                 setTitleInputHidden(true);
-
+                console.log({ result, isEdit });
                 !isEdit && onCreated?.();
                 isEdit && result.data && onUpdated?.(result.data);
 
@@ -189,7 +189,7 @@ export const PostDialog = ({ post, open, closeDialog, onCreated, onUpdated }: Po
     }
 
     const handleOnImagesChange = (images: PostImage[]) => {
-        console.log({ images });
+        //console.log({ images });
         setImageFiles(images);
     }
 
