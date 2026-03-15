@@ -65,6 +65,7 @@ jobs:
             done
 
             echo "Running database migrations..."
+            docker rm -f backend-migrate 2>/dev/null || true
             docker compose run --rm --name backend-migrate backend node dist/migrate.js
 
             echo "Starting containers..."
