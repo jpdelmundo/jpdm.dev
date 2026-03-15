@@ -1,3 +1,4 @@
+import { createPostController } from '@/controllers/postController.js';
 import { createUserController } from '@/controllers/userController.js';
 import type { AppContext } from '@/infra/appContext.js';
 import { authRequired } from '@/utils/auth.js';
@@ -6,9 +7,10 @@ import { Router } from 'express';
 export const createUserRouter = (appCtx: AppContext) => {
     const router = Router();
     const controller = createUserController(appCtx);
+    const postController = createPostController(appCtx);
 
     //public
-    router.get('/:id/posts', controller.posts); //:id = id or vanity_id
+    router.get('/:id/posts', postController.getUserPublished); //:id = id or vanity_id
     router.get('/reset-password', controller.isResetPasswordTokenHashValid);
 
     router.post('/', controller.create);

@@ -9,6 +9,7 @@ export const createPostRouter = (appCtx: AppContext) => {
 
     router.get('/:id', controller.get);
     router.post('/:id/log-view', controller.logView);
+    router.get('/og/:id', controller.getOG);
     //router.get('/:id/comments', controller.getComments);
 
     //private

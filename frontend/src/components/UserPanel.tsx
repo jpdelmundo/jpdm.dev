@@ -99,18 +99,18 @@ export const UserPanel = () => {
                             sx: {
                                 overflow: 'unset',
                                 mt: '15px',
-                                '&::before': {
-                                    content: '""',
-                                    display: 'block',
-                                    position: 'absolute',
-                                    top: 0,
-                                    right: '15px',
-                                    width: 10,
-                                    height: 10,
-                                    bgcolor: 'background.paper',
-                                    transform: 'translateY(-50%) rotate(45deg)',
-                                    zIndex: 1,
-                                },
+                                // '&::before': {
+                                //     content: '""',
+                                //     display: 'block',
+                                //     position: 'absolute',
+                                //     top: 0,
+                                //     right: '15px',
+                                //     width: 10,
+                                //     height: 10,
+                                //     bgcolor: 'background.paper',
+                                //     transform: 'translateY(-50%) rotate(45deg)',
+                                //     zIndex: 1,
+                                // },
                             }
                         }
                     }}

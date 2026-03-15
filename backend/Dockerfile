@@ -5,16 +5,16 @@ COPY package*.json ./
 COPY tsconfig*.json ./
 COPY shared/ ./shared/
 COPY backend/ ./backend/
+COPY frontend/ ./frontend/
 RUN npm ci
 
-#development
-FROM base AS development
-WORKDIR /app/backend
-EXPOSE 3000
-CMD ["npm", "run", "dev"]
+#frontend builder
+FROM base AS frontend-builder
+WORKDIR /app/frontend
+RUN npm run build
 
-#builder
-FROM base AS builder
+#backend builder
+FROM base AS backend-builder
 WORKDIR /app/backend
 RUN npm run build
 
@@ -33,8 +33,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/backend/node_modules ./backend/node_modules
-COPY --from=builder /app/backend/dist ./backend/dist
-COPY --from=builder /app/shared/dist ./shared/dist
+COPY --from=backend-builder /app/backend/dist ./backend/dist
+COPY --from=backend-builder /app/shared/dist ./shared/dist
+COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 COPY ./backend/migrations ./backend/migrations
 WORKDIR /app/backend
 EXPOSE 3000

@@ -2,14 +2,12 @@ import { ServiceError } from '@/errors/ServiceError.js';
 import type { AppContext } from '@/infra/appContext.js';
 import { bindContext } from '@/infra/bindContext.js';
 import { botCheck } from '@/services/captchaService.js';
-import { createPostService } from '@/services/postService.js';
 import { createUserService } from '@/services/userService.js';
 import type { AuthorizedRequest } from '@/types/AuthorizedRequest.js';
 import type { RouteParams } from '@/types/RouteParams.js';
 import { jsonBase64Decode } from '@shared/utils/encoding.js';
 import * as bcrypt from 'bcrypt';
 import type { Request, Response } from 'express';
-import { validate } from 'uuid';
 import { createRefreshTokenCookie } from '../services/authService.js';
 import { fail, ok } from '../utils/apiHelper.js';
 import { generateJwt, getCurrentUser } from '../utils/auth.js';
@@ -73,35 +71,6 @@ export const createUserController = (app: AppContext) => {
             if (!result) return fail(res, 'That code doesn\'t look right. Please check and try again.');
 
             return ok(res);
-        },
-
-        posts: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
-            const { page_num } = req.query;
-            const { id } = req.params;
-            if (!id) return fail(res, 'Cannot fetch posts. Missing user id.');
-
-            const ctx = makeCtx(req);
-            const userSvc = createUserService(ctx);
-            const postSvc = createPostService(ctx);
-
-            const user = validate(id) //if uuid format
-                ? await userSvc.findById(id)
-                : await userSvc.findByVanityId(id);
-            if (!user) return fail(res, 'Cannot fetch posts. User not found.');
-            const user_id = user.id;
-            const result = await postSvc.get({
-                user_id,
-                visibility: 'public',
-                is_published: true,
-                page_num: page_num ? parseInt(String(page_num)) : 1,
-                page_size: 30,
-                order_by: 'created_at',
-                order_dir: 'desc'
-            });
-            const enriched = await postSvc.enrich(result.page_items);
-            result.page_items = enriched;
-
-            return ok(res, result);
         },
 
         recoverAccount: async (req: Request, res: Response): Promise<Response> => {

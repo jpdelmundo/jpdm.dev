@@ -1,16 +1,16 @@
 services:
-  frontend:
-    container_name: frontend
-    build:
-      context: .
-      dockerfile: frontend/Dockerfile
-    ports:
-      - "${FRONTEND_PORT}:5173"
-    depends_on:
-      - backend
-    restart: unless-stopped
-    networks:
-      - app-net
+  # frontend:
+  #   container_name: frontend
+  #   build:
+  #     context: .
+  #     dockerfile: frontend/Dockerfile
+  #   ports:
+  #     - "${FRONTEND_PORT}:5173"
+  #   depends_on:
+  #     - backend
+  #   restart: unless-stopped
+  #   networks:
+  #     - app-net
   
   backend:
     container_name: backend
@@ -20,6 +20,8 @@ services:
     volumes:
       - ./backend/usercontent:/app/backend/usercontent
       - ./backend/logs:/app/backend/logs
+      - ./www/frontend:/mnt/frontend-out
+    entrypoint: ["/bin/sh", "-c", "cp -r /app/frontend/dist/. /mnt/frontend-out && node dist/app.js"]
     env_file:
       - .env
     ports:

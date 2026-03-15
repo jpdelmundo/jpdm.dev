@@ -1,27 +1,29 @@
-#frontend
-#base
-FROM node:24.13-alpine AS base
-WORKDIR /app
-COPY package*.json ./
-COPY tsconfig*.json ./
-COPY shared/ ./shared/
-COPY frontend/ ./frontend/
-RUN npm ci
+# unused. backend includes frontend in the image to allow backend to access frontend dist file allowing backend to add opengraph meta tags to index.html
+# TODO remove later
+# #frontend
+# #base
+# FROM node:24.13-alpine AS base
+# WORKDIR /app
+# COPY package*.json ./
+# COPY tsconfig*.json ./
+# COPY shared/ ./shared/
+# COPY frontend/ ./frontend/
+# RUN npm ci
 
-#development
-FROM base AS development
-WORKDIR /app/frontend
-EXPOSE 5173
-CMD ["npm", "run", "dev"]
+# #development
+# FROM base AS development
+# WORKDIR /app/frontend
+# EXPOSE 5173
+# CMD ["npm", "run", "dev"]
 
-#builder
-FROM base AS builder
-WORKDIR /app/frontend
-RUN npm run build
+# #builder
+# FROM base AS builder
+# WORKDIR /app/frontend
+# RUN npm run build
 
-#use nginx to serve production
-FROM node:24.13-alpine AS production
-WORKDIR /app/frontend
-COPY --from=builder /app/frontend/dist ./dist
-EXPOSE 5173
-CMD ["npx", "serve", "-s", "dist", "-l", "5173"]
+# #use nginx to serve production
+# FROM node:24.13-alpine AS production
+# WORKDIR /app/frontend
+# COPY --from=builder /app/frontend/dist ./dist
+# EXPOSE 5173
+# CMD ["npx", "serve", "-s", "dist", "-l", "5173"]

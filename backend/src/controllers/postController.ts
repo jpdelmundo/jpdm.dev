@@ -4,6 +4,7 @@ import { createCommentService } from '@/services/commentService.js';
 import { createPostLikeService } from '@/services/postLikeService.js';
 import { createPostService } from '@/services/postService.js';
 import { createPostViewService } from '@/services/postViewService.js';
+import { createUserService } from '@/services/userService.js';
 import type { RouteParams } from '@/types/RouteParams.js';
 import { fail, ok } from '@/utils/apiHelper.js';
 import { getCurrentUser } from '@/utils/auth.js';
@@ -12,16 +13,49 @@ import type { PostViewInitializer } from '@shared/models/generated/PostView.js';
 import type { DeviceFingerprint } from '@shared/types/DeviceFingerprint.js';
 import { jsonBase64Decode } from '@shared/utils/encoding.js';
 import type { Request, Response } from 'express';
+import { validate } from 'uuid';
 
 export const createPostController = (app: AppContext) => {
     const makeCtx = bindContext(app);
 
     return {
 
+        getUserPublished: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
+            const { page_num } = req.query;
+            const { id } = req.params;
+
+            const ctx = makeCtx(req);
+            const userSvc = createUserService(ctx);
+            const postSvc = createPostService(ctx);
+
+            const user = validate(id) //if uuid format
+                ? await userSvc.findById(id)
+                : await userSvc.findByVanityId(id);
+            if (!user) return fail(res);
+
+            const user_id = user.id;
+            const result = await postSvc.get({
+                user_id,
+                visibility: 'public',
+                is_published: true,
+                page_num: page_num ? parseInt(String(page_num)) : 1,
+                page_size: 30,
+                order_by: 'created_at',
+                order_dir: 'desc'
+            });
+            const enriched = await postSvc.enrich(result.page_items);
+            result.page_items = enriched;
+
+            return ok(res, result);
+        },
+
         create: async (req: Request, res: Response): Promise<Response> => {
             const { title, content, files } = req.body;
             const result = await createPostService(makeCtx(req)).create({
-                user_id: req.user!.id, title, content, files
+                user_id: req.user!.id,
+                title,
+                content,
+                files
             });
             if (!result.id) return fail(res);
 
@@ -116,8 +150,7 @@ export const createPostController = (app: AppContext) => {
             const result = await postSvc.update(id, {
                 title,
                 content,
-                files,
-                current_user_id: req.user!.id
+                files
             });
             if (!result.id) return fail(res);
 
