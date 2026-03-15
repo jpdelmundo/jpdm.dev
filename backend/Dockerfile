@@ -39,4 +39,5 @@ COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 COPY ./backend/migrations ./backend/migrations
 WORKDIR /app/backend
 EXPOSE 3000
-CMD ["node", "dist/app.js"]
+#CMD ["node", "dist/app.js"]
+CMD ["/bin/sh", "-c", "rm -rf /mnt/frontend-out/* && cp -r /app/frontend/dist/. /mnt/frontend-out && node dist/app.js"]
