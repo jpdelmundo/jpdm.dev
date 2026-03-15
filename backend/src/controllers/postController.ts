@@ -165,6 +165,15 @@ export const createPostController = (app: AppContext) => {
             const postImage = await createPostService(makeCtx(req)).uploadImage(id, file!);
 
             return ok(res, postImage);
-        }
+        },
+
+        getOG: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
+            const { id } = req.params;
+            const postSvc = await createPostService(makeCtx(req));
+            const post = await postSvc.getById(id!);
+            const [enriched] = await postSvc.enrich([post]);
+
+            return ok(res, enriched);
+        },
     }
 };

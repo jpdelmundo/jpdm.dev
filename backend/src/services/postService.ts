@@ -248,7 +248,7 @@ export const createPostService = (ctx: ServiceContext) => {
                     } else {
                         //check if file owned by user
                         const userFile = await txDeps.fileRepo.findById(image.file_id);
-                        if (!userFile || userFile.user_id != current_user_id) continue;
+                        if (!userFile || !isOwner(actor, userFile.user_id)) continue;
 
                         const newImage = await txDeps.imageRepo.create({ file_id: image.file_id, post_id: post.id, sort: image.sort });
                         newImageSet.add(newImage.id);
