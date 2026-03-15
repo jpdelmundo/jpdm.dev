@@ -20,7 +20,7 @@ services:
     volumes:
       - ./backend/usercontent:/app/backend/usercontent
       - ./backend/logs:/app/backend/logs
-      - ./www/frontend:/mnt/frontend-out
+      - /srv/www/frontend:/mnt/frontend-out
     env_file:
       - .env
     ports:
