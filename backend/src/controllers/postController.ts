@@ -177,14 +177,16 @@ export const createPostController = (app: AppContext) => {
             const [enriched] = await postSvc.enrich([post]);
             const file = fileURLToPath(new URL('../../../frontend/dist/index.html', import.meta.url));
             const html = readFileSync(file, { encoding: 'utf-8' });
-            const origUrl = req.headers['x-original-uri'];
+            const proto = req.headers['x-forwarded-proto'] ?? 'https';
+            const host = req.headers['host'];
+            const path = req.headers['x-original-uri'];
 
             const ogMeta = `${post.title ? `<title>${escapeHtml(post.title)}</title>` : ''}
 <meta name="description" content="${escapeHtml(post.content).slice(0, 200)}" />
 <meta property="og:title" content="${escapeHtml(post.title).slice(0, 100)}" />
 <meta property="og:description" content="${escapeHtml(post.content).slice(0, 200)}" />
 <meta property="og:image" content="${enriched?.images[0]?.url || ''}" />
-<meta property="og:url" content="${origUrl}" />`;
+<meta property="og:url" content="${proto}://${host}${path}" />`;
 
             return res.status(200).send(html.replace('<!-- OG_META -->', ogMeta));
         },
