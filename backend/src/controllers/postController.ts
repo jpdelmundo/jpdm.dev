@@ -180,13 +180,16 @@ export const createPostController = (app: AppContext) => {
             const proto = req.headers['x-forwarded-proto'] ?? 'https';
             const host = req.headers['host'];
             const path = req.headers['x-original-uri'];
+            const title = post.title ? post.title : post.content;
 
-            const ogMeta = `${post.title ? `<title>${escapeHtml(post.title)}</title>` : ''}
+            const ogMeta = `${title ? `<title>${escapeHtml(title).slice(0, 100)}</title>` : ''}
 <meta name="description" content="${escapeHtml(post.content).slice(0, 200)}" />
-<meta property="og:title" content="${escapeHtml(post.title).slice(0, 100)}" />
+<meta property="og:title" content="${escapeHtml(title).slice(0, 100)}" />
 <meta property="og:description" content="${escapeHtml(post.content).slice(0, 200)}" />
-<meta property="og:image" content="${enriched?.images[0]?.url || ''}" />
-<meta property="og:url" content="${proto}://${host}${path}" />`;
+<meta property="og:image" content="${enriched?.images[0]?.url || '/ogbg.webp'}" />
+<meta property="og:url" content="${proto}://${host}${path}" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="${host}" />`;
 
             return res.status(200).send(html.replace('<!-- OG_META -->', ogMeta));
         },
