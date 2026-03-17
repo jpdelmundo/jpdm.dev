@@ -205,6 +205,7 @@ export const createPostController = (app: AppContext) => {
             const host = req.headers['host'];
             const hostBaseUrl = `${proto}://${host}`;
 
+            res.setHeader('content-type', 'image/webp');
             return res.redirect(!enriched?.url ? `${hostBaseUrl}/ogbg.webp` : enriched.url);
         }
     }
