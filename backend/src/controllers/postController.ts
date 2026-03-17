@@ -69,7 +69,7 @@ export const createPostController = (app: AppContext) => {
 
         get: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
             const { id } = req.params;
-            const postSvc = await createPostService(makeCtx(req));
+            const postSvc = createPostService(makeCtx(req));
             const post = await postSvc.getById(id!);
             const [enriched] = await postSvc.enrich([post]);
 
@@ -172,24 +172,47 @@ export const createPostController = (app: AppContext) => {
             return ok(res, postImage);
         },
 
+        //         getOG: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
+        //             const { id } = req.params;
+        //             const postSvc = await createPostService(makeCtx(req));
+        //             const post = await postSvc.getById(id!);
+        //             const file = fileURLToPath(new URL('../../../frontend/dist/index.html', import.meta.url));
+        //             const html = readFileSync(file, { encoding: 'utf-8' });
+        //             const proto = req.headers['x-forwarded-proto'] ?? 'https';
+        //             const host = req.headers['host'];
+        //             const path = req.headers['x-original-uri'];
+        //             const title = post.title ? post.title : post.content;
+        //             const hostBaseUrl = `${proto}://${host}`;
+
+        //             const ogMeta = `${title ? `<title>${escapeHtml(title).slice(0, 100)}</title>` : ''}
+        // <meta name="description" content="${escapeHtml(post.content).slice(0, 200)}" />
+        // <meta property="og:title" content="${escapeHtml(title).slice(0, 100)}" />
+        // <meta property="og:description" content="${escapeHtml(post.content).slice(0, 200)}" />
+        // <meta property="og:image" content="${hostBaseUrl}/og/image/${id}" />
+        // <meta property="og:url" content="${hostBaseUrl}${path}" />
+        // <meta property="og:type" content="article" />
+        // <meta property="og:site_name" content="${host}" />`;
+
+        //             return res.status(200).send(html.replace('<!-- OG_META -->', ogMeta));
+        //         },
         getOG: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
             const { id } = req.params;
             const postSvc = await createPostService(makeCtx(req));
             const post = await postSvc.getById(id!);
+            const [enriched] = await postSvc.enrich([post]);
             const file = fileURLToPath(new URL('../../../frontend/dist/index.html', import.meta.url));
             const html = readFileSync(file, { encoding: 'utf-8' });
             const proto = req.headers['x-forwarded-proto'] ?? 'https';
             const host = req.headers['host'];
             const path = req.headers['x-original-uri'];
             const title = post.title ? post.title : post.content;
-            const hostBaseUrl = `${proto}://${host}`;
 
             const ogMeta = `${title ? `<title>${escapeHtml(title).slice(0, 100)}</title>` : ''}
 <meta name="description" content="${escapeHtml(post.content).slice(0, 200)}" />
 <meta property="og:title" content="${escapeHtml(title).slice(0, 100)}" />
 <meta property="og:description" content="${escapeHtml(post.content).slice(0, 200)}" />
-<meta property="og:image" content="${hostBaseUrl}/og/image/${id}" />
-<meta property="og:url" content="${hostBaseUrl}${path}" />
+<meta property="og:image" content="${enriched?.images[0]?.url || `${proto}://${host}/ogbg.webp`}" />
+<meta property="og:url" content="${proto}://${host}${path}" />
 <meta property="og:type" content="article" />
 <meta property="og:site_name" content="${host}" />`;
 
