@@ -7,6 +7,7 @@ export const createPostRouter = (appCtx: AppContext) => {
     const router = Router();
     const controller = createPostController(appCtx);
 
+    router.get('/og/image/:id', controller.getOGImage);
     router.get('/og/:id', controller.getOG);
     router.get('/:id', controller.get);
     router.post('/:id/log-view', controller.logView);

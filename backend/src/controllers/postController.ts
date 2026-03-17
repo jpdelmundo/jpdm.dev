@@ -1,6 +1,7 @@
 import type { AppContext } from '@/infra/appContext.js';
 import { bindContext } from '@/infra/bindContext.js';
 import { createCommentService } from '@/services/commentService.js';
+import { createImageService } from '@/services/imageService.js';
 import { createPostLikeService } from '@/services/postLikeService.js';
 import { createPostService } from '@/services/postService.js';
 import { createPostViewService } from '@/services/postViewService.js';
@@ -9,6 +10,7 @@ import type { RouteParams } from '@/types/RouteParams.js';
 import { fail, ok } from '@/utils/apiHelper.js';
 import { getCurrentUser } from '@/utils/auth.js';
 import { escapeHtml } from '@/utils/helper.js';
+import type ImageExtended from '@shared/models/extensions/ImageExtended.js';
 import type { PostId } from '@shared/models/generated/Post.js';
 import type { PostViewInitializer } from '@shared/models/generated/PostView.js';
 import type { DeviceFingerprint } from '@shared/types/DeviceFingerprint.js';
@@ -181,17 +183,30 @@ export const createPostController = (app: AppContext) => {
             const host = req.headers['host'];
             const path = req.headers['x-original-uri'];
             const title = post.title ? post.title : post.content;
+            const hostBaseUrl = `${proto}://${host}`;
 
             const ogMeta = `${title ? `<title>${escapeHtml(title).slice(0, 100)}</title>` : ''}
 <meta name="description" content="${escapeHtml(post.content).slice(0, 200)}" />
 <meta property="og:title" content="${escapeHtml(title).slice(0, 100)}" />
 <meta property="og:description" content="${escapeHtml(post.content).slice(0, 200)}" />
-<meta property="og:image" content="${enriched?.images[0]?.url || `${proto}://${host}/ogbg.webp`}" />
-<meta property="og:url" content="${proto}://${host}${path}" />
+<meta property="og:image" content="${hostBaseUrl}/og/image/" />
+<meta property="og:url" content="${hostBaseUrl}${path}" />
 <meta property="og:type" content="article" />
 <meta property="og:site_name" content="${host}" />`;
 
             return res.status(200).send(html.replace('<!-- OG_META -->', ogMeta));
         },
+
+        getOGImage: async (req: Request<RouteParams>, res: Response): Promise<void> => {
+            const { id } = req.params;
+            const imageSvc = await createImageService(makeCtx(req));
+            const [image] = await imageSvc.get({ post_id: id });
+            const [enriched] = (image ? await imageSvc.enrich([image]) : []) as ImageExtended[];
+            const proto = req.headers['x-forwarded-proto'] ?? 'https';
+            const host = req.headers['host'];
+            const hostBaseUrl = `${proto}://${host}`;
+
+            return res.redirect(!enriched?.url ? `${hostBaseUrl}/ogbg.webp` : enriched.url);
+        }
     }
 };
