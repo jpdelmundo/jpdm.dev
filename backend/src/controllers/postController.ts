@@ -176,7 +176,6 @@ export const createPostController = (app: AppContext) => {
             const { id } = req.params;
             const postSvc = await createPostService(makeCtx(req));
             const post = await postSvc.getById(id!);
-            const [enriched] = await postSvc.enrich([post]);
             const file = fileURLToPath(new URL('../../../frontend/dist/index.html', import.meta.url));
             const html = readFileSync(file, { encoding: 'utf-8' });
             const proto = req.headers['x-forwarded-proto'] ?? 'https';
@@ -189,7 +188,7 @@ export const createPostController = (app: AppContext) => {
 <meta name="description" content="${escapeHtml(post.content).slice(0, 200)}" />
 <meta property="og:title" content="${escapeHtml(title).slice(0, 100)}" />
 <meta property="og:description" content="${escapeHtml(post.content).slice(0, 200)}" />
-<meta property="og:image" content="${hostBaseUrl}/og/image/" />
+<meta property="og:image" content="${hostBaseUrl}/og/image/${id}" />
 <meta property="og:url" content="${hostBaseUrl}${path}" />
 <meta property="og:type" content="article" />
 <meta property="og:site_name" content="${host}" />`;
