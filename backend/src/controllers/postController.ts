@@ -186,7 +186,7 @@ export const createPostController = (app: AppContext) => {
 <meta name="description" content="${escapeHtml(post.content).slice(0, 200)}" />
 <meta property="og:title" content="${escapeHtml(title).slice(0, 100)}" />
 <meta property="og:description" content="${escapeHtml(post.content).slice(0, 200)}" />
-<meta property="og:image" content="${enriched?.images[0]?.url || '/ogbg.webp'}" />
+<meta property="og:image" content="${enriched?.images[0]?.url || `${proto}://${host}/ogbg.webp`}" />
 <meta property="og:url" content="${proto}://${host}${path}" />
 <meta property="og:type" content="article" />
 <meta property="og:site_name" content="${host}" />`;
