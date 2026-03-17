@@ -9,3 +9,13 @@ export const checkRequiredParameter = (param: Record<string, unknown>): void => 
         if (value == null) throw new Error(`Missing required parameter: ${key}`);
     }
 }
+
+export function escapeHtml(str: string | null): string {
+    if (typeof str !== 'string') return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}

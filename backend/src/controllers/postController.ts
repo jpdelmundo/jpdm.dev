@@ -8,11 +8,14 @@ import { createUserService } from '@/services/userService.js';
 import type { RouteParams } from '@/types/RouteParams.js';
 import { fail, ok } from '@/utils/apiHelper.js';
 import { getCurrentUser } from '@/utils/auth.js';
+import { escapeHtml } from '@/utils/helper.js';
 import type { PostId } from '@shared/models/generated/Post.js';
 import type { PostViewInitializer } from '@shared/models/generated/PostView.js';
 import type { DeviceFingerprint } from '@shared/types/DeviceFingerprint.js';
 import { jsonBase64Decode } from '@shared/utils/encoding.js';
 import type { Request, Response } from 'express';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
 import { validate } from 'uuid';
 
 export const createPostController = (app: AppContext) => {
@@ -172,8 +175,18 @@ export const createPostController = (app: AppContext) => {
             const postSvc = await createPostService(makeCtx(req));
             const post = await postSvc.getById(id!);
             const [enriched] = await postSvc.enrich([post]);
+            const file = fileURLToPath(new URL('../../../frontend/dist/index.html', import.meta.url));
+            const html = readFileSync(file, { encoding: 'utf-8' });
+            const origUrl = req.headers['x-original-uri'];
 
-            return ok(res, enriched);
+            const ogMeta = `${post.title ? `<title>${escapeHtml(post.title)}</title>` : ''}
+<meta name="description" content="${escapeHtml(post.content).slice(0, 200)}" />
+<meta property="og:title" content="${escapeHtml(post.title).slice(0, 100)}" />
+<meta property="og:description" content="${escapeHtml(post.content).slice(0, 200)}" />
+<meta property="og:image" content="${enriched?.images[0]?.url || ''}" />
+<meta property="og:url" content="${origUrl}" />`;
+
+            return res.status(200).send(html.replace('<!-- OG_META -->', ogMeta));
         },
     }
 };
