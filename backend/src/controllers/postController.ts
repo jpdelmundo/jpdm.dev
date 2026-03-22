@@ -151,7 +151,7 @@ export const createPostController = (app: AppContext) => {
         update: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
             const { id } = req.params;
             const { title, content, files } = req.body;
-            const postSvc = await createPostService(makeCtx(req));
+            const postSvc = createPostService(makeCtx(req));
             const result = await postSvc.update(id, {
                 title,
                 content,

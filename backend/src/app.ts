@@ -1,6 +1,5 @@
-import '@/env.js';
+import './env.js';
 //do not remove this comment to prevent auto organize on save (@/env should be the first import)
-import '@/config/passport.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
@@ -8,8 +7,11 @@ import express, { type NextFunction, type Request, type Response } from 'express
 import http from 'http';
 import https from 'https';
 import fs from 'node:fs';
-import path, { resolve } from 'node:path';
+import { resolve } from 'node:path';
 import passport from 'passport';
+import './config/config.js';
+import { USERCONTENT_DIR } from './config/config.js';
+import './config/passport.js';
 import { ServiceError } from './errors/ServiceError.js';
 import router from './router.js';
 import { ApiError, error } from './utils/apiHelper.js';
@@ -28,7 +30,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(currentUser);
 app.use(passport.initialize());
-app.use('/usercontent', verifySignedUrl, express.static(path.resolve(process.env.USERCONTENT_DIR!)));
+app.use('/usercontent', verifySignedUrl, express.static(USERCONTENT_DIR));
 app.use('/', router);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

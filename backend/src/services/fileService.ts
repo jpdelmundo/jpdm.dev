@@ -1,3 +1,4 @@
+import { USERCONTENT_DIR } from '@/config/config.js';
 import { ServiceError } from '@/errors/ServiceError.js';
 import type { ServiceContext } from '@/infra/serviceContext.js';
 import { FileRepository } from '@/repositories/FileRepository.js';
@@ -47,7 +48,7 @@ export const createFileService = ({ deps, actor }: ServiceContext) => {
 
         // delete actual file
         try {
-            await fs.promises.unlink(path.resolve(process.env.USERCONTENT_DIR!, file.path));
+            await fs.promises.unlink(path.resolve(USERCONTENT_DIR, file.path));
         } catch (err) {
             const e = err as NodeJS.ErrnoException;
             if (e.code !== 'ENOENT') throw e;
@@ -77,7 +78,7 @@ export const createFileService = ({ deps, actor }: ServiceContext) => {
         }
 
         const userDir = path.posix.join('temp_upload', createHash('sha256').update(isAuthenticatedUser(actor) ? actor.id : 'system').digest('hex').slice(0, 16));
-        const destDir = path.resolve(process.env.USERCONTENT_DIR!, userDir);
+        const destDir = path.resolve(USERCONTENT_DIR, userDir);
         if (!fs.existsSync(destDir)) {
             fs.mkdirSync(destDir, { recursive: true });
         }
@@ -90,7 +91,7 @@ export const createFileService = ({ deps, actor }: ServiceContext) => {
         const compressedFilename = `${parsed.name}.webp`;
         const compressedFilePath = path.posix.join(destDir, compressedFilename);
         fs.writeFileSync(compressedFilePath, compressed);
-        fs.unlinkSync(file.path);
+        fs.unlink(file.path, (err) => err && console.warn(`Failed to unlink temp file: ${file.path}`));
 
         const newFile: FileInitializer = {
             user_id: isAuthenticatedUser(actor) ? actor.id : '',

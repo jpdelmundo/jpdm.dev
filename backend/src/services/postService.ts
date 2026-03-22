@@ -1,10 +1,11 @@
+import { USERCONTENT_DIR } from '@/config/config.js';
 import { ServiceError } from '@/errors/ServiceError.js';
 import type { ServiceContext } from '@/infra/serviceContext.js';
 import type { Deps } from '@/types/Deps.js';
 import type { KeyValue } from '@/types/KeyValue.js';
-import { checkRequiredParameter } from '@/utils/helper.js';
+import { moveFile } from '@/utils/helper.js';
 import { compress } from '@/utils/image.js';
-import { canModify as canModifyResource, hasRole, isOwner, isSystem } from '@/utils/permissions.js';
+import { canModify as canModifyResource, isOwner } from '@/utils/permissions.js';
 import type ImageExtended from '@shared/models/extensions/ImageExtended.js';
 import type PostDTO from '@shared/models/extensions/PostExtended.js';
 import { type File, type FileInitializer } from '@shared/models/generated/File.js';
@@ -130,9 +131,9 @@ export const createPostService = (ctx: ServiceContext) => {
         if (!id) throw new ServiceError('Missing parameter: id');
         if (!validate(id)) throw new ServiceError('Invalid post id', ErrorCode.INVALID_ID);
 
-        const result = await get({ id });
-        if (!result[0]) throw new ServiceError('Post not found', ErrorCode.NOT_FOUND);
-        return result[0];
+        const [result] = await get({ id });
+        if (!result) throw new ServiceError('Post not found', ErrorCode.NOT_FOUND);
+        return result;
     };
 
     const create = async (data: CreateInput): Promise<PostDTO> => {
@@ -140,46 +141,41 @@ export const createPostService = (ctx: ServiceContext) => {
         if (!user_id) throw new ServiceError('Missing parameter: user_id');
         if (!content || content.trim().length == 0) throw new ServiceError('Content cannot be empty', ErrorCode.MISSING_PARAMETER, { param: 'content' });
         if (content.length > 2000) throw new ServiceError('Content too long', ErrorCode.LENGTH_TOO_LONG, { param: 'content' });
-        if (!isOwner(actor, data.user_id) && !isSystem(actor)) throw new ServiceError('Unauthorized request.', ErrorCode.FORBIDDEN);
+        if (!isOwner(actor, data.user_id)) throw new ServiceError('Unauthorized request.', ErrorCode.FORBIDDEN);
 
         const txResult = await deps.withTransaction(async (txDeps: Deps) => {
             //create post
             const { postRepo, imageRepo, fileRepo } = txDeps;
-            const newPost = await postRepo.create({
+            const post = await postRepo.create({
                 user_id,
                 content,
                 ...(title && { title })
             });
-            if (!newPost) throw new Error('Failed creating post');
+            if (!post) throw new Error('Failed creating post');
 
             //get id
             //create post files
             if (files && files.length > 0) {
                 for (const file of files) {
                     const userFile = await fileRepo.findById(file.file_id);
-                    if (!userFile || userFile.user_id != newPost.user_id) continue;
+                    if (!userFile || userFile.user_id != post.user_id) continue;
 
-                    const newImage = await imageRepo.create({ file_id: userFile.id, post_id: newPost.id, sort: file.sort });
+                    const newImage = await imageRepo.create({ file_id: userFile.id, post_id: post.id, sort: file.sort });
                     if (!newImage) throw new Error('Failed creating post image');
 
-                    //TODO move file from temp_upload to images/<post dir>/
-                    const userDir = path.posix.join('images', createHash('sha256').update(newPost.id).digest('hex').slice(0, 16));
-                    const destDir = path.resolve(process.env.USERCONTENT_DIR!, userDir);
-                    if (!fs.existsSync(destDir)) {
-                        fs.mkdirSync(destDir, { recursive: true });
-                    }
+                    //move file from temp_upload to images/<post dir>/
+                    const userPostDir = path.join('images', createHash('sha256').update(post.id).digest('hex').slice(0, 16));
+                    const destDirAbs = path.resolve(USERCONTENT_DIR, userPostDir);
+                    const filePathAbs = path.resolve(USERCONTENT_DIR, userFile.path);
+                    const newPathAbs = path.join(destDirAbs, path.basename(userFile.path));
+                    await moveFile(filePathAbs, newPathAbs);
 
-                    const filePath = path.resolve(process.env.USERCONTENT_DIR!, userFile.path);
-                    const newPath = path.join(userDir, path.basename(filePath));
-                    fs.copyFileSync(filePath, path.join(process.env.USERCONTENT_DIR!, newPath));
-                    fs.unlinkSync(filePath);
-
-                    //TODO update file.path to new path
-                    fileRepo.update(userFile.id, { path: newPath, expires_at: null });
+                    //update file.path to new path
+                    fileRepo.update(userFile.id, { path: path.join(userPostDir, path.basename(userFile.path)), expires_at: null });
                 }
             }
 
-            return newPost;
+            return post;
         });
 
         const result = (await get({ id: txResult.id, include: ['images'] }) as PostDTO[])[0];
@@ -250,6 +246,16 @@ export const createPostService = (ctx: ServiceContext) => {
                         const userFile = await txDeps.fileRepo.findById(image.file_id);
                         if (!userFile || !isOwner(actor, userFile.user_id)) continue;
 
+                        //TODO move file from original location to post dir
+                        const userPostDir = path.join('images', createHash('sha256').update(post.id).digest('hex').slice(0, 16));
+                        const destDirAbs = path.resolve(USERCONTENT_DIR, userPostDir);
+                        const filePathAbs = path.resolve(USERCONTENT_DIR, userFile.path);
+                        const newPathAbs = path.join(destDirAbs, path.basename(filePathAbs));
+                        await moveFile(filePathAbs, newPathAbs);
+
+                        //update db
+                        await txDeps.fileRepo.update(image.file_id, { path: path.join(userPostDir, path.basename(userFile.path)) });
+
                         const newImage = await txDeps.imageRepo.create({ file_id: image.file_id, post_id: post.id, sort: image.sort });
                         newImageSet.add(newImage.id);
                         //create
@@ -281,22 +287,23 @@ export const createPostService = (ctx: ServiceContext) => {
             }
         }
 
-        const result = (await get({ id, include: ['images'] }))[0];
+        const [result] = await get({ id, include: ['images'] });
         if (!result?.id) throw new ServiceError(`Post not found. id: ${id}`, ErrorCode.NOT_FOUND);
 
         return result;
     };
 
-    const canRead = async (id: PostId) => {
-        checkRequiredParameter({ id, actor });
-        const post = await deps.postRepo.findById(id);
-        if (!post) return false;
-        if (post.is_published && post.visibility == 'public') return true;
-        if (isOwner(actor, post.user_id)) return true;
-        if (isSystem(actor)) return true;
-        if (hasRole(actor, 'admin')) return true;
-        return false;
-    };
+    // const canRead = async (id: PostId) => {
+    //     if (!id) throw new ServiceError('Missing required parameter: id');
+
+    //     const post = await deps.postRepo.findById(id);
+    //     if (!post) return false;
+    //     if (post.is_published && post.visibility == 'public') return true;
+    //     if (isOwner(actor, post.user_id)) return true;
+    //     if (isSystem(actor)) return true;
+    //     if (hasRole(actor, 'admin')) return true;
+    //     return false;
+    // };
 
     const uploadImage = async (post_id: PostId, file: Express.Multer.File) => {
         if (!post_id) throw new ServiceError('Missing required parameter: post_id');
@@ -318,7 +325,7 @@ export const createPostService = (ctx: ServiceContext) => {
         if (!canModify(post_id)) throw new ServiceError('Unauthorized request');
 
         const userDir = path.posix.join('images', createHash('sha256').update(post_id).digest('hex').slice(0, 16));
-        const destDir = path.resolve(process.env.USERCONTENT_DIR!, userDir);
+        const destDir = path.resolve(USERCONTENT_DIR, userDir);
         if (!fs.existsSync(destDir)) {
             fs.mkdirSync(destDir, { recursive: true });
         }
@@ -348,13 +355,11 @@ export const createPostService = (ctx: ServiceContext) => {
         return createdFile;
     };
 
-    const canModify = (post_id: PostId) => {
-        return (async () => {
-            const post = await deps.postRepo.findById(post_id);
-            if (!post) return false;
+    const canModify = async (post_id: PostId) => {
+        const post = await deps.postRepo.findById(post_id);
+        if (!post) return false;
 
-            return canModifyResource(actor, post.user_id);
-        })();
+        return canModifyResource(actor, post.user_id);
     };
 
     return {
@@ -365,8 +370,6 @@ export const createPostService = (ctx: ServiceContext) => {
         create,
         delete: del,
         update,
-        canRead,
-        uploadImage,
-        canModify
+        uploadImage
     };
 };

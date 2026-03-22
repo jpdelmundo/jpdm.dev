@@ -1,3 +1,4 @@
+import { HttpError } from '@/errors/HttpError.js';
 import { pool } from '@/infra/db.js';
 import { makeDeps } from '@/infra/makeDeps.js';
 import type { ServiceContext } from '@/infra/serviceContext.js';
@@ -24,7 +25,7 @@ const systemContext: ServiceContext = {
 export const currentUser = async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
     const token = authHeader?.split(' ')[1];
-    const anonUser: UserIdentity = { type: 'anonymous', id: '00000000-0000-0000-0000-000000000000', username: 'anonymous', email: '', roles: [] };
+    const anonUser: UserIdentity = { type: 'anonymous', id: '', username: 'anonymous', email: '', roles: [] };
 
     if (!token) {
         req.user = anonUser;
@@ -110,11 +111,11 @@ export const verifySignedUrl = (req: Request, res: Response, next: NextFunction)
     const { expires, signature } = req.query;
     const fullPath = path.posix.join(req.baseUrl, req.path);
 
-    if (!expires || !signature) throw new Error('Missing signature');
-    if (Math.floor(Date.now() / 1000) > Number(expires)) throw new Error('URL expired');
+    if (!expires || !signature) throw new HttpError(401, 'Unauthorized request');
+    if (Math.floor(Date.now() / 1000) > Number(expires)) throw new HttpError(403, 'Invalid or expired URL');
 
     const expected = sign(`${fullPath}:${expires}`);
-    if (!crypto.timingSafeEqual(Buffer.from(String(signature)), Buffer.from(expected))) throw new Error('Invalid signature');
+    if (!crypto.timingSafeEqual(Buffer.from(String(signature)), Buffer.from(expected))) throw new HttpError(403, 'Invalid or expired URL');
 
     next();
 }

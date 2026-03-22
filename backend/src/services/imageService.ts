@@ -1,3 +1,4 @@
+import { USERCONTENT_DIR_BASENAME } from "@/config/config.js";
 import { ServiceError } from "@/errors/ServiceError.js";
 import type { ServiceContext } from "@/infra/serviceContext.js";
 import type { KeyValue } from "@/types/KeyValue.js";
@@ -53,7 +54,7 @@ export const createImageService = (ctx: ServiceContext) => {
         const result: ImageExtended[] = [];
         for (const item of items) {
             const file = fileMap.get(item.file_id);
-            const url = new URL(path.posix.join(process.env.USERCONTENT_DIR!, file?.path || ''), process.env.STATIC_SERVER);
+            const url = new URL(path.join(USERCONTENT_DIR_BASENAME, file?.path || ''), process.env.STATIC_SERVER);
             const expires = Math.floor((Date.now() / 1000) + 900); //15min expiration
             const signature = sign(`${url.pathname}:${expires}`);
             url.searchParams.append('expires', expires.toString());

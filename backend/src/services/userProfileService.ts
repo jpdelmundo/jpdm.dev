@@ -1,3 +1,4 @@
+import { USERCONTENT_DIR, USERCONTENT_DIR_BASENAME } from "@/config/config.js";
 import { ServiceError } from "@/errors/ServiceError.js";
 import type { ServiceContext } from "@/infra/serviceContext.js";
 import { createFileService } from '@/services/fileService.js';
@@ -42,7 +43,7 @@ export const createUserProfileService = (ctx: ServiceContext) => {
         const findResult = await deps.userProfileRepo.find(findParams);
         const items = ('page_items' in findResult ? findResult.page_items : findResult) as UserProfileDTO[];
         for (const item of items) {
-            if (item.avatar_url?.includes(path.posix.join(process.env.USERCONTENT_DIR!, 'avatars'))) {
+            if (item.avatar_url?.includes(path.posix.join(USERCONTENT_DIR_BASENAME, 'avatars'))) {
                 const url = new URL(item.avatar_url);
                 const expires = Math.floor((Date.now() / 1000) + 900); //15min expiration
                 const signature = sign(`${url.pathname}:${expires}`);
@@ -141,7 +142,7 @@ export const createUserProfileService = (ctx: ServiceContext) => {
         }
 
         const userDir = path.posix.join('avatars', crypto.createHash('sha256').update(user_id).digest('hex').slice(0, 16));
-        const destDir = path.resolve(process.env.USERCONTENT_DIR!, userDir);
+        const destDir = path.resolve(USERCONTENT_DIR, userDir);
         if (!fs.existsSync(destDir)) {
             fs.mkdirSync(destDir, { recursive: true });
         }
@@ -173,8 +174,7 @@ export const createUserProfileService = (ctx: ServiceContext) => {
             ...(dimensions ? { width: dimensions.width, height: dimensions.height } : {})
         };
         const avatarFile = await createFileService(ctx).create(newFile);
-
-        const avatar_url = `${process.env.USERCONTENT_BASE_URL}/${avatarFile.path}`;
+        const avatar_url = `${USERCONTENT_DIR_BASENAME}/${avatarFile.path}`;
         await updateByUserId(user_id, { avatar_url, avatar_file_id: avatarFile.id });
 
         return avatarFile;
