@@ -1,9 +1,10 @@
 import { USERCONTENT_DIR_BASENAME } from "@/config/config.js";
 import { ServiceError } from "@/errors/ServiceError.js";
 import type { ServiceContext } from "@/infra/serviceContext.js";
+import type { Deps } from "@/types/Deps.js";
 import type { KeyValue } from "@/types/KeyValue.js";
 import { sign } from "@/utils/auth.js";
-import { checkRequiredParameter } from "@/utils/helper.js";
+import { canModify } from "@/utils/permissions.js";
 import type ImageExtended from "@shared/models/extensions/ImageExtended.js";
 import type { Image, ImageId } from "@shared/models/generated/Image.js";
 import type { PostId } from "@shared/models/generated/Post.js";
@@ -12,7 +13,6 @@ import type { EnrichOptions } from "@shared/types/EnrichOptions.js";
 import { ErrorCode } from "@shared/types/ErrorCode.js";
 import path from 'path';
 import { createFileService } from './fileService.js';
-import { createPostService } from './postService.js';
 
 type GetParams = {
     current_user_id?: UserId;
@@ -64,7 +64,8 @@ export const createImageService = (ctx: ServiceContext) => {
                 ...item,
                 url: url.toString(),
                 width: file?.width || 0,
-                height: file?.height || 0
+                height: file?.height || 0,
+                user_id: file?.user_id || ''
             });
         }
 
@@ -77,29 +78,19 @@ export const createImageService = (ctx: ServiceContext) => {
 
     const del = async (id: ImageId) => {
         if (!id) throw new ServiceError('Missing parameter: id');
-
-        //check if admin or if has access (current_user_id)
-        if (!canDelete(id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
-
-        const image = await deps.imageRepo.findById(id);
+        const [image] = await get({ id });
         if (!image) throw new ServiceError(`Image not found: ${id}`);
+        const [enrinched] = await enrich([image]);
+        if (!enrinched) throw new ServiceError(`Error enriching image`);
+        if (!canModify(actor, enrinched.user_id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
-        //delete files first
-        createFileService(ctx).delete(image.file_id);
+        const txResult = await deps.withTransaction(async (txDeps: Deps) => {
+            //delete files first
+            createFileService({ deps: txDeps, actor }).delete(image.file_id);
 
-        //delete record
-        deps.imageRepo.delete(id);
-    };
-
-    const canDelete = (id: ImageId): Promise<boolean> => {
-        checkRequiredParameter({ id, actor });
-        return (async () => {
-            const image = await deps.imageRepo.findById(id);
-            if (!image) return false;
-
-            const canDelete = await createPostService(ctx).canModify(image.post_id);
-            return canDelete;
-        })();
+            //delete record
+            txDeps.imageRepo.delete(id);
+        });
     };
 
     return {

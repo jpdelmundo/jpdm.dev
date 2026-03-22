@@ -13,11 +13,11 @@ export const isSystem = (actor: Actor): boolean =>
 export const isAuthenticatedUser = (actor: Actor): actor is { type: 'user'; id: string; username: string; email: string | null; roles: UserRole[] } =>
     actor.type === 'user';
 
-export const isOwner = (actor: Actor, userId: string): boolean =>
-    actor.type === 'user' && actor.id === userId;
+export const isOwner = (actor: Actor, itemUserId: string): boolean =>
+    actor.type === 'user' && actor.id === itemUserId;
 
-export const canModify = (actor: Actor, userId: string): boolean =>
-    isSystem(actor) || isOwner(actor, userId) || hasRole(actor, 'admin');
+export const canModify = (actor: Actor, itemUserId: string): boolean =>
+    isSystem(actor) || isOwner(actor, itemUserId) || hasRole(actor, 'admin');
 
 // export const canModerate = (actor: Actor): boolean =>
 //     isSystem(actor) || hasAnyRole(actor, ['admin']);
