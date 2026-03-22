@@ -7,41 +7,16 @@ import { sign } from "@/utils/auth.js";
 import { canModify } from "@/utils/permissions.js";
 import type ImageExtended from "@shared/models/extensions/ImageExtended.js";
 import type { Image, ImageId } from "@shared/models/generated/Image.js";
-import type { PostId } from "@shared/models/generated/Post.js";
-import type { UserId } from "@shared/models/generated/User.js";
 import type { EnrichOptions } from "@shared/types/EnrichOptions.js";
 import { ErrorCode } from "@shared/types/ErrorCode.js";
 import path from 'path';
 import { createFileService } from './fileService.js';
 
-type GetParams = {
-    current_user_id?: UserId;
-    id?: ImageId;
-    post_id?: PostId;
-    post_ids?: PostId[];
-    // user_id?: UserId;
-    // page_num?: number;
-    // page_size?: number;
-    // order_by?: string;
-    // order_dir?: OrderDirection;
-    //skip_access_check?: boolean;
-}
-
 export const createImageService = (ctx: ServiceContext) => {
     const { deps, actor } = ctx;
 
     const get = async <P extends KeyValue>(params: P) => {
-        const { id, post_id, post_ids } = params as GetParams;
-
-        const findParams = {
-            ...(id && { id }),
-            ...(post_id && { post_id }),
-            ...(post_ids && { post_ids })
-        } as P;
-
-        const findResult = await deps.imageRepo.find(findParams);
-
-        return findResult;
+        return deps.imageRepo.find(params);
     };
 
     const enrich = async (items: Image[], options: EnrichOptions = {}): Promise<ImageExtended[]> => {
@@ -80,9 +55,10 @@ export const createImageService = (ctx: ServiceContext) => {
         if (!id) throw new ServiceError('Missing parameter: id');
         const [image] = await get({ id });
         if (!image) throw new ServiceError(`Image not found: ${id}`);
-        const [enrinched] = await enrich([image]);
-        if (!enrinched) throw new ServiceError(`Error enriching image`);
-        if (!canModify(actor, enrinched.user_id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
+        const file = await deps.fileRepo.findById(image.file_id);
+        if (!file) throw new ServiceError(`File not found: ${image.file_id}`);
+
+        if (!canModify(actor, file.user_id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
         const txResult = await deps.withTransaction(async (txDeps: Deps) => {
             //delete files first

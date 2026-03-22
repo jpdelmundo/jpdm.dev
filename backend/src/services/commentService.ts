@@ -9,27 +9,11 @@ import { canModify as canModifyResource } from '@/utils/permissions.js';
 import type { CommentDTO, CommentDTO as Comments } from '@shared/models/dto/CommentDTO.js';
 import type PostDTO from '@shared/models/extensions/PostExtended.js';
 import type { Comment, CommentId, CommentInitializer, CommentMutator } from '@shared/models/generated/Comment.js';
-import type { Post, PostId } from '@shared/models/generated/Post.js';
+import type { Post } from '@shared/models/generated/Post.js';
 import type { UserId } from '@shared/models/generated/User.js';
-import type { DateComparison } from '@shared/types/DateComparison.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
 import type { Moderation } from '@shared/types/Moderation.js';
-import type { OrderDirection } from '@shared/types/OrderDirection.js';
 import OpenAI from 'openai';
-
-type GetParams = {
-    id?: CommentId;
-    comment?: string;
-    date_from?: DateComparison;
-    date_to?: DateComparison;
-    post_id?: PostId;
-    user_id?: UserId;
-    page_num?: number;
-    page_size?: number;
-    order_by?: string;
-    order_dir?: OrderDirection;
-    include?: string[];
-}
 
 type CreateParams = CommentInitializer;
 type UpdateParams = CommentMutator;
@@ -108,25 +92,11 @@ Rules:
     };
 
     const get = async <P extends KeyValue>(params: P) => {
-        const { id, post_id, user_id, comment, date_from, date_to, page_num, page_size, order_by, order_dir } = params as GetParams;
-
         const findParams = {
-            ...(id && { id }),
-            ...(post_id && { post_id }),
-            ...(comment && { comment }),
-            ...(date_from && { date_from }),
-            ...(date_to && { date_to }),
-            ...(user_id && { user_id }),
-            ...(page_num && { page_num }),
-            ...(page_size && { page_size }),
-            ...(order_by && { order_by }),
-            ...(order_dir && { order_dir }),
+            ...params,
             ...(actor?.type == 'user' && { prioritize_user_id: actor.id }),
         } as P;
-
-        const findResult = await deps.commentRepo.find(findParams);
-
-        return findResult;
+        return deps.commentRepo.find(findParams);
     };
 
     const enrich = async (items: Comment[], options: { include?: string[] } = {}): Promise<CommentDTO[]> => {

@@ -20,27 +20,11 @@ import OpenAI from "openai";
 import path from 'path';
 import { moderate } from './userService.js';
 
-type GetParams = {
-    id?: UserProfileId;
-    ids?: UserProfileId[];
-    user_id?: UserId;
-    user_ids?: UserId[];
-}
-
 export const createUserProfileService = (ctx: ServiceContext) => {
     const { deps, actor } = ctx;
 
     const get = async <P extends KeyValue>(params: P) => {
-        const { id, ids, user_id, user_ids } = params as GetParams;
-
-        const findParams = {
-            ...(id && { id }),
-            ...(ids && { ids }),
-            ...(user_id && { user_id }),
-            ...(user_ids && { user_ids }),
-        } as P;
-
-        const findResult = await deps.userProfileRepo.find(findParams);
+        const findResult = await deps.userProfileRepo.find(params);
         const items = ('page_items' in findResult ? findResult.page_items : findResult) as UserProfileDTO[];
         for (const item of items) {
             if (item.avatar_url?.includes(path.posix.join(USERCONTENT_DIR_BASENAME, 'avatars'))) {

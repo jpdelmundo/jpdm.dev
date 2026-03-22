@@ -13,23 +13,9 @@ import fs from 'fs';
 import { imageSizeFromFile } from 'image-size/fromFile';
 import path from 'path';
 
-type GetParams = {
-    id?: FileId;
-    ids?: FileId[];
-}
-
 export const createFileService = ({ deps, actor }: ServiceContext) => {
     const get = async <P extends KeyValue>(params: P) => {
-        const { id, ids } = params as GetParams;
-
-        const findParams = {
-            ...(id && { id }),
-            ...(ids && { ids }),
-        } as P;
-
-        const findResult = await deps.fileRepo.find(findParams);
-
-        return findResult;
+        return deps.fileRepo.find(params);
     }
 
     const create = async (data: FileInitializer) => {

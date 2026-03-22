@@ -12,10 +12,8 @@ import { type File, type FileInitializer } from '@shared/models/generated/File.j
 import type { Image, ImageId } from '@shared/models/generated/Image.js';
 import type { Post, PostId, PostInitializer, PostMutator } from '@shared/models/generated/Post.js';
 import type { UserId } from '@shared/models/generated/User.js';
-import type { VisibilityEnum } from '@shared/models/generated/VisibilityEnum.js';
 import type { EnrichOptions } from '@shared/types/EnrichOptions.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
-import type { OrderDirection } from '@shared/types/OrderDirection.js';
 import { createHash } from 'crypto';
 import { fileTypeFromFile } from 'file-type';
 import fs from 'fs';
@@ -28,20 +26,6 @@ import { createPostLikeService } from './postLikeService.js';
 import { createUserProfileService } from './userProfileService.js';
 import { createUserService } from './userService.js';
 
-type GetParams = {
-    current_user_id?: UserId;
-    id?: PostId;
-    ids?: PostId[];
-    user_id?: UserId;
-    visibility?: VisibilityEnum;
-    is_published?: boolean;
-    page_num?: number;
-    page_size?: number;
-    order_by?: string;
-    order_dir?: OrderDirection;
-    include?: string[];
-}
-
 type CreateInput = PostInitializer & { files?: { file_id: string; sort: number }[]; }
 type UpdateInput = PostMutator & { files?: { id: string; file_id: string; sort: number }[]; };
 
@@ -49,23 +33,7 @@ export const createPostService = (ctx: ServiceContext) => {
     const { deps, actor } = ctx;
 
     const get = async <P extends KeyValue>(params: P) => {
-        const { id, ids, user_id, visibility, is_published, page_num, page_size, order_by, order_dir } = params as GetParams;
-
-        const findParams = {
-            ...(id && { id }),
-            ...(ids && { ids }),
-            ...(user_id && { user_id }),
-            ...(visibility && { visibility }),
-            ...(is_published && { is_published }),
-            ...(page_num && { page_num }),
-            ...(page_size && { page_size }),
-            ...(order_by && { order_by }),
-            ...(order_dir && { order_dir }),
-        } as P;
-
-        const findResult = await deps.postRepo.find(findParams);
-
-        return findResult;
+        return deps.postRepo.find(params);
     };
 
     const enrich = async (items: Post[], options: EnrichOptions = { include: ['stats', 'images'] }) => {

@@ -12,7 +12,6 @@ import type { UserRole as UserRoleModel } from '@shared/models/generated/UserRol
 import { ErrorCode } from '@shared/types/ErrorCode.js';
 import type { Jwt, PayloadData } from '@shared/types/Jwt.js';
 import type { Moderation } from '@shared/types/Moderation.js';
-import type { OrderDirection } from '@shared/types/OrderDirection.js';
 import type { UserRole } from '@shared/types/UserRole.js';
 import { jsonBase64Decode } from '@shared/utils/encoding.js';
 import { generateRandomUsername, getEmailUsername } from '@shared/utils/username.js';
@@ -26,16 +25,6 @@ import { validate } from 'uuid';
 import { ApiError } from '../utils/apiHelper.js';
 import { mail } from '../utils/mailer.js';
 import * as userProfileService from './userProfileService.js';
-
-type GetParams = {
-    current_user_id?: UserId;
-    id?: UserId;
-    ids?: UserId[];
-    page_num?: number;
-    page_size?: number;
-    order_by?: string;
-    order_dir?: OrderDirection;
-}
 
 type UpdateParams = UserMutator & {
     old_password?: string;
@@ -51,20 +40,7 @@ export const createUserService = (ctx: ServiceContext) => {
     const { deps, actor } = ctx;
 
     const get = async <P extends KeyValue>(params: P) => {
-        const { id, ids, page_num, page_size, order_by, order_dir } = params as GetParams;
-
-        const findParams = {
-            ...(id && { id }),
-            ...(ids && { ids }),
-            ...(page_num && { page_num }),
-            ...(page_size && { page_size }),
-            ...(order_by && { order_by }),
-            ...(order_dir && { order_dir }),
-        } as P;
-
-        const findResult = await deps.userRepo.find(findParams);
-
-        return findResult;
+        return deps.userRepo.find(params);
     };
 
     const findById = async (id: string): Promise<User | null> => {
