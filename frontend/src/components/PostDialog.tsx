@@ -1,7 +1,6 @@
 import { apiPost, apiPut } from '@/api/apiClient';
 import { getFingerprint } from '@/utils/device';
 import { getDimensionOrientation, getErrorMessage, getImageFileDetail, scrollbarWidthAware } from '@/utils/helper';
-import type PostDTO from '@shared/models/extensions/PostExtended';
 import type { File as FileModel } from '@shared/models/generated/File';
 import { jsonBase64Encode } from '@shared/utils/encoding';
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
@@ -20,6 +19,7 @@ import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import type PostDTO from '@shared/models/dto/PostDTO.ts';
 import type ImageExtended from '@shared/models/extensions/ImageExtended';
 import type { ImageOrientation } from '@shared/types/ImageOrientation';
 import type { PostImageDraft } from '@shared/types/PostImageDraft';

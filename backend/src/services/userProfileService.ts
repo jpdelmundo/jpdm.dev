@@ -7,7 +7,7 @@ import { sign } from "@/utils/auth.js";
 import { getUserAvatarDir } from "@/utils/helper.js";
 import { compress } from "@/utils/image.js";
 import { moderateImage, moderateName } from "@/utils/llm.js";
-import { canModify } from "@/utils/permissions.js";
+import { canModify as _canModify } from '@/utils/permissions.js';
 import type { FileInitializer } from "@shared/models/generated/File.js";
 import type { UserId } from "@shared/models/generated/User.js";
 import type { UserProfile, UserProfileId, UserProfileInitializer, UserProfileMutator } from "@shared/models/generated/UserProfile.js";
@@ -69,6 +69,7 @@ export const createUserProfileService = (ctx: ServiceContext) => {
 
     const update = async (id: UserProfileId, params: UserProfileMutator) => {
         if (!id) throw new ServiceError('Missing parameter: id');
+        if (!await canModify(id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
         const updated = await deps.userProfileRepo.update(id, params);
 
@@ -76,8 +77,9 @@ export const createUserProfileService = (ctx: ServiceContext) => {
     };
 
     const updateByUserId = async (user_id: UserId, param: UserProfileMutator) => {
-        if (!user_id) throw new ServiceError('Missing parameter: user_id');
         const { avatar_url, bio, date_of_birth, first_name, last_name, gender, phone_number, avatar_file_id } = param;
+        if (!user_id) throw new ServiceError('Missing parameter: user_id');
+        if (!_canModify(actor, user_id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
         if (first_name || last_name) {
             const name = `${first_name} ${last_name}`;
@@ -122,7 +124,7 @@ export const createUserProfileService = (ctx: ServiceContext) => {
     };
 
     const handleAvatarUpload = async (user_id: UserId, file: Express.Multer.File) => {
-        if (!canModify(actor, user_id)) throw new ServiceError('Unauthorized request');
+        if (!_canModify(actor, user_id)) throw new ServiceError('Unauthorized request');
         if (!user_id) throw new ServiceError('Missing required parameter: user_id');
         if (!file) throw new ServiceError('Missing required parameter: file');
         const type = await fileTypeFromFile(file.path);
@@ -142,7 +144,7 @@ export const createUserProfileService = (ctx: ServiceContext) => {
     };
 
     const deleteAvatar = async (user_id: UserId) => {
-        if (!canModify(actor, user_id)) throw new ServiceError('Unauthorized request');
+        if (!_canModify(actor, user_id)) throw new ServiceError('Unauthorized request');
         if (!user_id) throw new ServiceError('Missing required parameter: user_id');
 
         await updateByUserId(user_id, { avatar_url: null });
@@ -178,6 +180,13 @@ export const createUserProfileService = (ctx: ServiceContext) => {
 
         return avatarFile;
     }
+
+    const canModify = async (id: UserProfileId) => {
+        const userProfile = await deps.userProfileRepo.findById(id);
+        if (!userProfile) return false;
+
+        return _canModify(actor, userProfile.user_id);
+    };
 
     return {
         get,

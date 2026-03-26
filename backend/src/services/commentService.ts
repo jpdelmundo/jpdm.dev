@@ -1,14 +1,13 @@
 import { ServiceError } from '@/errors/ServiceError.js';
 import type { ServiceContext } from '@/infra/serviceContext.js';
-import { CommentRepository } from '@/repositories/CommentRepository.js';
 import { createPostService } from '@/services/postService.js';
 import { createUserProfileService } from '@/services/userProfileService.js';
 import { createUserService } from '@/services/userService.js';
 import type { KeyValue } from '@/types/KeyValue.js';
 import { moderateComment } from '@/utils/llm.js';
-import { canModify as canModifyResource } from '@/utils/permissions.js';
+import { canModify as _canModify } from '@/utils/permissions.js';
 import type { CommentDTO, CommentDTO as Comments } from '@shared/models/dto/CommentDTO.js';
-import type PostDTO from '@shared/models/extensions/PostExtended.js';
+import type PostDTO from '@shared/models/dto/PostDTO.js';
 import type { Comment, CommentId, CommentInitializer, CommentMutator } from '@shared/models/generated/Comment.js';
 import type { Post } from '@shared/models/generated/Post.js';
 import type { UserId } from '@shared/models/generated/User.js';
@@ -22,12 +21,10 @@ export const createCommentService = (ctx: ServiceContext) => {
 
     const canModify = async (id: CommentId): Promise<boolean> => {
         if (!id) return false;
-        if (!actor) return false;
-
         const item = await deps.commentRepo.findById(id);
         if (!item) return false;
 
-        return canModifyResource(actor, item.user_id);
+        return _canModify(actor, item.user_id);
     };
 
     const create = async (params: CreateParams): Promise<Comments> => {
@@ -106,7 +103,7 @@ export const createCommentService = (ctx: ServiceContext) => {
         const { comment } = params;
 
         if (!id) throw new ServiceError('Missing parameter: id');
-        if (!(await canModify(id))) throw new ServiceError('Unauthorized request');
+        if (!await canModify(id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
         if (!comment || comment.trim().length == 0) throw new ServiceError('Content cannot be empty', ErrorCode.MISSING_PARAMETER, { param: 'comment' });
         if (comment.length > 2000) throw new ServiceError('Content too long', ErrorCode.LENGTH_TOO_LONG, { param: 'comment' });
 
@@ -115,8 +112,7 @@ export const createCommentService = (ctx: ServiceContext) => {
         if (!moderation) throw new Error('Invalid AI moderation result');
         if (!moderation.is_allowed) throw new ServiceError(`AI Moderation: ${moderation.reason}`);
 
-        const repo = new CommentRepository();
-        const updated = await repo.update(id, {
+        const updated = await deps.commentRepo.update(id, {
             ...(comment && { comment: String(comment).trim().replace(/\n{3,}/g, "\n\n") })
         });
 
@@ -125,7 +121,7 @@ export const createCommentService = (ctx: ServiceContext) => {
 
     const del = async (id: CommentId): Promise<Comment | null> => {
         if (!id) throw new ServiceError('Missing parameter: id');
-        if (!(await canModify(id))) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
+        if (!await canModify(id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
         const deleted = await deps.commentRepo.delete(id);
         if (!deleted?.id) throw new ServiceError(`Failed deleting comment. id: ${id}`);

@@ -1,9 +1,9 @@
 import { ServiceError } from '@/errors/ServiceError.js';
 import type { ServiceContext } from '@/infra/serviceContext.js';
 import type { KeyValue } from '@/types/KeyValue.js';
-import { checkRequiredParameter, randomString } from '@/utils/helper.js';
+import { randomString } from '@/utils/helper.js';
 import { moderateName } from '@/utils/llm.js';
-import { canModify as canModifyResource } from '@/utils/permissions.js';
+import { canModify as _canModify } from '@/utils/permissions.js';
 import type { MeDTO } from '@shared/models/dto/MeDTO.js';
 import type UserWithRoles from '@shared/models/extensions/UserWithRoles.js';
 import type { RefreshToken, RefreshTokenInitializer } from '@shared/models/generated/RefreshToken.js';
@@ -419,7 +419,7 @@ The Support Team`
     const update = async (id: UserId, params: UpdateParams) => {
         const { old_password, new_password, deleted, deleted_at } = params;
         if (!id) throw new ServiceError('Missing parameter: id');
-        if (!canModify(id)) throw new ServiceError('Unauthorized request');
+        if (!await canModify(id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
         if (old_password && new_password) {
             const user = await findById(id);
@@ -446,14 +446,11 @@ The Support Team`
 
     const del = async (id: UserId, params: DeleteParams) => {
         const { password, token } = params;
-        if (actor.type == 'user') {
-            if (!password && !token) throw new ServiceError('Missing or empty require parameter: password or token');
-        }
-        if (!canModify(id)) throw new ServiceError('Unauthorized request');
+        if (!password && !token) throw new ServiceError('Missing or empty require parameter: password or token');
+        if (!await canModify(id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
         const user = await findById(id);
-        if (!user) throw new Error(`User not found. id: ${id}`);
-        if (password && !await bcrypt.compare(password, user.password || '')) throw new ServiceError('Incorrect password', ErrorCode.INVALID_CREDENTIALS);
+        if (password && !await bcrypt.compare(password, user?.password || '')) throw new ServiceError('Incorrect password', ErrorCode.INVALID_CREDENTIALS);
         if (token) {
             const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as Jwt;
             if (!decoded.id || decoded.scope != 'delete_account') throw new ServiceError('Invalid delete token');
@@ -461,7 +458,7 @@ The Support Team`
         }
 
         const deleted = await deps.userRepo.delete(id);
-        if (!deleted?.id) throw new Error(`Failed deleting user. id: ${id}`);
+        if (!deleted?.id) throw new Error(`Failed deleting user: ${id}`);
 
         deps.refreshTokenRepo.markUserRefreshTokensAsRevoked(id);
 
@@ -485,15 +482,11 @@ The Support Team`
         return result;
     };
 
-    const canModify = (id: UserId) => {
-        checkRequiredParameter({ id, actor });
+    const canModify = async (id: UserId) => {
+        const user = await deps.userRepo.findById(id);
+        if (!user) return false;
 
-        return (async () => {
-            const user = await deps.userRepo.findById(id);
-            if (!user) return false;
-
-            return canModifyResource(actor, user.id);
-        })();
+        return _canModify(actor, user.id);
     };
 
     return {

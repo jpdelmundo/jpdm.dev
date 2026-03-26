@@ -11,7 +11,7 @@ export const isSystem = (actor: Actor): boolean =>
     actor.type === 'system';
 
 export const isAuthenticatedUser = (actor: Actor): actor is { type: 'user'; id: string; username: string; email: string | null; roles: UserRole[] } =>
-    actor.type === 'user';
+    actor.type === 'user' && actor.id !== '';
 
 export const isOwner = (actor: Actor, itemUserId: string): boolean =>
     actor.type === 'user' && actor.id === itemUserId;

@@ -33,6 +33,26 @@ export default defineConfig(({ command }) => {
             if (id.includes('node_modules/react-hook-form')) {
               return 'vendor-rhf';
             }
+
+            if (id.includes('@mui/x-data-grid')) {
+              return 'vendor-mui-datagrid';
+            }
+
+            if (id.includes('@mui/x-date-pickers')) {
+              return 'vendor-mui-datepickers';
+            }
+
+            if (id.includes('@mui/material') || id.includes('@mui/system') || id.includes('@mui/base')) {
+              return 'vendor-mui-core';
+            }
+
+            if (id.includes('@mui')) {
+              return 'vendor-mui-misc';
+            }
+
+            if (id.includes('@emotion')) {
+              return 'vendor-emotion';
+            }
           }
         }
       },

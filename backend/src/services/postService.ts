@@ -5,9 +5,9 @@ import type { Deps } from '@/types/Deps.js';
 import type { KeyValue } from '@/types/KeyValue.js';
 import { moveFile } from '@/utils/helper.js';
 import { compress } from '@/utils/image.js';
-import { canModify as canModifyResource, isOwner } from '@/utils/permissions.js';
+import { canModify as _canModify, isOwner } from '@/utils/permissions.js';
+import type PostDTO from '@shared/models/dto/PostDTO.js';
 import type ImageExtended from '@shared/models/extensions/ImageExtended.js';
-import type PostDTO from '@shared/models/extensions/PostExtended.js';
 import { type File, type FileInitializer } from '@shared/models/generated/File.js';
 import type { Image, ImageId } from '@shared/models/generated/Image.js';
 import type { Post, PostId, PostInitializer, PostMutator } from '@shared/models/generated/Post.js';
@@ -25,6 +25,7 @@ import { createImageService } from './imageService.js';
 import { createPostLikeService } from './postLikeService.js';
 import { createUserProfileService } from './userProfileService.js';
 import { createUserService } from './userService.js';
+
 
 type CreateInput = PostInitializer & { files?: { file_id: string; sort: number }[]; }
 type UpdateInput = PostMutator & { files?: { id: string; file_id: string; sort: number }[]; };
@@ -111,7 +112,7 @@ export const createPostService = (ctx: ServiceContext) => {
         if (!user_id) throw new ServiceError('Missing parameter: user_id');
         if (!content || content.trim().length == 0) throw new ServiceError('Content cannot be empty', ErrorCode.MISSING_PARAMETER, { param: 'content' });
         if (content.length > 2000) throw new ServiceError('Content too long', ErrorCode.LENGTH_TOO_LONG, { param: 'content' });
-        if (!isOwner(actor, data.user_id)) throw new ServiceError('Unauthorized request.', ErrorCode.FORBIDDEN);
+        if (!isOwner(actor, data.user_id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
         const txResult = await deps.withTransaction(async (txDeps: Deps) => {
             //create post
@@ -156,7 +157,7 @@ export const createPostService = (ctx: ServiceContext) => {
 
     const del = async (id: PostId) => {
         if (!id) throw new ServiceError('Missing parameter: id');
-        if (!canModify(id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
+        if (!await canModify(id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
         const deleted = await deps.withTransaction(async (txDeps: Deps) => {
             //get the post to get the images
@@ -192,7 +193,7 @@ export const createPostService = (ctx: ServiceContext) => {
         if (!id) throw new ServiceError('Missing parameter: id or post_id');
         if (!content || content.trim().length == 0) throw new ServiceError('Content cannot be empty', ErrorCode.MISSING_PARAMETER, { param: 'content' });
         if (content.length > 2000) throw new ServiceError('Content too long', ErrorCode.LENGTH_TOO_LONG, { param: 'content' });
-        if (!canModify(id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
+        if (!await canModify(id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
         const post = await getById(id);
         const [enrinched] = await enrich([post]);
@@ -276,7 +277,7 @@ export const createPostService = (ctx: ServiceContext) => {
             throw new ServiceError('File type not allowed', ErrorCode.NOT_ALLOWED);
         }
 
-        if (!canModify(post_id)) throw new ServiceError('Unauthorized request');
+        if (!await canModify(post_id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
         const userDir = path.posix.join('images', createHash('sha256').update(post_id).digest('hex').slice(0, 16));
         const destDir = path.resolve(USERCONTENT_DIR, userDir);
@@ -313,7 +314,7 @@ export const createPostService = (ctx: ServiceContext) => {
         const post = await deps.postRepo.findById(post_id);
         if (!post) return false;
 
-        return canModifyResource(actor, post.user_id);
+        return _canModify(actor, post.user_id);
     };
 
     return {
