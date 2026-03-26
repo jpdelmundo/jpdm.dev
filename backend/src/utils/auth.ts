@@ -59,7 +59,7 @@ export const generateJwt = (payload: PayloadData) => {
 
 export const authRequired = async (req: Request, res: Response, next: NextFunction) => {
     const authUser = req.user;
-    if (!authUser) throw new Error('Unauthorized request');
+    if (!authUser || authUser.type == 'anonymous') throw new Error('Unauthorized request');
 
     const payload = getJwtPayload(req);
     if (!payload) throw new JsonWebTokenError('Problem decoding payload');

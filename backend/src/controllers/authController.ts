@@ -77,7 +77,6 @@ export const createAuthController = (app: AppContext) => {
         //if (!refreshTokenId) throw new Error('Refresh token id missing');
         if (!refreshTokenId) return fail(res, 'Missing refresh token id', 400);
 
-        console.log({ refreshTokenId });
         //get use
         const userSvc = createUserService(makeCtx(req));
         const refreshToken = await userSvc.getRefreshToken(refreshTokenId);
@@ -86,7 +85,6 @@ export const createAuthController = (app: AppContext) => {
         console.log({ refreshToken });
         //check if refresh token not yet used or revoked
         if (refreshToken.is_used || refreshToken.is_revoked) {
-            //TODO log reuse or used/revoked refresh token
             console.log('Refresh token used/revoked', { refreshToken });
             clearRefreshTokenCookie(req, res);
             throw new Error('Refresh token used/revoked');

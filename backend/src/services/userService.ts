@@ -2,6 +2,7 @@ import { ServiceError } from '@/errors/ServiceError.js';
 import type { ServiceContext } from '@/infra/serviceContext.js';
 import type { KeyValue } from '@/types/KeyValue.js';
 import { checkRequiredParameter, randomString } from '@/utils/helper.js';
+import { moderateName } from '@/utils/llm.js';
 import { canModify as canModifyResource } from '@/utils/permissions.js';
 import type { MeDTO } from '@shared/models/dto/MeDTO.js';
 import type UserWithRoles from '@shared/models/extensions/UserWithRoles.js';
@@ -11,20 +12,17 @@ import type { UserProfile } from '@shared/models/generated/UserProfile.js';
 import type { UserRole as UserRoleModel } from '@shared/models/generated/UserRole.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
 import type { Jwt, PayloadData } from '@shared/types/Jwt.js';
-import type { Moderation } from '@shared/types/Moderation.js';
 import type { UserRole } from '@shared/types/UserRole.js';
 import { jsonBase64Decode } from '@shared/utils/encoding.js';
 import { generateRandomUsername, getEmailUsername } from '@shared/utils/username.js';
 import { isValidEmail, validatePassword, validateUsername } from '@shared/utils/validation.js';
 import * as bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import OpenAI from 'openai';
 import type { Profile as FacebookProfile } from 'passport-facebook';
 import type { Profile as GoogleProfile } from 'passport-google-oauth20';
 import { validate } from 'uuid';
 import { ApiError } from '../utils/apiHelper.js';
 import { mail } from '../utils/mailer.js';
-import * as userProfileService from './userProfileService.js';
 
 type UpdateParams = UserMutator & {
     old_password?: string;
@@ -117,7 +115,7 @@ export const createUserService = (ctx: ServiceContext) => {
             if (validatePassword(password).length > 0) throw new ServiceError('Password invalid');
             if (validateUsername(username).length > 0) throw new ServiceError('Username invalid');
 
-            const moderation = await moderate(username);
+            const moderation = await moderateName(username);
             if (!moderation) throw new Error('Invalid AI moderation result');
             if (!moderation.is_allowed) throw new ServiceError(`AI Moderation: ${moderation.reason}`);
         }
@@ -381,16 +379,6 @@ The Support Team`
             ...(profile.provider == 'google' && { google_id: profile.id })
         });
 
-        const avatar_url = profile.photos?.[0]?.value;
-        const first_name = profile.name?.givenName;
-        const last_name = profile.name?.familyName;
-        userProfileService.createUserProfileService(ctx).create({
-            user_id: newUser.id,
-            ...(first_name && { first_name }),
-            ...(last_name && { last_name }),
-            ...(avatar_url && { avatar_url })
-        });
-
         return newUser;
     };
 
@@ -423,16 +411,6 @@ The Support Team`
             username: newUsername,
             facebook_id: profile.id,
             ...(email && { email })
-        });
-
-        const avatar_url = profile.photos?.[0]?.value;
-        const first_name = profile.name?.givenName;
-        const last_name = profile.name?.familyName;
-        userProfileService.createUserProfileService(ctx).create({
-            user_id: newUser.id,
-            ...(first_name && { first_name }),
-            ...(last_name && { last_name }),
-            ...(avatar_url && { avatar_url })
         });
 
         return newUser;
@@ -550,46 +528,4 @@ The Support Team`
         toMe,
         canModify
     };
-};
-
-export const moderate = async (name: string): Promise<Moderation | null> => {
-
-    const llm = new OpenAI({
-        apiKey: process.env.LITELLM_VIRTUAL_KEY,
-        baseURL: process.env.LITELLM_API_BASE_URL
-    });
-
-    const result = await llm.chat.completions.create({
-        model: 'moderation-model',
-        messages: [
-            {
-                role: 'system',
-                content: `You are a name/username filtering system.
-Respond ONLY with valid JSON with properties:
-- is_allowed: boolean
-- reason: string
-
-Disallow:
-- insults, bad words, anything about the face, mouth or looks
-- spam messages
-
-Rules:
-- If is_allowed = true, set "reason" to an empty string.
-- If is_allowed = false, state clearly but concisely like talking to a human being why it's not allowed.
-- Do NOT include the name/username in the reason value.
-- Do NOT describe the person's physical traits.
-- Do NOT mention the moderation rules in the output.`
-            },
-            {
-                role: 'user',
-                content: name
-            }
-        ],
-        temperature: 0.3,
-        response_format: { type: "json_object" }
-    });
-
-    const content = result.choices[0]?.message.content?.trim();
-    console.log({ name, content });
-    return content ? JSON.parse(content) : null;
 };

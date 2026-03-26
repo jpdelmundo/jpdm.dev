@@ -1,5 +1,7 @@
 import fs from 'fs';
-import crypto from 'node:crypto';
+import crypto, { randomBytes } from 'node:crypto';
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import path from 'path';
 
 export const randomString = (length: number) => {
@@ -28,4 +30,52 @@ export const moveFile = async (src: string, dest: string) => {
         await fs.promises.copyFile(src, dest);
         fs.promises.unlink(src);
     });
+}
+
+export const downloadImage = async (url: string, destDir: string, timeoutMs: number = 30000): Promise<string | null> => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (!res.ok || !res.body) return null;
+
+        const contentType = res.headers.get('content-type');
+        if (!contentType?.startsWith('image/')) return null;
+
+        //check dest
+        const outputDir = path.resolve(destDir);
+        fs.promises.mkdir(outputDir, { recursive: true });
+
+        //get orig filename
+        const urlObj = new URL(url);
+        let filename = path.basename(urlObj.pathname);
+
+        //check if has filename
+        if (!filename) {
+            const ext = contentType.split('/')[1] || 'jpg';
+            filename = `${randomBytes(8).toString('hex')}.${ext}`;
+        }
+
+        const outputPath = path.join(outputDir, filename);
+
+        // const buffer = Buffer.from(await res.arrayBuffer());
+        // await fs.promises.writeFile(outputPath, buffer);
+
+        //use stream (better for memory)
+        const nodeStream = Readable.from(res.body);
+        const fileStream = fs.createWriteStream(outputPath);
+        await pipeline(nodeStream, fileStream);
+        console.log(`File downloaded ${url}: ${outputPath}`);
+        return outputPath;
+    } catch (error) {
+        clearTimeout(timeoutId);
+        console.error(`Failed to download ${url}:`, error);
+        return null;
+    }
+}
+
+export const getUserAvatarDir = (user_id: string) => {
+    return path.posix.join('avatars', crypto.createHash('sha256').update(user_id).digest('hex').slice(0, 16));
 }

@@ -11,7 +11,7 @@ export const createUserProfileRouter = (app: AppContext) => {
     //private
     router.use(authRequired);
     router.get('/:id', controller.get);
-    router.post('/:id/avatar', uploadHandler.single('file'), controller.uploadAvatar);
+    router.post('/:id/avatar', uploadHandler.single('file'), controller.handleAvatarUpload);
     router.delete('/:id/avatar', controller.deleteAvatar);
     router.put('/:id', controller.update);
 

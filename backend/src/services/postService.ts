@@ -40,9 +40,11 @@ export const createPostService = (ctx: ServiceContext) => {
         const { include } = options;
         const userIds = [...new Set(items.map(i => i.user_id))];
         const postIds = [...new Set(items.map(i => i.id))];
+        const userProfileSvc = createUserProfileService(ctx);
 
         const users = await createUserService(ctx).get({ ids: userIds });
-        const userProfiles = await createUserProfileService(ctx).get({ user_ids: userIds });
+        const userProfiles = await userProfileSvc.get({ user_ids: userIds });
+        const userProfilesEnrinched = await userProfileSvc.enrich(userProfiles);
         const postLikes = actor.type == 'user' ? await createPostLikeService(ctx).get({ user_id: actor.id, post_ids: postIds }) : [];
         const postCommentsCount = include?.includes('stats') ? await getCommentsCount({ post_ids: postIds }) : [];
 
@@ -51,7 +53,7 @@ export const createPostService = (ctx: ServiceContext) => {
         const postImages = (images ? await imageSvc.enrich(images) : []) as ImageExtended[];
 
         const userMap = new Map(users.map(u => [u.id, u]));
-        const userProfileMap = new Map(userProfiles.map(u => [u.user_id, u]));
+        const userProfileMap = new Map(userProfilesEnrinched.map(u => [u.user_id, u]));
         const postLikesMap = new Map(postLikes.map(l => [l.post_id, l]));
         const postCommentsCountMap = new Map(postCommentsCount.map(p => [p.post_id, p]));
         const postImagesMap = postImages.reduce((acc, item) => {

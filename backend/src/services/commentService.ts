@@ -5,6 +5,7 @@ import { createPostService } from '@/services/postService.js';
 import { createUserProfileService } from '@/services/userProfileService.js';
 import { createUserService } from '@/services/userService.js';
 import type { KeyValue } from '@/types/KeyValue.js';
+import { moderateComment } from '@/utils/llm.js';
 import { canModify as canModifyResource } from '@/utils/permissions.js';
 import type { CommentDTO, CommentDTO as Comments } from '@shared/models/dto/CommentDTO.js';
 import type PostDTO from '@shared/models/extensions/PostExtended.js';
@@ -12,53 +13,12 @@ import type { Comment, CommentId, CommentInitializer, CommentMutator } from '@sh
 import type { Post } from '@shared/models/generated/Post.js';
 import type { UserId } from '@shared/models/generated/User.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
-import type { Moderation } from '@shared/types/Moderation.js';
-import OpenAI from 'openai';
 
 type CreateParams = CommentInitializer;
 type UpdateParams = CommentMutator;
 
 export const createCommentService = (ctx: ServiceContext) => {
     const { deps, actor } = ctx;
-
-    const moderate = async (comment: string): Promise<Moderation | null> => {
-        const llm = new OpenAI({
-            apiKey: process.env.LITELLM_VIRTUAL_KEY,
-            baseURL: process.env.LITELLM_API_BASE_URL
-        });
-
-        const result = await llm.chat.completions.create({
-            model: 'moderation-model',
-            messages: [
-                {
-                    role: 'system',
-                    content: `You are a content moderation system.
-Respond ONLY with valid JSON with properties:
-- is_allowed: boolean
-- reason: string
-
-Disallow:
-- insults, anything about the face, mouth or looks
-- spam messages
-
-Rules:
-- If is_allowed = true, set "reason" to an empty string.
-- If is_allowed = false, state clearly and concisely like talking to a human being why it's not allowed.
-- Do NOT include the name/username in the reason value.`
-                },
-                {
-                    role: 'user',
-                    content: comment
-                }
-            ],
-            temperature: 0,
-            response_format: { type: "json_object" }
-        });
-
-        const content = result.choices[0]?.message.content;
-
-        return content ? JSON.parse(content) : null;
-    };
 
     const canModify = async (id: CommentId): Promise<boolean> => {
         if (!id) return false;
@@ -77,7 +37,7 @@ Rules:
         if (!comment || comment.trim().length == 0) throw new ServiceError('Content cannot be empty', ErrorCode.MISSING_PARAMETER, { param: 'comment' });
         if (comment.length > 2000) throw new ServiceError('Content too long', ErrorCode.LENGTH_TOO_LONG, { param: 'comment' });
 
-        const moderation = await moderate(comment);
+        const moderation = await moderateComment(comment);
         if (!moderation) throw new Error('Invalid AI moderation result');
         if (!moderation.is_allowed) throw new ServiceError(`AI Moderation: ${moderation.reason}`);
 
@@ -103,9 +63,11 @@ Rules:
         const { include } = options;
         const userIds = [...new Set(items.map(i => i.user_id))];
         const postIds = [...new Set(items.map(i => i.post_id))];
+        const userProfileSvc = createUserProfileService(ctx);
 
         const users = await createUserService(ctx).get({ ids: userIds });
-        const userProfiles = await createUserProfileService(ctx).get({ user_ids: userIds });
+        const userProfiles = await userProfileSvc.get({ user_ids: userIds });
+        const userProfilesEnrinched = await userProfileSvc.enrich(userProfiles);
 
         let posts: Post[] = [];
         let enrichedPosts: PostDTO[] = [];
@@ -116,7 +78,7 @@ Rules:
         }
 
         const userMap = new Map(users.map(i => [i.id, i]));
-        const userProfileMap = new Map(userProfiles.map(i => [i.user_id, i]));
+        const userProfileMap = new Map(userProfilesEnrinched.map(i => [i.user_id, i]));
         const postMap = new Map(enrichedPosts.map(i => [i.id, i]));
 
         const getDisplayName = (id: UserId) => {
@@ -149,7 +111,7 @@ Rules:
         if (comment.length > 2000) throw new ServiceError('Content too long', ErrorCode.LENGTH_TOO_LONG, { param: 'comment' });
 
 
-        const moderation = await moderate(comment);
+        const moderation = await moderateComment(comment);
         if (!moderation) throw new Error('Invalid AI moderation result');
         if (!moderation.is_allowed) throw new ServiceError(`AI Moderation: ${moderation.reason}`);
 

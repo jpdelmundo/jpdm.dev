@@ -7,6 +7,7 @@ import express, { type NextFunction, type Request, type Response } from 'express
 import http from 'http';
 import https from 'https';
 import fs from 'node:fs';
+import { homedir } from 'node:os';
 import { resolve } from 'node:path';
 import passport from 'passport';
 import './config/config.js';
@@ -48,8 +49,8 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 let server;
 if (process.env.NODE_ENV !== 'production') {
   server = https.createServer({
-    key: fs.readFileSync(resolve(process.cwd(), process.env.SSL_KEY_PATH!)),
-    cert: fs.readFileSync(resolve(process.cwd(), process.env.SSL_CERT_PATH!)),
+    key: fs.readFileSync(resolve(homedir(), '.vite-plugin-mkcert/dev.pem')),
+    cert: fs.readFileSync(resolve(homedir(), '.vite-plugin-mkcert/cert.pem')),
   }, app);
 } else {
   server = http.createServer(app);

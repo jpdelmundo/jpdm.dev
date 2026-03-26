@@ -19,8 +19,7 @@ export const uploadHandler = multer({
             cb(null, tmpUploadDir);
         },
         filename: (req: Request, file: Express.Multer.File, cb: FilenameCallback) => {
-            const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-            cb(null, filename);
+            cb(null, file.originalname);
         }
     }),
     fileFilter(req, file, callback) {

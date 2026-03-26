@@ -12,8 +12,11 @@ export const createUserProfileController = (app: AppContext) => {
     return {
         get: async (req: Request, res: Response): Promise<Response> => {
             const { id } = req.params;
-            const result = (await createUserProfileService(makeCtx(req)).get({ user_id: id }))[0];
-            return ok(res, result);
+            const userProfileSvc = createUserProfileService(makeCtx(req));
+            const result = await userProfileSvc.get({ user_id: id });
+            const [enrinched] = await userProfileSvc.enrich(result);
+
+            return ok(res, enrinched);
         },
 
         update: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
@@ -24,10 +27,10 @@ export const createUserProfileController = (app: AppContext) => {
             return ok(res, result);
         },
 
-        uploadAvatar: async (req: Request, res: Response): Promise<Response> => {
+        handleAvatarUpload: async (req: Request, res: Response): Promise<Response> => {
             const file = req.file;
             const id = req.params.id as UserId;
-            const avatarFile = await createUserProfileService(makeCtx(req)).updateAvatar(id, file!);
+            const avatarFile = await createUserProfileService(makeCtx(req)).handleAvatarUpload(id, file!);
 
             return ok(res, avatarFile);
         },

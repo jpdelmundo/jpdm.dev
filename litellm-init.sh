@@ -17,7 +17,9 @@ RESPONSE=$(curl -s -X POST "$PROXY_URL/key/generate" \
   -d "{
     \"key\": \"$KEY_VALUE\",
     \"models\": [\"moderation-model\", \"vision-model\"],
-    \"key_alias\": \"jpdm-key\"
+    \"key_alias\": \"jpdm-key\",
+    \"max_budget\": 10.00,
+    \"budget_duration\": \"monthly\"
   }")
 
 echo "Key init response: $RESPONSE"

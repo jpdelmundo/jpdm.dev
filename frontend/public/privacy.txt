@@ -1,6 +1,6 @@
 PRIVACY POLICY AND DATA DELETION
 
-This website is a personal project. User data is collected only for basic functionality such as account login and content interaction.
+User data is collected only for basic functionality such as account login and content interaction.
 
 If you choose to log in using Facebook, only basic profile information permitted by Google, Facebook (such as name, profile picture, and email) is used for authentication. No data is sold or shared with third parties.
 
