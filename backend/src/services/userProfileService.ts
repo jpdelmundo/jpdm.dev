@@ -129,7 +129,7 @@ export const createUserProfileService = (ctx: ServiceContext) => {
         if (!type) throw new ServiceError('Cannot determine file type');
 
         if (!type.mime.startsWith('image/')) {
-            fs.promises.unlink(file.path).catch(() => { });
+            fs.promises.unlink(path.resolve(USERCONTENT_DIR, file.path)).catch((e) => console.error(e));
             throw new ServiceError('File type not allowed', ErrorCode.NOT_ALLOWED);
         }
 

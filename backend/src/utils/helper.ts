@@ -28,7 +28,7 @@ export const moveFile = async (src: string, dest: string) => {
     await fs.promises.mkdir(path.dirname(dest), { recursive: true });
     await fs.promises.rename(src, dest).catch(async () => {
         await fs.promises.copyFile(src, dest);
-        fs.promises.unlink(src);
+        fs.promises.unlink(src).catch((e) => console.error(e));
     });
 }
 

@@ -181,12 +181,7 @@ export const createPostService = (ctx: ServiceContext) => {
         });
 
         for (const file of deleted.files) {
-            try {
-                await fs.promises.unlink(file.path);
-            } catch (err) {
-                const e = err as NodeJS.ErrnoException;
-                if (e.code !== 'ENOENT') throw e;
-            }
+            fs.promises.unlink(path.resolve(USERCONTENT_DIR, file.path)).catch((e) => console.error(e));
         }
 
         return deleted.post;
@@ -249,12 +244,7 @@ export const createPostService = (ctx: ServiceContext) => {
         });
 
         for (const file of updated.deletedFiles) {
-            try {
-                await fs.promises.unlink(file.path);
-            } catch (err) {
-                const e = err as NodeJS.ErrnoException;
-                if (e.code !== 'ENOENT') throw e;
-            }
+            fs.promises.unlink(path.resolve(USERCONTENT_DIR, file.path)).catch((e) => console.error(e));
         }
 
         const [result] = await get({ id, include: ['images'] });
@@ -282,13 +272,7 @@ export const createPostService = (ctx: ServiceContext) => {
         if (!type) throw new ServiceError('Cannot determine file type');
 
         if (!type.mime.startsWith('image/')) {
-            try {
-                await fs.promises.unlink(file.path);
-            } catch (err) {
-                const e = err as NodeJS.ErrnoException;
-                if (e.code !== 'ENOENT') throw e;
-            }
-
+            fs.promises.unlink(path.resolve(USERCONTENT_DIR, file.path)).catch((e) => console.error(e));
             throw new ServiceError('File type not allowed', ErrorCode.NOT_ALLOWED);
         }
 

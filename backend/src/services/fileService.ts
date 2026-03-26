@@ -33,12 +33,7 @@ export const createFileService = ({ deps, actor }: ServiceContext) => {
         if (!file) throw new ServiceError(`File not found: ${id}`);
 
         // delete actual file
-        try {
-            await fs.promises.unlink(path.resolve(USERCONTENT_DIR, file.path));
-        } catch (err) {
-            const e = err as NodeJS.ErrnoException;
-            if (e.code !== 'ENOENT') throw e;
-        }
+        fs.promises.unlink(path.resolve(USERCONTENT_DIR, file.path)).catch((e) => console.error(e));
 
         const deleted = await repo.delete(id);
         if (!deleted?.id) throw new ServiceError(`File delete failed: ${id}`);
@@ -53,13 +48,7 @@ export const createFileService = ({ deps, actor }: ServiceContext) => {
         if (!type) throw new ServiceError('Cannot determine file type');
 
         if (!type.mime.startsWith('image/')) {
-            try {
-                await fs.promises.unlink(file.path);
-            } catch (err) {
-                const e = err as NodeJS.ErrnoException;
-                if (e.code !== 'ENOENT') throw e;
-            }
-
+            fs.promises.unlink(path.resolve(USERCONTENT_DIR, file.path)).catch((e) => console.error(e));
             throw new ServiceError('File type not allowed', ErrorCode.NOT_ALLOWED);
         }
 
