@@ -1,4 +1,4 @@
-import { USERCONTENT_DIR } from '@/config/config.js';
+import { POST_ALLOWED_USER, USERCONTENT_DIR } from '@/config/config.js';
 import { ServiceError } from '@/errors/ServiceError.js';
 import type { ServiceContext } from '@/infra/serviceContext.js';
 import type { Deps } from '@/types/Deps.js';
@@ -113,6 +113,7 @@ export const createPostService = (ctx: ServiceContext) => {
         if (!content || content.trim().length == 0) throw new ServiceError('Content cannot be empty', ErrorCode.MISSING_PARAMETER, { param: 'content' });
         if (content.length > 2000) throw new ServiceError('Content too long', ErrorCode.LENGTH_TOO_LONG, { param: 'content' });
         if (!isOwner(actor, data.user_id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
+        if (POST_ALLOWED_USER && actor.type == 'user' && POST_ALLOWED_USER !== actor.username) throw new ServiceError('User not allowed to post', ErrorCode.FORBIDDEN);
 
         const txResult = await deps.withTransaction(async (txDeps: Deps) => {
             //create post
