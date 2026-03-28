@@ -1,5 +1,3 @@
-import type { UserRoleEnum } from './UserRoleEnum.js';
-
 /** Identifier type for user_roles */
 export type UserRoleId = string & { __flavor?: 'UserRoleId' };
 
@@ -9,7 +7,7 @@ export interface UserRole {
 
   user_id: string;
 
-  role: UserRoleEnum;
+  role: string;
 }
 
 /** Represents the table public.user_roles */
@@ -19,8 +17,8 @@ export interface UserRoleInitializer {
 
   user_id: string;
 
-  /** Default value: 'user'::user_role */
-  role?: UserRoleEnum;
+  /** Default value: 'user'::character varying */
+  role?: string;
 }
 
 /** Represents the table public.user_roles */
@@ -29,7 +27,7 @@ export interface UserRoleMutator {
 
   user_id?: string;
 
-  role?: UserRoleEnum;
+  role?: string;
 }
 
 export const UserRoleColumns = [

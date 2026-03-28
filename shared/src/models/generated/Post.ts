@@ -1,5 +1,3 @@
-import type { VisibilityEnum } from './VisibilityEnum.js';
-
 /** Identifier type for posts */
 export type PostId = string & { __flavor?: 'PostId' };
 
@@ -17,7 +15,7 @@ export interface Post {
 
   user_id: string;
 
-  visibility: VisibilityEnum;
+  visibility: string;
 
   is_published: boolean;
 
@@ -43,8 +41,8 @@ export interface PostInitializer {
 
   user_id: string;
 
-  /** Default value: 'public'::visibility */
-  visibility?: VisibilityEnum;
+  /** Default value: 'public'::character varying */
+  visibility?: string;
 
   /** Default value: true */
   is_published?: boolean;
@@ -70,7 +68,7 @@ export interface PostMutator {
 
   user_id?: string;
 
-  visibility?: VisibilityEnum;
+  visibility?: string;
 
   is_published?: boolean;
 

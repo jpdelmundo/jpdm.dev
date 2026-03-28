@@ -1,6 +1,6 @@
 import type { KeyValue } from '@/types/KeyValue.js';
 import type { Post, PostId, PostInitializer, PostMutator } from '@shared/models/generated/Post.js';
-import type { VisibilityEnum } from '@shared/models/generated/VisibilityEnum.js';
+import type { Visibility } from '@shared/types/Visibility.js';
 import { type OrderDirection } from '@shared/types/OrderDirection.js';
 import { BaseRepository } from './BaseRepository.js';
 
@@ -8,7 +8,7 @@ type FindParams = {
     id?: PostId;
     ids?: PostId[];
     user_id?: string;
-    visibility?: VisibilityEnum;
+    visibility?: Visibility;
     is_published?: boolean;
     is_admin?: boolean;
     page_num?: number;
