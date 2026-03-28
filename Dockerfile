@@ -2,11 +2,11 @@
 FROM node:24.13-alpine AS base
 WORKDIR /app
 COPY package*.json ./
+RUN npm ci
 COPY tsconfig*.json ./
 COPY shared/ ./shared/
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
-RUN npm ci
 
 #builder - builds everything from root
 FROM base AS builder
