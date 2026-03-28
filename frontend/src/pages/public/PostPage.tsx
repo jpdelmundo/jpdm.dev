@@ -6,15 +6,15 @@ import { PostSkeleton } from '@/components/skeleton/PostSkeleton';
 import { useAuthStore } from '@/store/useAuthStore';
 import Box from '@mui/material/Box';
 import type PostDTO from '@shared/models/dto/PostDTO.ts';
-import type ImageExtended from '@shared/models/extensions/ImageExtended';
-import type { ImageId } from '@shared/models/generated/Image';
+import type PostImageExtended from '@shared/models/extensions/PostImageExtended';
+import type { PostImageId } from '@shared/models/generated/PostImage';
 import type { ApiErrorDetail } from '@shared/types/ApiResult';
 import { useEffect, useRef, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 type ImageDialogState = {
-    imageId: ImageId;
-    images: ImageExtended[];
+    imageId: PostImageId;
+    images: PostImageExtended[];
 } | null;
 
 export function PostPage() {
@@ -59,7 +59,7 @@ export function PostPage() {
         setPost(post);
     };
 
-    const handlePostImageClick = (imageId: ImageId, images: ImageExtended[]) => {
+    const handlePostImageClick = (imageId: PostImageId, images: PostImageExtended[]) => {
         setViewer({ imageId, images });
         origLocation.current = location;
         window.history.pushState({}, '', `/images/${imageId}`);

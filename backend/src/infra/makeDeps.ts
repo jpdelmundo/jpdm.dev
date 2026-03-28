@@ -1,6 +1,6 @@
-import { CommentRepository } from "@/repositories/CommentRepository.js";
+import { PostCommentRepository } from "@/repositories/PostCommentRepository.js";
 import { FileRepository } from "@/repositories/FileRepository.js";
-import { ImageRepository } from "@/repositories/ImageRepository.js";
+import { PostImageRepository } from "@/repositories/PostImageRepository.js";
 import { PasswordResetRepository } from "@/repositories/PasswordResetRepository.js";
 import { PostLikeRepository } from "@/repositories/PostLikeRepository.js";
 import { PostRepository } from "@/repositories/PostRepository.js";
@@ -16,9 +16,9 @@ import { withTransaction } from "./withTransaction.js";
 const makeRepos = (db: Db) => ({
     postRepo: new PostRepository(db),
     postLikeRepo: new PostLikeRepository(db),
-    imageRepo: new ImageRepository(db),
+    postImageRepo: new PostImageRepository(db),
     fileRepo: new FileRepository(db),
-    commentRepo: new CommentRepository(db),
+    postCommentRepo: new PostCommentRepository(db),
     userRepo: new UserRepository(db),
     userProfileRepo: new UserProfileRepository(db),
     userRoleRepo: new UserRoleRepository(db),

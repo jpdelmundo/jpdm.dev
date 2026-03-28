@@ -7,9 +7,9 @@ import { moveFile } from '@/utils/helper.js';
 import { compress } from '@/utils/image.js';
 import { canModify as _canModify, isOwner } from '@/utils/permissions.js';
 import type PostDTO from '@shared/models/dto/PostDTO.js';
-import type ImageExtended from '@shared/models/extensions/ImageExtended.js';
+import type PostImageExtended from '@shared/models/extensions/PostImageExtended.js';
 import { type File, type FileInitializer } from '@shared/models/generated/File.js';
-import type { Image, ImageId } from '@shared/models/generated/Image.js';
+import type { PostImage, PostImageId } from '@shared/models/generated/PostImage.js';
 import type { Post, PostId, PostInitializer, PostMutator } from '@shared/models/generated/Post.js';
 import type { UserId } from '@shared/models/generated/User.js';
 import type { EnrichOptions } from '@shared/types/EnrichOptions.js';
@@ -21,7 +21,7 @@ import { imageSizeFromFile } from 'image-size/fromFile';
 import path from 'path';
 import { validate } from 'uuid';
 import { createFileService } from './fileService.js';
-import { createImageService } from './imageService.js';
+import { createPostImageService } from './postImageService.js';
 import { createPostLikeService } from './postLikeService.js';
 import { createUserProfileService } from './userProfileService.js';
 import { createUserService } from './userService.js';
@@ -49,9 +49,9 @@ export const createPostService = (ctx: ServiceContext) => {
         const postLikes = actor.type == 'user' ? await createPostLikeService(ctx).get({ user_id: actor.id, post_ids: postIds }) : [];
         const postCommentsCount = include?.includes('stats') ? await getCommentsCount({ post_ids: postIds }) : [];
 
-        const imageSvc = createImageService(ctx);
-        const images = (include?.includes('images') ? await imageSvc.get({ post_ids: postIds }) : []) as Image[];
-        const postImages = (images ? await imageSvc.enrich(images) : []) as ImageExtended[];
+        const imageSvc = createPostImageService(ctx);
+        const images = (include?.includes('images') ? await imageSvc.get({ post_ids: postIds }) : []) as PostImage[];
+        const postImages = (images ? await imageSvc.enrich(images) : []) as PostImageExtended[];
 
         const userMap = new Map(users.map(u => [u.id, u]));
         const userProfileMap = new Map(userProfilesEnrinched.map(u => [u.user_id, u]));
@@ -62,7 +62,7 @@ export const createPostService = (ctx: ServiceContext) => {
             arr.push(item);
             acc.set(item.post_id, arr);
             return acc;
-        }, new Map<PostId, ImageExtended[]>());
+        }, new Map<PostId, PostImageExtended[]>());
 
         const getDisplayName = (id: UserId) => {
             const userProfile = userProfileMap.get(id);
@@ -117,7 +117,7 @@ export const createPostService = (ctx: ServiceContext) => {
 
         const txResult = await deps.withTransaction(async (txDeps: Deps) => {
             //create post
-            const { postRepo, imageRepo, fileRepo } = txDeps;
+            const { postRepo, postImageRepo, fileRepo } = txDeps;
             const post = await postRepo.create({
                 user_id,
                 content,
@@ -132,7 +132,7 @@ export const createPostService = (ctx: ServiceContext) => {
                     const userFile = await fileRepo.findById(file.file_id);
                     if (!userFile || userFile.user_id != post.user_id) continue;
 
-                    const newImage = await imageRepo.create({ file_id: userFile.id, post_id: post.id, sort: file.sort });
+                    const newImage = await postImageRepo.create({ file_id: userFile.id, post_id: post.id, sort: file.sort });
                     if (!newImage) throw new Error('Failed creating post image');
 
                     //move file from temp_upload to images/<post dir>/
@@ -162,7 +162,7 @@ export const createPostService = (ctx: ServiceContext) => {
 
         const deleted = await deps.withTransaction(async (txDeps: Deps) => {
             //get the post to get the images
-            const postImages = await txDeps.imageRepo.find({ post_id: id });
+            const postImages = await txDeps.postImageRepo.find({ post_id: id });
 
             //delete files, get list of files to unlink
             const files = [];
@@ -171,10 +171,10 @@ export const createPostService = (ctx: ServiceContext) => {
             }
 
             //delete images
-            await txDeps.imageRepo.deleteByPostId(id);
+            await txDeps.postImageRepo.deleteByPostId(id);
 
             //delete comments
-            await txDeps.commentRepo.deleteByPostId(id);
+            await txDeps.postCommentRepo.deleteByPostId(id);
 
             const result = await txDeps.postRepo.delete(id);
             if (!result?.id) throw new ServiceError(`Delete failed: ${id}`);
@@ -200,13 +200,13 @@ export const createPostService = (ctx: ServiceContext) => {
         const [enrinched] = await enrich([post]);
         const images = enrinched?.images;
         const updated = await deps.withTransaction(async (txDeps: Deps) => {
-            const newImageSet = new Set<ImageId>();
+            const newImageSet = new Set<PostImageId>();
             if (files) {
                 for (const image of files) {
                     const existing = images?.find(v => v.file_id == image.file_id);
                     if (existing) {
                         //update sort
-                        await txDeps.imageRepo.update(existing.id, { sort: image.sort });
+                        await txDeps.postImageRepo.update(existing.id, { sort: image.sort });
                         newImageSet.add(existing.id);
                     } else {
                         //check if file owned by user
@@ -223,7 +223,7 @@ export const createPostService = (ctx: ServiceContext) => {
                         //update db
                         await txDeps.fileRepo.update(image.file_id, { path: path.join(userPostDir, path.basename(userFile.path)) });
 
-                        const newImage = await txDeps.imageRepo.create({ file_id: image.file_id, post_id: post.id, sort: image.sort });
+                        const newImage = await txDeps.postImageRepo.create({ file_id: image.file_id, post_id: post.id, sort: image.sort });
                         newImageSet.add(newImage.id);
                         //create
                     }
@@ -236,7 +236,7 @@ export const createPostService = (ctx: ServiceContext) => {
                 for (const image of removeImages) {
                     const deletedFile = await txDeps.fileRepo.delete(image.file_id);
                     deletedFile && deletedFiles.add(deletedFile);
-                    await txDeps.imageRepo.delete(image.id);
+                    await txDeps.postImageRepo.delete(image.id);
                 }
             }
 

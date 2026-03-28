@@ -20,13 +20,13 @@ import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import type PostDTO from '@shared/models/dto/PostDTO.ts';
-import type ImageExtended from '@shared/models/extensions/ImageExtended';
+import type PostImageExtended from '@shared/models/extensions/PostImageExtended';
 import type { ImageOrientation } from '@shared/types/ImageOrientation';
 import type { PostImageDraft } from '@shared/types/PostImageDraft';
 import { EditPostImagesDialog } from './EditPostImages';
 import { ImageCollage } from './ImageCollage';
 
-type PostImage = PostImageDraft | ImageExtended;
+type PostImage = PostImageDraft | PostImageExtended;
 
 export type FormInput = {
     title: string | null;
@@ -65,7 +65,7 @@ export const PostDialog = ({ post, open, closeDialog, onCreated, onUpdated }: Po
             const postImages = [];
             for (let i = 0; i < imageFiles.length; i++) {
                 if (post && 'post_id' in imageFiles[i]) {
-                    const imageFile = imageFiles[i] as ImageExtended;
+                    const imageFile = imageFiles[i] as PostImageExtended;
                     postImages.push({
                         file_id: imageFile.file_id,
                         sort: i + 1

@@ -1,9 +1,9 @@
-/** Identifier type for comments */
-export type CommentId = string & { __flavor?: 'CommentId' };
+/** Identifier type for post_comments */
+export type PostCommentId = string & { __flavor?: 'PostCommentId' };
 
-/** Represents the table public.comments */
-export interface Comment {
-  id: CommentId;
+/** Represents the table public.post_comments */
+export interface PostComment {
+  id: PostCommentId;
 
   post_id: string;
 
@@ -16,10 +16,10 @@ export interface Comment {
   updated_at: Date | null;
 }
 
-/** Represents the table public.comments */
-export interface CommentInitializer {
+/** Represents the table public.post_comments */
+export interface PostCommentInitializer {
   /** Default value: gen_random_uuid() */
-  id?: CommentId;
+  id?: PostCommentId;
 
   post_id: string;
 
@@ -33,9 +33,9 @@ export interface CommentInitializer {
   updated_at?: Date | null;
 }
 
-/** Represents the table public.comments */
-export interface CommentMutator {
-  id?: CommentId;
+/** Represents the table public.post_comments */
+export interface PostCommentMutator {
+  id?: PostCommentId;
 
   post_id?: string;
 
@@ -48,7 +48,7 @@ export interface CommentMutator {
   updated_at?: Date | null;
 }
 
-export const CommentColumns = [
+export const PostCommentColumns = [
   "id",
   "post_id",
   "user_id",

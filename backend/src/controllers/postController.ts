@@ -1,7 +1,7 @@
 import type { AppContext } from '@/infra/appContext.js';
 import { bindContext } from '@/infra/bindContext.js';
-import { createCommentService } from '@/services/commentService.js';
-import { createImageService } from '@/services/imageService.js';
+import { createPostCommentService } from '@/services/postCommentService.js';
+import { createPostImageService } from '@/services/postImageService.js';
 import { createPostLikeService } from '@/services/postLikeService.js';
 import { createPostService } from '@/services/postService.js';
 import { createPostViewService } from '@/services/postViewService.js';
@@ -10,7 +10,7 @@ import type { RouteParams } from '@/types/RouteParams.js';
 import { fail, ok } from '@/utils/apiHelper.js';
 import { getCurrentUser } from '@/utils/auth.js';
 import { escapeHtml } from '@/utils/helper.js';
-import type ImageExtended from '@shared/models/extensions/ImageExtended.js';
+import type PostImageExtended from '@shared/models/extensions/PostImageExtended.js';
 import type { PostId } from '@shared/models/generated/Post.js';
 import type { PostViewInitializer } from '@shared/models/generated/PostView.js';
 import type { DeviceFingerprint } from '@shared/types/DeviceFingerprint.js';
@@ -80,7 +80,7 @@ export const createPostController = (app: AppContext) => {
             const { id } = req.params;
             const { comment } = req.body;
 
-            const result = await createCommentService(makeCtx(req)).create({
+            const result = await createPostCommentService(makeCtx(req)).create({
                 post_id: id!,
                 user_id: req.user!.id,
                 comment
@@ -94,7 +94,7 @@ export const createPostController = (app: AppContext) => {
             const { page_num } = req.query;
             const { id } = req.params;
 
-            const result = await createCommentService(makeCtx(req)).get({
+            const result = await createPostCommentService(makeCtx(req)).get({
                 post_id: id!,
                 page_num: page_num ? parseInt(String(page_num)) : 1,
                 page_size: 10,
@@ -221,9 +221,9 @@ export const createPostController = (app: AppContext) => {
 
         getOGImage: async (req: Request<RouteParams>, res: Response): Promise<void> => {
             const { id } = req.params;
-            const imageSvc = await createImageService(makeCtx(req));
+            const imageSvc = await createPostImageService(makeCtx(req));
             const [image] = await imageSvc.get({ post_id: id });
-            const [enriched] = (image ? await imageSvc.enrich([image]) : []) as ImageExtended[];
+            const [enriched] = (image ? await imageSvc.enrich([image]) : []) as PostImageExtended[];
             const proto = req.headers['x-forwarded-proto'] ?? 'https';
             const host = req.headers['host'];
             const hostBaseUrl = `${proto}://${host}`;

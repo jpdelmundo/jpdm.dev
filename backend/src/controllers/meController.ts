@@ -1,6 +1,6 @@
 import type { AppContext } from "@/infra/appContext.js";
 import { bindContext } from "@/infra/bindContext.js";
-import { createCommentService } from '@/services/commentService.js';
+import { createPostCommentService } from '@/services/postCommentService.js';
 import type { RouteParams } from "@/types/RouteParams.js";
 import { ok } from "@/utils/apiHelper.js";
 import type { Request, Response } from "express";
@@ -11,7 +11,7 @@ export const createMeController = (app: AppContext) => {
     return {
         get: async (req: Request, res: Response): Promise<Response> => {
             const { page_num, page_size, comment, date_from, date_to } = req.query;
-            const commentSvc = createCommentService(makeCtx(req));
+            const commentSvc = createPostCommentService(makeCtx(req));
 
             const result = await commentSvc.get({
                 ...(req.user?.id && { user_id: req.user.id }),
@@ -33,7 +33,7 @@ export const createMeController = (app: AppContext) => {
         update: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
             const { id } = req.params;
             const { comment } = req.body;
-            const commentSvc = createCommentService(makeCtx(req));
+            const commentSvc = createPostCommentService(makeCtx(req));
 
             const updated = await commentSvc.update(id, { comment });
             if (!updated) return ok(res, null);
@@ -45,7 +45,7 @@ export const createMeController = (app: AppContext) => {
 
         delete: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
             const { id } = req.params;
-            const commentSvc = createCommentService(makeCtx(req));
+            const commentSvc = createPostCommentService(makeCtx(req));
 
             const deleted = await commentSvc.delete(id);
 

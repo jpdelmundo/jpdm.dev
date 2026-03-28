@@ -1,9 +1,9 @@
-/** Identifier type for images */
-export type ImageId = string & { __flavor?: 'ImageId' };
+/** Identifier type for post_images */
+export type PostImageId = string & { __flavor?: 'PostImageId' };
 
-/** Represents the table public.images */
-export interface Image {
-  id: ImageId;
+/** Represents the table public.post_images */
+export interface PostImage {
+  id: PostImageId;
 
   post_id: string;
 
@@ -16,10 +16,10 @@ export interface Image {
   updated_at: Date | null;
 }
 
-/** Represents the table public.images */
-export interface ImageInitializer {
+/** Represents the table public.post_images */
+export interface PostImageInitializer {
   /** Default value: gen_random_uuid() */
-  id?: ImageId;
+  id?: PostImageId;
 
   post_id: string;
 
@@ -34,9 +34,9 @@ export interface ImageInitializer {
   updated_at?: Date | null;
 }
 
-/** Represents the table public.images */
-export interface ImageMutator {
-  id?: ImageId;
+/** Represents the table public.post_images */
+export interface PostImageMutator {
+  id?: PostImageId;
 
   post_id?: string;
 
@@ -49,7 +49,7 @@ export interface ImageMutator {
   updated_at?: Date | null;
 }
 
-export const ImageColumns = [
+export const PostImageColumns = [
   "id",
   "post_id",
   "file_id",

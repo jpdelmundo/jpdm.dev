@@ -4,7 +4,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useConfirmStore } from '@/store/useConfirmStore';
 import { useSnackbarStore } from '@/store/useSnackbarStore';
 import type { CollageImage } from '@/types/CollageImage';
-import type { CommentsUpdatedParams } from '@/types/CommentsUpdatedParams';
+import type { PostCommentsUpdatedParams } from '@/types/PostCommentsUpdatedParams';
 import { copyToClipboard, formatCounters, getDimensionOrientation, getRelativeTime } from '@/utils/helper';
 import ChatBubbleOutlineRounded from '@mui/icons-material/ChatBubbleOutlineRounded';
 import CheckCircleRounded from '@mui/icons-material/CheckCircleRounded';
@@ -21,13 +21,13 @@ import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import type PostDTO from '@shared/models/dto/PostDTO.ts';
-import type ImageExtended from '@shared/models/extensions/ImageExtended';
-import type { ImageId } from '@shared/models/generated/Image';
+import type PostImageExtended from '@shared/models/extensions/PostImageExtended';
+import type { PostImageId } from '@shared/models/generated/PostImage';
 import type { ImageOrientation } from '@shared/types/ImageOrientation';
 import { memo, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Avatar } from './Avatar.tsx';
-import { Comments } from './Comments';
+import { PostComments } from './PostComments';
 import { ImageCollage } from './ImageCollage';
 import { PostDialog } from './PostDialog';
 import { Tooltip } from './Tooltip';
@@ -36,7 +36,7 @@ type PostProps = {
     post: PostDTO;
     onDeleted?: (post: PostDTO) => void;
     onUpdated?: (post: PostDTO) => void;
-    onImageClick: (imageId: ImageId, images: ImageExtended[]) => void;
+    onImageClick: (imageId: PostImageId, images: PostImageExtended[]) => void;
 };
 
 export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProps) => {
@@ -105,7 +105,7 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
         showMessage(<Box display={'flex'} alignItems={'center'} gap={1}><CheckCircleRounded fontSize="small" /> Copied URL to clipboard</Box>);
     }
 
-    const onCommentsUpdated = (params: CommentsUpdatedParams) => {
+    const onCommentsUpdated = (params: PostCommentsUpdatedParams) => {
         const { type } = params;
         type == 'comment_added' && setCommentsCount(prev => prev + 1);
         type == 'comment_deleted' && setCommentsCount(prev => prev != 0 ? prev - 1 : 0);
@@ -219,7 +219,7 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
                         </Tooltip>
                     </Box>
                 </Stack>
-                <Comments open={commentsOpen} postId={id} onCommentsUpdated={onCommentsUpdated} />
+                <PostComments open={commentsOpen} postId={id} onCommentsUpdated={onCommentsUpdated} />
             </Paper>
 
             <Menu

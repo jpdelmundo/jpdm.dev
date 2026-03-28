@@ -12,12 +12,12 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
-import type ImageExtended from "@shared/models/extensions/ImageExtended";
+import type PostImageExtended from "@shared/models/extensions/PostImageExtended";
 import type { PostImageDraft } from "@shared/types/PostImageDraft";
 import { useEffect, useRef, useState, type ChangeEvent, type MouseEvent } from "react";
 import { CoverImage } from "./CoverImage";
 
-type PostImage = PostImageDraft | ImageExtended;
+type PostImage = PostImageDraft | PostImageExtended;
 
 type EditPostImagesDialogProps = {
     open: boolean;

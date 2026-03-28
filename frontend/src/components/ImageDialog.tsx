@@ -6,15 +6,15 @@ import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
-import type ImageExtended from '@shared/models/extensions/ImageExtended';
-import type { ImageId } from '@shared/models/generated/Image';
+import type PostImageExtended from '@shared/models/extensions/PostImageExtended';
+import type { PostImageId } from '@shared/models/generated/PostImage';
 import { useEffect, useState } from 'react';
 
 type ImageDialogParams = {
     open: boolean;
     closeDialog: () => void;
-    images?: ImageExtended[] | null;
-    imageId: ImageId | null;
+    images?: PostImageExtended[] | null;
+    imageId: PostImageId | null;
 };
 
 const buttonStyle = {
@@ -33,15 +33,15 @@ const iconStyle = {
 };
 
 type ApiGetResult = {
-    post_image: ImageExtended;
-    post_image_set: ImageExtended[];
+    post_image: PostImageExtended;
+    post_image_set: PostImageExtended[];
 };
 
 export function ImageDialog({ open, closeDialog, imageId, images }: ImageDialogParams) {
     console.log('ImageDialog render', { images, imageId });
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedImage, setSelectedImage] = useState<ImageExtended | null>(null);
-    const [imageSet, setImageSet] = useState<ImageExtended[] | null>(images || null);
+    const [selectedImage, setSelectedImage] = useState<PostImageExtended | null>(null);
+    const [imageSet, setImageSet] = useState<PostImageExtended[] | null>(images || null);
 
     const getData = async ({ include_set }: { include_set?: boolean } = {}) => {
         setIsLoading(true);

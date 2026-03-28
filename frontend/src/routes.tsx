@@ -1,6 +1,6 @@
 import { useRoutes } from 'react-router-dom';
 import { RequireAuth } from './components/RequireAuth';
-import { Comments } from './pages/dashboard/Comments.tsx';
+import { PostComments } from './pages/dashboard/PostComments.tsx';
 import { DashboardHome } from './pages/dashboard/DashboardHome.tsx';
 import { DashboardLayout } from './pages/dashboard/DashboardLayout.tsx';
 import { Users } from './pages/dashboard/Users';
@@ -66,7 +66,7 @@ const routes = [
                 element: <DashboardLayout />,
                 children: [
                     { index: true, element: <DashboardHome /> },
-                    { path: 'comments', element: <Comments /> },
+                    { path: 'comments', element: <PostComments /> },
                     { path: 'users', element: <Users /> },
                 ]
             }

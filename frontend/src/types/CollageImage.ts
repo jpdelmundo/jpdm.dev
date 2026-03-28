@@ -1,7 +1,7 @@
-import type { ImageId } from '@shared/models/generated/Image';
+import type { PostImageId } from '@shared/models/generated/PostImage';
 
 export interface CollageImage {
-    id: ImageId;
+    id: PostImageId;
     url: string;
     width: number;
     height: number;

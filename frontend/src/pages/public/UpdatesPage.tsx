@@ -8,15 +8,15 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import type PostDTO from '@shared/models/dto/PostDTO.ts';
-import type ImageExtended from '@shared/models/extensions/ImageExtended';
-import type { ImageId } from '@shared/models/generated/Image';
+import type PostImageExtended from '@shared/models/extensions/PostImageExtended';
+import type { PostImageId } from '@shared/models/generated/PostImage';
 import type { Paginated } from '@shared/types/Paginated';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, type Location } from 'react-router-dom';
 
 type ImageDialogState = {
-    imageId: ImageId;
-    images: ImageExtended[];
+    imageId: PostImageId;
+    images: PostImageExtended[];
 } | null;
 
 export const UpdatesPage = () => {
@@ -52,13 +52,13 @@ export const UpdatesPage = () => {
         setPosts(prev => prev.map(v => v.id === post.id ? post : v));
     }, []);
 
-    const handlePostImageClick = useCallback((imageId: ImageId, images: ImageExtended[]) => {
+    const handlePostImageClick = useCallback((imageId: PostImageId, images: PostImageExtended[]) => {
         setViewer({ imageId, images });
         origLocation.current = location;
         window.history.pushState({}, '', `/images/${imageId}`);
     }, []);
 
-    // const handlePostImageClick = useCallback((imageId: ImageId, images: ImageExtended[]) => {
+    // const handlePostImageClick = useCallback((imageId: PostImageId, images: PostImageExtended[]) => {
     //     setViewer({ imageId, images });
     //     origLocation.current = location;
     //     window.history.pushState({}, '', `/images/${imageId}`);

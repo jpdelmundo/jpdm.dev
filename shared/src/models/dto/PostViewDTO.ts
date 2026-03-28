@@ -1,5 +1,5 @@
-import { type Comment } from '../generated/Comment.js';
+import { type PostComment } from '../generated/PostComment.js';
 
-export interface CommentDTO extends Comment {
+export interface PostCommentDTO extends PostComment {
     display_name: string;
 }
