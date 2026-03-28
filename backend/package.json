@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/app.ts",
     "debug": "tsx watch --inspect src/app.ts",
-    "build": "rm -rf dist && tsc -b tsconfig.build.json && tsc-alias -p tsconfig.alias.json",
+    "build": "rm -rf dist *.tsbuildinfo ../shared/dist ../shared/*.tsbuildinfo && tsc -b tsconfig.build.json && tsc-alias -p tsconfig.alias.json",
     "migrate": "tsx src/migrate.ts",
     "migrate:prod": "node dist/migrate.js",
     "preload": "node -e \"import('geolite2-redist').then(geolite => geolite.downloadDbs())\"",

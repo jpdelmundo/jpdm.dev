@@ -7,7 +7,8 @@
     "shared"
   ],
   "scripts": {
-    "clean": "rm -rf shared/dist shared/*.tsbuildinfo backend/dist backend/*.tsbuildinfo frontend/dist frontend/*.tsbuildinfo",
+    "clean": "rm -rf shared/dist shared/*.tsbuildinfo backend/dist backend/*.tsbuildinfo frontend/dist frontend/*.tsbuildinfo frontend/node_modules/.tmp",
+    "build": "npm run clean && tsc -b && tsc-alias -p backend/tsconfig.alias.json && npx vite build frontend",
     "be:dev": "npm run dev -w backend",
     "be:debug": "npm run debug -w backend",
     "be:build": "npm run build -w backend",

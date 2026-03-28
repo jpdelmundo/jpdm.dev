@@ -16,7 +16,7 @@ services:
     container_name: backend
     build:
       context: .
-      dockerfile: backend/Dockerfile
+      dockerfile: Dockerfile
     volumes:
       - ./backend/usercontent:/app/backend/usercontent
       - ./backend/logs:/app/backend/logs
