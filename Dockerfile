@@ -2,6 +2,9 @@
 FROM node:24.13-alpine AS base
 WORKDIR /app
 COPY package*.json ./
+COPY backend/package*.json ./backend/
+COPY shared/package*.json ./shared/
+COPY frontend/package*.json ./frontend/
 RUN npm ci
 COPY tsconfig*.json ./
 COPY shared/ ./shared/

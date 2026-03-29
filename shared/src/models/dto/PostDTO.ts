@@ -1,4 +1,4 @@
-import type PostImageExtended from '@project/shared/src/models/extensions/PostImageExtended.js';
+import type PostImageExtended from '../extensions/PostImageExtended.js';
 import type { Post } from '../generated/Post.js';
 
 export default interface PostDTO extends Post {

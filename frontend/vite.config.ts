@@ -25,7 +25,8 @@ export default defineConfig(({ command }) => {
             if (
               id.includes('node_modules/react') ||
               id.includes('node_modules/react-dom') ||
-              id.includes('node_modules/react-router')
+              id.includes('node_modules/react-router') ||
+              id.includes('node_modules/@emotion')
             ) {
               return 'vendor-react';
             }
@@ -38,20 +39,9 @@ export default defineConfig(({ command }) => {
               return 'vendor-mui-datagrid';
             }
 
-            if (id.includes('@mui/x-date-pickers')) {
-              return 'vendor-mui-datepickers';
-            }
-
-            if (id.includes('@mui/material') || id.includes('@mui/system') || id.includes('@mui/base')) {
-              return 'vendor-mui-core';
-            }
-
+            // All remaining MUI packages in one chunk
             if (id.includes('@mui')) {
-              return 'vendor-mui-misc';
-            }
-
-            if (id.includes('@emotion')) {
-              return 'vendor-emotion';
+              return 'vendor-mui';
             }
           }
         }
