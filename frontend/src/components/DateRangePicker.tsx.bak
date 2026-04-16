@@ -1,0 +1,172 @@
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import MenuItem from '@mui/material/MenuItem';
+import MenuList from '@mui/material/MenuList';
+import Popover from '@mui/material/Popover';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import { DateCalendar } from '@mui/x-date-pickers';
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
+import { useState, type MouseEvent } from 'react';
+
+export const DateRangePicker = () => {
+    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+    const [startDate, setStartDate] = useState<Dayjs | null>(null);
+    const [endDate, setEndDate] = useState<Dayjs | null>(null);
+    const [leftMonth, setLeftMonth] = useState(dayjs().subtract(1, 'month'));
+    const [rightMonth, setRightMonth] = useState(dayjs());
+    console.log({ leftMonth, rightMonth });
+    type DateRange = [Dayjs | null, Dayjs | null];
+    type DateRangeItems = { label: string; getValue: () => DateRange };
+    const shortcutsItems: DateRangeItems[] = [
+        {
+            label: 'Today',
+            getValue: () => [dayjs(), dayjs()]
+        },
+        {
+            label: 'Yesterday',
+            getValue: () => [dayjs().subtract(1, 'day'), dayjs().subtract(1, 'day')]
+        },
+        {
+            label: 'This Week',
+            getValue: () => [dayjs().startOf('week'), dayjs().endOf('week')]
+        },
+        {
+            label: 'Previous Week',
+            getValue: () => [dayjs().subtract(1, 'week').startOf('week'), dayjs().subtract(1, 'week').endOf('week')]
+        },
+        {
+            label: 'This Month',
+            getValue: () => [dayjs().startOf('month'), dayjs().endOf('month')]
+        },
+        {
+            label: 'Previous Month',
+            getValue: () => [dayjs().subtract(1, 'month').startOf('month'), dayjs().subtract(1, 'month').endOf('month')]
+        },
+        {
+            label: 'This Year',
+            getValue: () => [dayjs().startOf('year'), dayjs().endOf('year')]
+        },
+        {
+            label: 'Previous Year',
+            getValue: () => [dayjs().subtract(1, 'year').startOf('year'), dayjs().subtract(1, 'year').endOf('year')]
+        },
+        {
+            label: 'All Time',
+            getValue: () => [dayjs('2000-01-01'), dayjs()]
+        }
+    ];
+
+    const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
+        setAnchorEl(e.currentTarget);
+    }
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    }
+
+    const open = Boolean(anchorEl);
+    const id = open ? 'date-range-picker-popover' : undefined;
+
+    return (
+        <>
+            <Button
+                variant="outlined"
+                onClick={handleClick}
+                size="small"
+                sx={{
+                    fontSize: '13px',
+                    backgroundColor: '#ffffff',
+                    color: '#000000',
+                    borderColor: '#dddddd',
+                    transition: 'border-color 1.s ease',
+                    '&:hover': {
+                        borderColor: '#aaaaaa',
+                    }
+                }}>This Year</Button>
+            <Popover
+                id={id}
+                open={open}
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                }}
+                onClose={handleClose}
+                transitionDuration={0}
+                disableScrollLock
+                slotProps={{
+                    paper: {
+                        sx: {
+                            border: 'solid 1px #dddddd',
+                            boxShadow: '0 3px 6px #00000022 !important'
+                        }
+                    },
+
+                }}
+            >
+                <Stack direction={'row'}>
+                    <MenuList>
+                        {shortcutsItems.map(i => (
+                            <MenuItem
+                                key={i.label}
+                                onClick={() => {
+                                    const [start, end] = i.getValue();
+                                    setStartDate(start);
+                                    setEndDate(end);
+
+                                }}
+                            >
+                                {i.label}
+                            </MenuItem>
+                        ))}
+                        <MenuItem>Custom Range</MenuItem>
+                    </MenuList>
+                    <Box>
+                        <Typography sx={{ pl: 2 }}>From</Typography>
+                        <DateCalendar
+                            value={startDate}
+                            onChange={(date) => {
+                                setStartDate(date);
+                                if (date && endDate && date.isAfter(endDate, 'day')) {
+                                    setEndDate(date);
+                                }
+                            }}
+                            onMonthChange={(month) => {
+                                setLeftMonth(month);
+                                if (month.isAfter(rightMonth)) setRightMonth(month.add(1, 'month'));
+                            }}
+                            slotProps={{
+                                nextIconButton: { disabled: leftMonth.isSame(rightMonth, 'month') || leftMonth.isAfter(rightMonth, 'month') }
+                            }}
+                        ></DateCalendar>
+                    </Box>
+                    <Box>
+                        <Typography sx={{ pl: 2 }}>To</Typography>
+                        <DateCalendar
+                            value={endDate}
+                            onChange={(date) => {
+                                setEndDate(date);
+                                if (date && startDate && date.isBefore(startDate, 'day')) {
+                                    setStartDate(date);
+                                }
+                            }}
+                            onMonthChange={(month) => {
+                                setRightMonth(month);
+                                if (month.isBefore(leftMonth)) setLeftMonth(month.subtract(1, 'month'));
+                            }}
+                            slotProps={{
+                                previousIconButton: { disabled: rightMonth.isSame(leftMonth, 'month') || rightMonth.isAfter(leftMonth, 'month') }
+                            }}
+                        ></DateCalendar>
+                    </Box>
+                </Stack>
+                <Stack direction={'row'} justifyContent={'flex-end'}>
+                    <Button onClick={handleClose}>Cancel</Button>
+                    <Button>OK</Button>
+                </Stack>
+            </Popover>
+        </>
+    );
+}

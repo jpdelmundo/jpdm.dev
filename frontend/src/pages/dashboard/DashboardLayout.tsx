@@ -15,7 +15,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Outlet, Link as RLink, useNavigate } from "react-router-dom";
 
 export const DashboardLayout = () => {
@@ -46,18 +46,18 @@ export const DashboardLayout = () => {
         { text: 'Comments', path: '/dashboard/comments', icon: ForumRoundedIcon },
     ];
 
-    useEffect(() => {
-        const origHtmlOverflow = document.documentElement.style.overflow;
-        const origBodyOverflow = document.body.style.overflow;
+    // useEffect(() => {
+    //     const origHtmlOverflow = document.documentElement.style.overflow;
+    //     const origBodyOverflow = document.body.style.overflow;
 
-        document.documentElement.style.overflow = 'hidden';
-        document.body.style.overflow = 'hidden';
+    //     document.documentElement.style.overflow = 'hidden';
+    //     document.body.style.overflow = 'hidden';
 
-        return () => {
-            document.documentElement.style.overflow = origHtmlOverflow;
-            document.body.style.overflow = origBodyOverflow;
-        };
-    }, []);
+    //     return () => {
+    //         document.documentElement.style.overflow = origHtmlOverflow;
+    //         document.body.style.overflow = origBodyOverflow;
+    //     };
+    // }, []);
 
     return (
         <>
@@ -118,11 +118,7 @@ export const DashboardLayout = () => {
                     </Drawer>
                     <Stack
                         flex={1}
-                        sx={{
-                            width: 'calc(100vw - 240px)',
-                            height: 'calc(100vh - 60px)',
-                            overflow: 'auto',
-                        }}>
+                        sx={{ width: 'calc(100vw - 240px)' }}>
                         <Container
                             component={'main'}
                             sx={{

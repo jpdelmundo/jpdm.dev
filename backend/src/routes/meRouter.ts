@@ -11,6 +11,8 @@ export const createMeRouter = (appCtx: AppContext) => {
     //private
     router.use(authRequired);
     router.get('/comments', controller.get);
+    router.get('/stats', controller.getStats);
+    //router.get('/post-views', controller.getPostViews);
     router.put('/comments/:id', controller.update);
     router.delete('/comments/:id', controller.delete);
     // router.post('/', controller.create);

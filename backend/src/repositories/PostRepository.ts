@@ -1,7 +1,9 @@
 import type { KeyValue } from '@/types/KeyValue.js';
+import type { PostStatsDTO } from '@shared/models/dto/PostStatsDTO.js';
+import type { PostViewsDTO } from '@shared/models/dto/PostViewsDTO.js';
 import type { Post, PostId, PostInitializer, PostMutator } from '@shared/models/generated/Post.js';
-import type { Visibility } from '@shared/types/Visibility.js';
 import { type OrderDirection } from '@shared/types/OrderDirection.js';
+import type { Visibility } from '@shared/types/Visibility.js';
 import { BaseRepository } from './BaseRepository.js';
 
 type FindParams = {
@@ -160,11 +162,72 @@ export class PostRepository extends BaseRepository<Post> {
         type PostCommentCount = { post_id: PostId; count: number };
 
         const sql = `select post_id, count(id) count
-                    from comments
+                    from post_comments
                     ${filter}
                     group by post_id`;
         const result = await this.query<PostCommentCount>(sql, values);
 
         return result.rows;
+    }
+
+    async getStats(params: KeyValue) {
+        const { user_id, start_date, end_date } = params;
+
+        const filters: string[] = [];
+        const values: unknown[] = [];
+
+        user_id !== undefined && (filters.push(`user_id = $${values.length + 1}`)) && values.push(user_id);
+        start_date !== undefined && (filters.push(`created_at >= $${values.length + 1}`)) && values.push(start_date);
+        end_date !== undefined && (filters.push(`created_at <= $${values.length + 1}`)) && values.push(end_date);
+
+        let filter = filters.join(' and ');
+        filter = filter ? `where ${filter}` : '';
+
+        const sql = `select
+(
+    select count(*) from post_views
+    ${filter}
+) post_views_count,
+(
+    select count(*) from post_likes
+    ${filter}
+) post_likes_count,
+(
+    select count(*) from post_comments pc
+    join posts p on p.id = pc.post_id
+    ${filter.replace('user_id', 'p.user_id').replace(/created_at/gi, 'pc.created_at')}
+) post_comments_count`;
+
+        const { rows } = await this.query<PostStatsDTO>(sql, values);
+
+        return rows[0];
+    }
+
+    async getPostViews(params: KeyValue) {
+        const { user_id, start_date, end_date, client_tz } = params;
+
+        const filters: string[] = [];
+        const values: unknown[] = [];
+
+        user_id !== undefined && (filters.push(`user_id = $${values.length + 1}`)) && values.push(user_id);
+        start_date !== undefined && (filters.push(`created_at >= $${values.length + 1}`)) && values.push(start_date);
+        end_date !== undefined && (filters.push(`created_at <= $${values.length + 1}`)) && values.push(end_date);
+
+        let filter = filters.join(' and ');
+        filter = filter ? `where ${filter}` : '';
+
+        //TODO check if valid IANA timezone (check pg timezone table)
+        const tz_clause = client_tz ? `at time zone '${String(client_tz).replace(/'/g, '')}'` : '';
+        const sql = `select
+    date_trunc('day', created_at ${tz_clause})::date date,
+    count(*) count
+from post_views
+${filter}
+group by 1
+order by 1 asc;`;
+
+        const { rows } = await this.query<PostViewsDTO>(sql, values);
+
+        return rows;
     }
 }

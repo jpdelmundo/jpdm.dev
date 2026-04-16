@@ -1,6 +1,7 @@
 import type { ApiResult } from '@shared/types/ApiResult';
 import type { ImageDetail } from '@shared/types/ImageDetail';
 import type { ImageOrientation } from '@shared/types/ImageOrientation';
+import dayjs from 'dayjs';
 
 export const fieldErrorProps = (errors: Record<string, string>, fieldName: string) => {
     return { error: !!errors[fieldName], helperText: errors[fieldName] || ' ' };
@@ -162,4 +163,17 @@ export function scrollbarWidthAware(apply: boolean) {
         //document.body.classList.remove('modal-dialog-open');
         //document.documentElement.style.removeProperty('--scrollbar-width');
     }
+}
+
+export function isUS() {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return timezone.startsWith('America/');
+}
+
+export function getStartOfWeek() {
+    return dayjs().startOf(isUS() ? 'week' : 'isoWeek');
+}
+
+export function getEndOfWeek() {
+    return dayjs().endOf(isUS() ? 'week' : 'isoWeek');
 }

@@ -9,8 +9,8 @@ import { canModify as _canModify, isOwner } from '@/utils/permissions.js';
 import type PostDTO from '@shared/models/dto/PostDTO.js';
 import type PostImageExtended from '@shared/models/extensions/PostImageExtended.js';
 import { type File, type FileInitializer } from '@shared/models/generated/File.js';
-import type { PostImage, PostImageId } from '@shared/models/generated/PostImage.js';
 import type { Post, PostId, PostInitializer, PostMutator } from '@shared/models/generated/Post.js';
+import type { PostImage, PostImageId } from '@shared/models/generated/PostImage.js';
 import type { UserId } from '@shared/models/generated/User.js';
 import type { EnrichOptions } from '@shared/types/EnrichOptions.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
@@ -93,7 +93,7 @@ export const createPostService = (ctx: ServiceContext) => {
         const getParams = {
             ...(post_ids && { post_ids })
         };
-        console.log({ getParams });
+
         const result = await deps.postRepo.getCommentsCount(getParams);
         return result;
     };
@@ -318,6 +318,22 @@ export const createPostService = (ctx: ServiceContext) => {
         return _canModify(actor, post.user_id);
     };
 
+    const getStats = async (params: KeyValue) => {
+        const { user_id, start_date, end_date, client_tz } = params;
+        if (!user_id && actor.type == 'user' && !actor.roles.includes('admin')) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
+
+        const _params = {
+            user_id,
+            ...(start_date !== undefined && { start_date }),
+            ...(end_date !== undefined && { end_date }),
+            ...(client_tz !== undefined && { client_tz }),
+        }
+        const stats = await deps.postRepo.getStats(_params);
+        const post_views = await deps.postRepo.getPostViews(_params);
+
+        return { stats, post_views };
+    }
+
     return {
         get,
         enrich,
@@ -326,6 +342,7 @@ export const createPostService = (ctx: ServiceContext) => {
         create,
         delete: del,
         update,
-        uploadImage
+        uploadImage,
+        getStats
     };
 };

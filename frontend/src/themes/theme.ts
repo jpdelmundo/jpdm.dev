@@ -31,7 +31,7 @@ export const theme = createTheme({
         }
     },
     shape: {
-        borderRadius: 8
+        borderRadius: 10
     },
     components: { //no MuiBox under createTheme components (for MuiBox classes add it here)
         MuiCssBaseline: {
@@ -56,7 +56,7 @@ export const theme = createTheme({
                 },
                 '.bordered-box': {
                     border: 'solid 1px #cccccc',
-                    borderRadius: '16px',
+                    borderRadius: '20px',
                 },
                 '.inline-flex-box': {
                     display: 'inline-flex',
@@ -216,10 +216,10 @@ export const theme = createTheme({
 
                             // backgroundColor: '#ffffff',
                             zIndex: -1,
-                            borderRadius: '16px',
+                            borderRadius: '20px',
                             overflow: 'hidden'
                         },
-                        borderRadius: '16px',
+                        borderRadius: '20px',
                         margin: '25px 0',
                         '& .header': {
                             marginBottom: '10px',
@@ -280,7 +280,7 @@ export const theme = createTheme({
                             alignItems: 'center',
                             '& .icon-stats': {
                                 padding: '2px 8px',
-                                borderRadius: '16px',
+                                borderRadius: '20px',
                                 cursor: 'pointer',
                                 '&:hover': {
                                     color: 'initial',
@@ -296,7 +296,7 @@ export const theme = createTheme({
                         '& .new-comment, .edit-comment': {
                             '& .MuiInputBase-root': {
                                 fontSize: '14px',
-                                borderRadius: '16px',
+                                borderRadius: '20px',
                                 paddingRight: 0,
                                 marginTop: '10px',
                                 backgroundColor: '#ffffff',
@@ -357,7 +357,7 @@ export const theme = createTheme({
                             '& .detail': {
                                 justifySelf: 'flex-start',
                                 backgroundColor: '#ffffff',
-                                borderRadius: '16px',
+                                borderRadius: '20px',
                                 padding: '6px 12px',
                                 //maxWidth: '85%',
                                 '& .user': {
@@ -395,7 +395,7 @@ export const theme = createTheme({
                     },
                     '&.page': {
                         padding: '25px',
-                        borderRadius: '16px',
+                        borderRadius: '20px',
                         position: 'relative',
                         background: 'none',
                         '&::before': {
@@ -410,7 +410,7 @@ export const theme = createTheme({
 
                             // backgroundColor: '#ffffff',
                             zIndex: -1,
-                            borderRadius: '16px',
+                            borderRadius: '20px',
                             overflow: 'hidden'
                         },
                     }

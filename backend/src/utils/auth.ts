@@ -32,23 +32,19 @@ export const currentUser = async (req: Request, res: Response, next: NextFunctio
         return next();
     }
 
-    try {
-        const payload = getJwtPayload(req);
-        if (!payload) throw new JsonWebTokenError('Problem decoding payload');
-        const user = await createUserService(systemContext).findById(payload.id);
+    const payload = getJwtPayload(req);
+    if (!payload) throw new JsonWebTokenError('Problem decoding payload');
+    const user = await createUserService(systemContext).findById(payload.id);
 
-        req.user = user
-            ? {
-                type: 'user',
-                id: payload.id,
-                email: payload.email,
-                username: payload.username,
-                roles: payload.roles
-            } as UserIdentity
-            : anonUser;
-    } catch (err) {
-        req.user = anonUser;
-    }
+    req.user = user
+        ? {
+            type: 'user',
+            id: payload.id,
+            email: payload.email,
+            username: payload.username,
+            roles: payload.roles
+        } as UserIdentity
+        : anonUser;
 
     next();
 }
