@@ -1,7 +1,7 @@
 import { apiGet } from '@/api/apiClient.ts';
 import { DateRangePicker } from '@/components/DateRangePicker.tsx';
 import { WaveSkeleton } from '@/components/skeleton/WaveSkeleton.tsx';
-import { DateRangeItem, DateRangeItems } from '@/types/DateRangeItems.ts';
+import { type DateRangeItem, DateRangeItems } from '@/types/DateRangeItems.ts';
 import { formatCounters } from '@/utils/helper.ts';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
@@ -33,7 +33,7 @@ export const DashboardHome = () => {
 
     const minDate = dateRangeItem.value[0].toDate();
     const maxDate = dateRangeItem.value[1].toDate();
-    const customTicks = [minDate, maxDate];
+    //const customTicks = [minDate, maxDate];
     const chartData = postViews;
 
     const getStatsData = async () => {
