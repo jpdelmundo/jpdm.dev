@@ -7,14 +7,20 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useAvatarProps } from '@/hooks/useAvatarProps';
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import type { SxProps } from '@mui/material/styles';
 import { Avatar } from './Avatar';
 
-export const UserPanel = () => {
+type Props = {
+    sx: SxProps
+};
+
+export const UserPanel = ({ sx }: Props) => {
     const user = useAuthStore(s => s.user);
     const avatarProps = useAvatarProps();
     const navigate = useNavigate();
@@ -60,7 +66,7 @@ export const UserPanel = () => {
         navigate('/dashboard');
     }
 
-    return (<>
+    return (<Box sx={sx}>
         {
             [
                 '/signin',
@@ -122,5 +128,5 @@ export const UserPanel = () => {
                 </Menu>
             </Grid>
         }
-    </>);
+    </Box>);
 }
