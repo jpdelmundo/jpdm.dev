@@ -464,16 +464,17 @@ export const theme = createTheme({
                 root: () => ({
                     '&.header-container': {
                         padding: '10px',
-                        backgroundColor: '#f3f3f3',
+                        backgroundColor: '#f3f3f391',
+                        backdropFilter: 'saturate(180%) blur(20px)',
                         //boxShadow: '0 1px 10px -8px #00000055',
                         maxWidth: 'unset !important',
                         display: 'block',
                         position: 'fixed',
-                        [theme.breakpoints.up('md')]: {
-                            //boxShadow: 'none',
-                            backgroundColor: 'transparent',
-                            backdropFilter: 'saturate(1.8) blur(20px)'
-                        }
+                        // [theme.breakpoints.up('md')]: {
+                        //     //boxShadow: 'none',
+                        //     backgroundColor: '#f3f3f391',
+                        //     backdropFilter: 'saturate(180%) blur(20px)'
+                        // }
                     }
                 })
             }

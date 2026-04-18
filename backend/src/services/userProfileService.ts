@@ -35,13 +35,13 @@ export const createUserProfileService = (ctx: ServiceContext) => {
             let avatar_url = item.avatar_url;
             if (!avatar_url && item.avatar_file_id) {
                 const avatarFile = avatarFileMap.get(item.avatar_file_id);
-                const url = avatarFile ? new URL(path.posix.join(USERCONTENT_DIR_BASENAME, avatarFile.path), process.env.STATIC_SERVER) : null;
+                const url = avatarFile ? new URL(path.posix.join(USERCONTENT_DIR_BASENAME, avatarFile.path), 'http://x') : null;
                 if (url) {
                     const expires = Math.floor((Date.now() / 1000) + 900);
                     const signature = sign(`${url.pathname}:${expires}`);
                     url.searchParams.append('expires', expires.toString());
                     url.searchParams.append('signature', signature);
-                    avatar_url = url.toString();
+                    avatar_url = url.pathname + url.search;
                 }
             }
             result.push({

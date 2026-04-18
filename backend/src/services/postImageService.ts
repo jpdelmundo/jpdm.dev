@@ -29,7 +29,7 @@ export const createPostImageService = (ctx: ServiceContext) => {
         const result: PostImageExtended[] = [];
         for (const item of items) {
             const file = fileMap.get(item.file_id);
-            const url = new URL(path.join(USERCONTENT_DIR_BASENAME, file?.path || ''), process.env.STATIC_SERVER);
+            const url = new URL(path.join(USERCONTENT_DIR_BASENAME, file?.path || ''), 'http://x');
             const expires = Math.floor((Date.now() / 1000) + 900); //15min expiration
             const signature = sign(`${url.pathname}:${expires}`);
             url.searchParams.append('expires', expires.toString());
@@ -37,7 +37,7 @@ export const createPostImageService = (ctx: ServiceContext) => {
 
             result.push({
                 ...item,
-                url: url.toString(),
+                url: url.pathname + url.search,
                 width: file?.width || 0,
                 height: file?.height || 0,
                 user_id: file?.user_id || ''

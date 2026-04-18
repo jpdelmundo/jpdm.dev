@@ -6,8 +6,13 @@ import mkcert from 'vite-plugin-mkcert';
 // https://vite.dev/config/
 export default defineConfig(({ command }) => {
   const isDev = command === 'serve';
-
   return {
+    server: {
+      proxy: {
+        '/api': 'http://localhost:3000',
+        '/usercontent': 'http://localhost:3000',
+      }
+    },
     plugins: [
       react(),
       isDev && mkcert()

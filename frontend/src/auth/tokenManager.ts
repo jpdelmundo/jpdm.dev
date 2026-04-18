@@ -10,10 +10,10 @@ export const getNewToken = async (): Promise<AccessToken> => {
 
     refreshPromise = (async () => {
         try {
-            const baseUrl = import.meta.env.VITE_API_BASE_URL;
+            const basePath = import.meta.env.VITE_API_BASE_PATH;
             const fp = jsonBase64Encode(getFingerprint());
 
-            const res = await fetch(`${baseUrl}/auth/refresh-token`, {
+            const res = await fetch(`${basePath}/auth/refresh-token`, {
                 method: 'post',
                 credentials: 'include',
                 headers: { 'content-type': 'application/json' },

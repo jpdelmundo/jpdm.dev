@@ -17,7 +17,7 @@ import type { SxProps } from '@mui/material/styles';
 import { Avatar } from './Avatar';
 
 type Props = {
-    sx: SxProps
+    sx?: SxProps
 };
 
 export const UserPanel = ({ sx }: Props) => {

@@ -10,15 +10,15 @@ import Stack from '@mui/material/Stack';
 import type { SxProps } from '@mui/material/styles';
 
 const linkSx: SxProps = {
-    color: 'inherit',
-    textDecoration: 'none'
+    color: '#000000',
+    textDecoration: 'none',
 };
 
 export const Layout = () => {
     return (
         <>
             <GradientBg />
-            <Container component="header" className="header-container" sx={{ height: '60px', zIndex: 1000 }}>
+            <Container component="header" className="header-container" sx={{ height: '60px', zIndex: 1000, borderBottom: 'solid 1px #dddddd88' }}>
                 <Stack direction="row" alignItems="center" maxWidth="md" sx={{ margin: '0 auto', gap: 2 }}>
                     <Box>
                         <Link

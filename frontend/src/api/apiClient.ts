@@ -25,7 +25,7 @@ type JsonValue = JsonPrimitive | JsonObject | JsonArray;
 type ApiRequestBody = JsonObject | FormData;
 type ApiGetParams = Record<string, string | number | boolean> | URLSearchParams;
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL;
+const basePath = import.meta.env.VITE_API_BASE_PATH;
 
 export async function apiRequest<T>(input: RequestInfo | URL, init?: RequestInit, isRetry = false) {
     await waitForRefreshIfNeeded();
@@ -91,7 +91,7 @@ export async function apiGet<T>(url: string, params?: ApiGetParams) {
         }
     }
 
-    let requestUrl = `${baseUrl}${url}`;
+    let requestUrl = `${basePath}${url}`;
     requestUrl = getParams.size > 0 ? `${requestUrl}?${getParams.toString()}` : requestUrl;
     const init = { method: 'get', credentials: 'include' as RequestCredentials };
 
@@ -100,7 +100,7 @@ export async function apiGet<T>(url: string, params?: ApiGetParams) {
 
 export async function apiPost<T>(url: string, body?: ApiRequestBody, onProgress?: (progress: number) => void, isRetry = false) {
     const isFormData = body instanceof FormData;
-    const requestUrl = `${baseUrl}${url}`;
+    const requestUrl = `${basePath}${url}`;
 
     if (isFormData) {
         await waitForRefreshIfNeeded();
@@ -177,7 +177,7 @@ export async function apiPost<T>(url: string, body?: ApiRequestBody, onProgress?
 }
 
 export async function apiPut<T>(url: string, body?: ApiRequestBody) {
-    const requestUrl = `${baseUrl}${url}`;
+    const requestUrl = `${basePath}${url}`;
     const init = {
         method: 'put',
         credentials: 'include' as RequestCredentials,
@@ -189,7 +189,7 @@ export async function apiPut<T>(url: string, body?: ApiRequestBody) {
 }
 
 export async function apiDelete<T>(url: string, body?: ApiRequestBody) {
-    const requestUrl = `${baseUrl}${url}`;
+    const requestUrl = `${basePath}${url}`;
     const init = {
         method: 'delete',
         credentials: 'include' as RequestCredentials,
