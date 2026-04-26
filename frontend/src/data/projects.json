@@ -1,0 +1,661 @@
+[
+  {
+    "id": "jpdm-dev",
+    "name": "jpdm.dev - Social/CMS Platform",
+    "year": "2025-Present",
+    "description": "Architecting and developing a fullstack social/CMS platform with TypeScript monorepo architecture. Features include OAuth authentication (Google/Facebook), JWT rotation with device fingerprinting, PostgreSQL database with service-repository pattern and dependency injection, AI integration with OpenAI/LiteLLM/llama.cpp/ollama, and agentic coding workflows.",
+    "tech": [
+      "TypeScript",
+      "React",
+      "Express.js",
+      "PostgreSQL",
+      "Docker",
+      "nginx",
+      "OAuth",
+      "JWT",
+      "LiteLLM",
+      "Gitea Actions",
+      "Vite"
+    ],
+    "links": [
+      {
+        "url": "https://jpdm.dev",
+        "label": "https://jpdm.dev"
+      }
+    ],
+    "media": [
+      {
+        "type": "image",
+        "url": "https://plus.unsplash.com/premium_photo-1712685912274-2483dade540f?q=80&w=2075&auto=format&fit=crop"
+      }
+    ],
+    "company": "Personal Project",
+    "role": "Fullstack Developer",
+    "featured": true
+  },
+  {
+    "id": "my-simpleology",
+    "name": "my.simpleology.com",
+    "year": "2011-2025",
+    "description": "Designed and implemented server, API, and UI of my.simpleology.com, a web application for productivity and goal management. Responsible for server migrations, code improvements, server performance optimization, and integration research.",
+    "tech": [
+      "Apache",
+      "PHP",
+      "jQuery",
+      "CSS",
+      "MySQL",
+      "React"
+    ],
+    "links": [
+      {
+        "url": "https://my.simpleology.com",
+        "label": "https://my.simpleology.com",
+        "type": "demo"
+      }
+    ],
+    "media": [
+      {
+        "type": "youtube-embed",
+        "url": "https://www.youtube.com/embed/jDKzeAxb9ag?si=T8TMCo58VkqUzFW_"
+      },
+      {
+        "type": "image",
+        "url": "/02.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/01.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/03.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/04.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/05.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/06.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/07.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/08.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/09.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/10.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/11.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/12.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/13.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/14.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/15.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/16.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/17.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/18.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/19.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/20.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/21.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/22.jpg"
+      }
+    ],
+    "company": "Simpleology, Inc.",
+    "role": "Software Engineer",
+    "featured": true
+  },
+  {
+    "id": "simpleology-products",
+    "name": "Simpleology, Neurogizers, Noobolics",
+    "year": "2008-2010",
+    "description": "Developed PayPal, ShipWire, and SalesForce integration libraries for company products. Setup marketing pages/funnels for the marketing team and provided technical support to customer care.",
+    "tech": [
+      "PHP",
+      "JavaScript",
+      "MySQL",
+      "PayPal API",
+      "ShipWire",
+      "SalesForce API",
+      "MooTools",
+      "Smarty Templates"
+    ],
+    "links": [
+      {
+        "url": "https://www.simpleology.com",
+        "label": "https://www.simpleology.com",
+        "type": "demo"
+      },
+      {
+        "url": "https://web.archive.org/web/20090211201036/http://neurogizers.com/",
+        "label": "https://www.neurogizers.com",
+        "type": "demo"
+      }
+    ],
+    "media": [
+      {
+        "type": "image",
+        "url": "/02.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/01.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/03.jpg"
+      }
+    ],
+    "company": "Mark Joyner Incorporated",
+    "role": "Developer",
+    "featured": false
+  },
+  {
+    "id": "projectx",
+    "name": "ProjectX - Web Desktop",
+    "year": "2011-2025",
+    "description": "Conceptualized, designed, and coded a case study web based desktop UI project featuring Amazon S3 integration for secure file storage and management.",
+    "tech": [
+      "PHP",
+      "Amazon S3",
+      "jQuery",
+      "MySQL"
+    ],
+    "links": [
+      {
+        "url": "http://projectx.czsecure.com",
+        "label": "http://projectx.czsecure.com",
+        "type": "demo"
+      }
+    ],
+    "media": [
+      {
+        "type": "youtube-embed",
+        "url": "https://www.youtube.com/embed/NLFJtFsxll0?si=pHgMVeDczdSM0PFj"
+      },
+      {
+        "type": "image",
+        "url": "/02.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/01.jpg"
+      }
+    ],
+    "company": "Simpleology, Inc.",
+    "role": "Software Engineer",
+    "featured": false
+  },
+  {
+    "id": "jobsrms",
+    "name": "Recruitment Management System (jobsrms.com)",
+    "year": "2009-2011",
+    "description": "Enhanced and fixed bugs for a recruitment management system that handles job postings, applicant tracking, and hiring workflows.",
+    "tech": [
+      "ASP.NET",
+      "SQL Server",
+      "C#"
+    ],
+    "links": [
+      {
+        "url": "https://web.archive.org/web/20130324112554/http://jobsrms.com/",
+        "label": "http://www.jobsrms.com",
+        "type": "demo"
+      }
+    ],
+    "media": [
+      {
+        "type": "image",
+        "url": "/01.jpg"
+      }
+    ],
+    "company": "iConcerto, Inc.",
+    "role": "Software Engineer",
+    "featured": false
+  },
+  {
+    "id": "venture-communications",
+    "name": "Venture Communications Website",
+    "year": "2006",
+    "description": "Developed a Flash-based website for Venture Communications as a freelance project.",
+    "tech": [
+      "Flash",
+      "ActionScript"
+    ],
+    "links": [
+      {
+        "url": "https://web.archive.org/web/20090415152347/http://www.venture-com.com/",
+        "label": "http://www.venture-com.com",
+        "type": "demo"
+      }
+    ],
+    "media": [
+      {
+        "type": "youtube-embed",
+        "url": "https://www.youtube.com/embed/_McANilZCMk?si=NWe8f9GvfxLDh-kj"
+      },
+      {
+        "type": "image",
+        "url": "/01.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/02.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/03.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/04.jpg"
+      }
+    ],
+    "company": "Venture Communications",
+    "role": "Freelance Flash Developer",
+    "featured": false
+  },
+  {
+    "id": "accenture-csat",
+    "name": "Accenture CSAT - Client Satisfaction Administration Tool",
+    "year": "2006-2008",
+    "description": "Client Satisfaction Administration Tool (CSAT) for managing customer feedback surveys, tracking satisfaction metrics, and generating reports for internal stakeholders.",
+    "tech": [
+      "ASP.NET",
+      "VB.NET",
+      "C#",
+      "JavaScript",
+      "T-SQL"
+    ],
+    "links": [],
+    "media": [
+      {
+        "type": "image",
+        "url": "/01.jpg"
+      }
+    ],
+    "company": "Accenture Incorporated",
+    "role": "Software Engineer / Application Designer",
+    "featured": false
+  },
+  {
+    "id": "hrms",
+    "name": "HRMS (HRIS)",
+    "year": "2009-2011",
+    "description": "Human Resource Management System handling employee records, attendance, payroll integration, and HR workflows.",
+    "tech": [
+      "ASP.NET",
+      "SQL Server",
+      "C#"
+    ],
+    "links": [],
+    "media": [],
+    "company": "iConcerto, Inc.",
+    "role": "Software Engineer",
+    "featured": false
+  },
+  {
+    "id": "asset-management",
+    "name": "Asset Management Application",
+    "year": "2009-2011",
+    "description": "Asset management system with barcode integration for tracking company assets, inventory management, and asset lifecycle tracking.",
+    "tech": [
+      "ASP.NET",
+      "SQL Server",
+      "C#",
+      "Barcode"
+    ],
+    "links": [],
+    "media": [],
+    "company": "iConcerto, Inc.",
+    "role": "Software Engineer",
+    "featured": false
+  },
+  {
+    "id": "dns-health-checker",
+    "name": "DNS Health Checker",
+    "year": "2009-2011",
+    "description": "DNS health monitoring application that connects to ActiveDirectory to check DNS server health and configuration.",
+    "tech": [
+      "ASP.NET",
+      "ActiveDirectory",
+      "DNS",
+      "C#"
+    ],
+    "links": [],
+    "media": [],
+    "company": "iConcerto, Inc.",
+    "role": "Software Engineer",
+    "featured": false
+  },
+  {
+    "id": "payment-services",
+    "name": "Payment Services",
+    "year": "2009-2011",
+    "description": "Payment processing system handling financial transactions and payment gateway integrations.",
+    "tech": [
+      "ASP.NET",
+      "SQL Server",
+      "C#",
+      "Payment Gateway"
+    ],
+    "links": [],
+    "media": [],
+    "company": "iConcerto, Inc.",
+    "role": "Software Engineer",
+    "featured": false
+  },
+  {
+    "id": "customer-bank-monitoring",
+    "name": "Customer Bank Monitoring",
+    "year": "2009-2011",
+    "description": "Bank customer monitoring system for tracking customer accounts and banking activities.",
+    "tech": [
+      "ASP.NET",
+      "SQL Server",
+      "C#"
+    ],
+    "links": [],
+    "media": [],
+    "company": "iConcerto, Inc.",
+    "role": "Software Engineer",
+    "featured": false
+  },
+  {
+    "id": "web-sso",
+    "name": "Web SSO Authentication",
+    "year": "2009-2011",
+    "description": "Single Sign-On authentication system involving different platforms (Windows, Linux) for unified authentication across multiple applications.",
+    "tech": [
+      "ASP.NET",
+      "SSO",
+      "Cross-platform",
+      "Windows",
+      "Linux"
+    ],
+    "links": [],
+    "media": [],
+    "company": "iConcerto, Inc.",
+    "role": "Software Engineer",
+    "featured": false
+  },
+  {
+    "id": "dns-programming",
+    "name": "DNS Programming",
+    "year": "2009-2011",
+    "description": "DNS programming utilities and tools for managing and configuring DNS servers programmatically.",
+    "tech": [
+      "ASP.NET",
+      "DNS",
+      "C#"
+    ],
+    "links": [],
+    "media": [],
+    "company": "iConcerto, Inc.",
+    "role": "Software Engineer",
+    "featured": false
+  },
+  {
+    "id": "activedirectory-programming",
+    "name": "ActiveDirectory Programming",
+    "year": "2009-2011",
+    "description": "ActiveDirectory integration tools for user management, authentication, and directory services.",
+    "tech": [
+      "ASP.NET",
+      "ActiveDirectory",
+      "C#"
+    ],
+    "links": [],
+    "media": [],
+    "company": "iConcerto, Inc.",
+    "role": "Software Engineer",
+    "featured": false
+  },
+  {
+    "id": "drupal-module",
+    "name": "Drupal Module/Component Development",
+    "year": "2009-2011",
+    "description": "Drupal instance with shopping cart integration and custom module development for specific business requirements.",
+    "tech": [
+      "Drupal",
+      "PHP",
+      "MySQL",
+      "Shopping Cart"
+    ],
+    "links": [],
+    "media": [],
+    "company": "iConcerto, Inc.",
+    "role": "Software Engineer",
+    "featured": false
+  },
+  {
+    "id": "mvc3-mysql",
+    "name": "MVC3 using MySQL",
+    "year": "2009-2011",
+    "description": "MVC3 web application development using MySQL database instead of SQL Server for specific project requirements.",
+    "tech": [
+      "ASP.NET MVC3",
+      "MySQL",
+      "C#"
+    ],
+    "links": [],
+    "media": [],
+    "company": "iConcerto, Inc.",
+    "role": "Software Engineer",
+    "featured": false
+  },
+  {
+    "id": "photo-resizer",
+    "name": "Photo Resizer",
+    "year": "2009-2011",
+    "description": "Desktop and web application for batch photo resizing with configurable output sizes and formats.",
+    "tech": [
+      "ASP.NET",
+      "C#",
+      "Image Processing"
+    ],
+    "links": [],
+    "media": [],
+    "company": "iConcerto, Inc.",
+    "role": "Software Engineer",
+    "featured": false
+  },
+  {
+    "id": "barcode-generator",
+    "name": "Barcode Generator",
+    "year": "2009-2011",
+    "description": "Barcode generation tool supporting multiple barcode formats for inventory and asset tracking systems.",
+    "tech": [
+      "ASP.NET",
+      "C#",
+      "Barcode"
+    ],
+    "links": [],
+    "media": [],
+    "company": "iConcerto, Inc.",
+    "role": "Software Engineer",
+    "featured": false
+  },
+  {
+    "id": "timekeeping-manager",
+    "name": "Timekeeping Manager",
+    "year": "2005-2006",
+    "description": "Offline timekeeping manager that extracts data from timekeeping systems in store branches, converts to XML parsed by Windows Service, and sends consolidated data to data warehouse.",
+    "tech": [
+      "ASP.NET",
+      "XML",
+      "Windows Service",
+      "SQL Server"
+    ],
+    "links": [],
+    "media": [],
+    "company": "HURIS, Inc.",
+    "role": "Web Developer",
+    "featured": false
+  },
+  {
+    "id": "advansave",
+    "name": "AdvanSave - Networking Marketing System",
+    "year": "2002",
+    "description": "Networking marketing system with downline account management, commission computations, and hierarchical member tracking.",
+    "tech": [
+      "ASP.NET",
+      "SQL Server",
+      "VB.NET"
+    ],
+    "links": [],
+    "media": [],
+    "company": "Hilton Consultancy, Inc.",
+    "role": "Developer",
+    "featured": false
+  },
+  {
+    "id": "psqi",
+    "name": "PSQI.org",
+    "year": "2002-2004",
+    "description": "Website development for PSQI organization.",
+    "tech": [
+      "PHP",
+      "HTML",
+      "CSS",
+      "JavaScript"
+    ],
+    "links": [],
+    "media": [],
+    "company": "Various Companies",
+    "role": "Freelance Web Developer",
+    "featured": false
+  },
+  {
+    "id": "timeline",
+    "name": "Timeline.com.ph",
+    "year": "2002-2004",
+    "description": "Website development for Timeline.com.ph.",
+    "tech": [
+      "PHP",
+      "HTML",
+      "CSS",
+      "JavaScript"
+    ],
+    "links": [
+      {
+        "url": "https://web.archive.org/web/20030713184055/http://www.timeline.com.ph/home.htm",
+        "label": "http://www.timeline.com.ph"
+      }
+    ],
+    "media": [
+      {
+        "type": "youtube-embed",
+        "url": "https://www.youtube.com/embed/bjj6BnqXG2o?si=dRe3Om5ZtpIw0hir"
+      },
+      {
+        "type": "image",
+        "url": "/01.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/02.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/03.jpg"
+      }
+    ],
+    "company": "Various Companies",
+    "role": "Freelance Web Developer",
+    "featured": false
+  },
+  {
+    "id": "bistro-holdings",
+    "name": "Bistro Holdings Inc. - Centralized Customer System",
+    "year": "2002-2004",
+    "description": "Centralized system of customer information consolidating MS SQL Server data from different branches.",
+    "tech": [
+      "MS SQL Server",
+      "ASP.NET",
+      "Data Consolidation"
+    ],
+    "links": [],
+    "media": [],
+    "company": "Various Companies",
+    "role": "Freelance Web Developer",
+    "featured": false
+  },
+  {
+    "id": "thesis",
+    "name": "Computer Laboratory Management System",
+    "year": "2001",
+    "description": "Thesis project - Best Thesis Award winner. Computer laboratory management system for scheduling, resource allocation, and lab monitoring.",
+    "tech": [
+      "ASP.NET",
+      "SQL Server",
+      "VB.NET"
+    ],
+    "links": [],
+    "media": [],
+    "company": "STI-Southwoods",
+    "role": "Student",
+    "featured": true
+  },
+  {
+    "id": "accutype-flash",
+    "name": "Accutype Flash Presentation",
+    "year": "2002-2004",
+    "description": "Online Flash presentation for Accutype's website.",
+    "tech": [
+      "Flash",
+      "ActionScript"
+    ],
+    "links": [],
+    "media": [],
+    "company": "Various Companies",
+    "role": "Freelance Web Developer",
+    "featured": false
+  }
+]

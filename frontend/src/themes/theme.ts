@@ -3,6 +3,7 @@ import type { } from '@mui/x-data-grid/themeAugmentation';
 import type { } from '@mui/x-date-pickers/themeAugmentation';
 
 export const theme = createTheme({
+    cssVariables: true,
     breakpoints: {
         values: {
             xs: 0,
@@ -18,7 +19,8 @@ export const theme = createTheme({
         },
         background: {
             default: '#f3f3f3'
-        }
+        },
+        divider: '#dddddd'
     },
     typography: {
         //fontSize: 15,
@@ -36,6 +38,9 @@ export const theme = createTheme({
     components: { //no MuiBox under createTheme components (for MuiBox classes add it here)
         MuiCssBaseline: {
             styleOverrides: () => ({
+                ':root': {
+                    '--shadow-paper': '0 4px 1px -2px #00000022'
+                },
                 html: {
                     '&.modal-dialog-open': {
                         overflow: 'hidden',
@@ -420,11 +425,6 @@ export const theme = createTheme({
         MuiDialog: {
             styleOverrides: {
                 root: () => ({
-                    '& .MuiDialog-paper': {
-                        boxShadow: '0 1px 2px #00000021, 0 4px 8px #00000010',
-                        width: '100%',
-                        margin: '10px'
-                    },
                     '& .MuiModal-backdrop': {
                         backgroundColor: '#f3f3f3dd'
                     },
@@ -444,7 +444,6 @@ export const theme = createTheme({
                             maxHeight: '100vh',
                             boxShadow: 'none',
                             borderRadius: 0,
-                            margin: 0,
                             '& img': {
                                 objectFit: 'contain',
                                 width: '100%',
@@ -456,7 +455,12 @@ export const theme = createTheme({
                             //backdropFilter: 'saturate(1.8) blur(20px)'
                         },
                     }
-                })
+                }),
+                paper: {
+                    boxShadow: '0 1px 2px #00000021, 0 4px 8px #00000010',
+                    width: '100%',
+                    margin: 0
+                }
             }
         },
         MuiContainer: {

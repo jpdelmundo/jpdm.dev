@@ -18,9 +18,9 @@ export const Layout = () => {
     return (
         <>
             <GradientBg />
-            <Container component="header" className="header-container" sx={{ height: '60px', zIndex: 1000, borderBottom: 'solid 1px #dddddd88' }}>
+            <Container component="header" className="header-container" sx={{ height: '60px', zIndex: 1000 }}>
                 <Stack direction="row" alignItems="center" maxWidth="md" sx={{ margin: '0 auto', gap: 2 }}>
-                    <Box>
+                    <Box sx={{ mr: 'auto' }}>
                         <Link
                             component={RLink}
                             to="/"
@@ -39,12 +39,10 @@ export const Layout = () => {
                         <Divider orientation="vertical" flexItem />
                         <Link component={RLink} to="/services" sx={linkSx}>Hire Me</Link>
                     </Stack>
-                    <UserPanel sx={{ ml: 'auto' }} />
+                    <UserPanel sx={{ ml: 'auto', width: '55px' }} />
                 </Stack>
             </Container>
-            <Container component={'main'} maxWidth="sm" sx={{ pt: '60px' }}>
-                <Outlet />
-            </Container >
+            <Outlet />
         </>
     );
 }

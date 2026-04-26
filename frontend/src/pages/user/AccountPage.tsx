@@ -9,6 +9,7 @@ import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -113,60 +114,62 @@ export const AccountPage = () => {
     if (!data) return <PageLoading />;
     if (error) return <Error error={error} />;
 
-    return <Paper elevation={0} className="page">
-        <Box mb={2}>
-            <Typography variant="h5" fontWeight={'bold'}>Account & Security</Typography>
-            <Typography fontSize={'small'} color="textDisabled">Created on {formatDateTime(data.created_at)}</Typography>
-        </Box>
-        <Typography>Email</Typography>
-        <Box {...boxProps}>
-            {
-                user?.email
-                    ? <Stack gap={1}>
-                        <Stack direction={'row'} gap={1}><MailOutlineRounded />  <Typography>{user?.email}</Typography></Stack>
-                        <Box><Button variant="contained" size="small" sx={{ width: '150px' }} onClick={updateEmailOnClick}>Change email</Button></Box>
-                    </Stack>
-                    : <Button variant="contained" size="small" sx={{ width: '150px' }} onClick={updateEmailOnClick}>Add email</Button>
-            }
-        </Box>
-        <Typography>Password</Typography>
-        <Box {...boxProps}>
-            <Button variant="contained" size="small" sx={{ width: '150px' }} onClick={changePasswordOnClick}>Change password</Button>
-        </Box>
-        <Typography>Delete account</Typography>
-        <Box {...boxProps}>
-            <Button variant="contained" size="small" color="error" sx={{ width: '150px' }} onClick={deleteOnClick}>Delete</Button>
-        </Box>
+    return <Container component={'main'} maxWidth="sm" sx={{ pt: '60px' }}>
+        <Paper elevation={0} className="page">
+            <Box mb={2}>
+                <Typography variant="h5" fontWeight={'bold'}>Account & Security</Typography>
+                <Typography fontSize={'small'} color="textDisabled">Created on {formatDateTime(data.created_at)}</Typography>
+            </Box>
+            <Typography>Email</Typography>
+            <Box {...boxProps}>
+                {
+                    user?.email
+                        ? <Stack gap={1}>
+                            <Stack direction={'row'} gap={1}><MailOutlineRounded />  <Typography>{user?.email}</Typography></Stack>
+                            <Box><Button variant="contained" size="small" sx={{ width: '150px' }} onClick={updateEmailOnClick}>Change email</Button></Box>
+                        </Stack>
+                        : <Button variant="contained" size="small" sx={{ width: '150px' }} onClick={updateEmailOnClick}>Add email</Button>
+                }
+            </Box>
+            <Typography>Password</Typography>
+            <Box {...boxProps}>
+                <Button variant="contained" size="small" sx={{ width: '150px' }} onClick={changePasswordOnClick}>Change password</Button>
+            </Box>
+            <Typography>Delete account</Typography>
+            <Box {...boxProps}>
+                <Button variant="contained" size="small" color="error" sx={{ width: '150px' }} onClick={deleteOnClick}>Delete</Button>
+            </Box>
 
-        <Dialog
-            disableScrollLock
-            transitionDuration={0}
-            open={dialogOpen}
-            onClose={closeDeleteDialog}
-            fullWidth
-            maxWidth="xs">
-            <DialogTitle> Are you sure you want to delete your account?</DialogTitle>
-            <DialogContent>
-                <Stack gap={2}>
-                    <Alert severity="warning" sx={{ fontSize: '16px' }} icon={<WarningRoundedIcon />}>Deleting your account may also delete all of your submitted content.</Alert>
-                    {data?.has_password
-                        && <>
-                            <Typography>To proceed, enter your password in the input box below then click the Delete button.</Typography>
-                            <PasswordField inputRef={inputRef} sx={{ alignSelf: 'center', display: data?.has_password ? '' : 'none' }} error={passwordError} />
-                        </>
-                    }
-                    {!data?.has_password && data?.social_login && <Typography>A popup window will open when you click the "Delete Account" button to confirm your identity.</Typography>}
-                </Stack>
-            </DialogContent>
-            <DialogActions sx={{ padding: '25px' }}>
-                <Stack>
-                    <Stack direction="row" alignItems={'end'} gap={1}>
-                        <Button size="small" onClick={closeDeleteDialog}>Cancel</Button>
-                        <Button variant="contained" color="error" size="small" onClick={dialogDeleteOnClick} loading={processing}>Delete Account</Button>
+            <Dialog
+                disableScrollLock
+                transitionDuration={0}
+                open={dialogOpen}
+                onClose={closeDeleteDialog}
+                fullWidth
+                maxWidth="xs">
+                <DialogTitle> Are you sure you want to delete your account?</DialogTitle>
+                <DialogContent>
+                    <Stack gap={2}>
+                        <Alert severity="warning" sx={{ fontSize: '16px' }} icon={<WarningRoundedIcon />}>Deleting your account may also delete all of your submitted content.</Alert>
+                        {data?.has_password
+                            && <>
+                                <Typography>To proceed, enter your password in the input box below then click the Delete button.</Typography>
+                                <PasswordField inputRef={inputRef} sx={{ alignSelf: 'center', display: data?.has_password ? '' : 'none' }} error={passwordError} />
+                            </>
+                        }
+                        {!data?.has_password && data?.social_login && <Typography>A popup window will open when you click the "Delete Account" button to confirm your identity.</Typography>}
                     </Stack>
-                    {deleteError && <Typography color="error" textAlign={'right'} mt={2}>{deleteError}</Typography>}
-                </Stack>
-            </DialogActions>
-        </Dialog>
-    </Paper>
+                </DialogContent>
+                <DialogActions sx={{ padding: '25px' }}>
+                    <Stack>
+                        <Stack direction="row" alignItems={'end'} gap={1}>
+                            <Button size="small" onClick={closeDeleteDialog}>Cancel</Button>
+                            <Button variant="contained" color="error" size="small" onClick={dialogDeleteOnClick} loading={processing}>Delete Account</Button>
+                        </Stack>
+                        {deleteError && <Typography color="error" textAlign={'right'} mt={2}>{deleteError}</Typography>}
+                    </Stack>
+                </DialogActions>
+            </Dialog>
+        </Paper>
+    </Container>
 }

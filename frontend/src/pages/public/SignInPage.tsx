@@ -10,6 +10,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { theme } from '@/themes/theme';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import { useEffect } from 'react';
@@ -46,7 +47,7 @@ export const SignInPage = () => {
         useAuthStore.setState({ signOutReason: null });
     }, []);
 
-    return (
+    return (<Container component={'main'} maxWidth="sm" sx={{ pt: '60px' }}>
         <Box
             display={'flex'}
             justifyContent={'center'}
@@ -61,5 +62,5 @@ export const SignInPage = () => {
                 <SignInForm onSubmit={submit} onSignInSuccess={signInSuccess} />
             </Paper>
         </Box>
-    );
+    </Container>);
 }

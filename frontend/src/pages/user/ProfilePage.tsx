@@ -14,6 +14,7 @@ import FileUploadRounded from '@mui/icons-material/FileUploadRounded';
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
+import Container from '@mui/material/Container';
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -180,214 +181,216 @@ export const ProfilePage = () => {
         setAvatarSrc(userProfile?.avatar_url || '');
     }, [userProfile]);
 
-    return <Paper
-        elevation={0}
-        className="page"
-        onDragOver={avatarOnDragOver}
-        onDragEnter={avatarOnDragEnter}
-        onDragLeave={avatarOnDragLeave}
-        onDrop={avatarOnDrop}
-        sx={{
-            border: avatarIsDragging ? 'dashed 5px #dddddd' : 'solid 5px #dddddd00'
-        }}
-    >
-        <Stack mb={2} direction={'row'}>
-            <Typography variant="h5" fontWeight={'bold'}>Profile</Typography>
-        </Stack>
-        <Stack gap="25px" alignItems={'center'}>
-            <Stack gap={'10px'} alignItems={'center'}>
-                <Box sx={{ position: 'relative' }}>
-                    {avatarIsUploading && <CircularProgress
-                        variant="determinate"
-                        value={avatarUploadProgress}
-                        sx={{
+    return <Container component={'main'} maxWidth="sm" sx={{ pt: '60px' }}>
+        <Paper
+            elevation={0}
+            className="page"
+            onDragOver={avatarOnDragOver}
+            onDragEnter={avatarOnDragEnter}
+            onDragLeave={avatarOnDragLeave}
+            onDrop={avatarOnDrop}
+            sx={{
+                border: avatarIsDragging ? 'dashed 5px #dddddd' : 'solid 5px #dddddd00'
+            }}
+        >
+            <Stack mb={2} direction={'row'}>
+                <Typography variant="h5" fontWeight={'bold'}>Profile</Typography>
+            </Stack>
+            <Stack gap="25px" alignItems={'center'}>
+                <Stack gap={'10px'} alignItems={'center'}>
+                    <Box sx={{ position: 'relative' }}>
+                        {avatarIsUploading && <CircularProgress
+                            variant="determinate"
+                            value={avatarUploadProgress}
+                            sx={{
+                                position: 'absolute',
+                                zIndex: 1,
+                                opacity: 0.8,
+                                color: '#ffffff'
+                            }}
+                            size={isSmUp ? 160 : 120}
+                            enableTrackSlot
+                        />}
+                        <Avatar
+                            onClick={photoOnEdit}
+                            {...avatarProps}
+                            sx={{
+                                fontSize: { xs: '50px', sm: '80px' },
+                                aspectRatio: 1,
+                                width: { xs: '120px', sm: '160px' },
+                                height: 'auto',
+                                cursor: 'pointer',
+                                opacity: avatarIsUploading ? 0.7 : 1
+                            }}
+                            src={avatarSrc}
+                        />
+                        <Stack sx={{
                             position: 'absolute',
-                            zIndex: 1,
-                            opacity: 0.8,
-                            color: '#ffffff'
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            borderRadius: '50%',
+                            '&:hover': !avatarIsUploading ? {
+                                bgcolor: 'rgb(0, 0, 0, 0.5)',
+                                '& .controls': {
+                                    display: 'flex'
+                                }
+                            } : {}
                         }}
-                        size={isSmUp ? 160 : 120}
-                        enableTrackSlot
-                    />}
-                    <Avatar
-                        onClick={photoOnEdit}
-                        {...avatarProps}
-                        sx={{
-                            fontSize: { xs: '50px', sm: '80px' },
-                            aspectRatio: 1,
-                            width: { xs: '120px', sm: '160px' },
-                            height: 'auto',
-                            cursor: 'pointer',
-                            opacity: avatarIsUploading ? 0.7 : 1
-                        }}
-                        src={avatarSrc}
-                    />
-                    <Stack sx={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        borderRadius: '50%',
-                        '&:hover': !avatarIsUploading ? {
-                            bgcolor: 'rgb(0, 0, 0, 0.5)',
-                            '& .controls': {
-                                display: 'flex'
-                            }
-                        } : {}
-                    }}
-                        direction={'row'}
-                        gap={1}>
-                        <Box className="controls" display={'none'} gap={5}>
-                            <IconButton
-                                sx={{
-                                    bgcolor: '#eeeeee',
-                                    border: 'solid 1px #dddddd',
-                                    borderRadius: '50%',
-                                    padding: '5px',
-                                    '&:hover': {
-                                        bgcolor: '#ffffff'
-                                    }
-                                }}
-                                onClick={photoOnEdit}
-                            >
-                                <FileUploadRounded sx={{
-                                    width: '30px',
-                                    height: 'auto'
-                                }} />
-                            </IconButton>
-                            {avatarSrc && <IconButton
-                                sx={{
-                                    bgcolor: '#bb0000',
-                                    color: '#ffffff',
-                                    borderRadius: '50%',
-                                    padding: '5px',
-                                    '&:hover': {
-                                        bgcolor: '#d80000'
-                                    }
-                                }}
-                                onClick={photoOnDeleteClick}
-                            >
-                                <ClearRounded sx={{
-                                    width: '30px',
-                                    height: 'auto'
-                                }} />
-                            </IconButton>}
-                        </Box>
-                    </Stack>
-                </Box>
+                            direction={'row'}
+                            gap={1}>
+                            <Box className="controls" display={'none'} gap={5}>
+                                <IconButton
+                                    sx={{
+                                        bgcolor: '#eeeeee',
+                                        border: 'solid 1px #dddddd',
+                                        borderRadius: '50%',
+                                        padding: '5px',
+                                        '&:hover': {
+                                            bgcolor: '#ffffff'
+                                        }
+                                    }}
+                                    onClick={photoOnEdit}
+                                >
+                                    <FileUploadRounded sx={{
+                                        width: '30px',
+                                        height: 'auto'
+                                    }} />
+                                </IconButton>
+                                {avatarSrc && <IconButton
+                                    sx={{
+                                        bgcolor: '#bb0000',
+                                        color: '#ffffff',
+                                        borderRadius: '50%',
+                                        padding: '5px',
+                                        '&:hover': {
+                                            bgcolor: '#d80000'
+                                        }
+                                    }}
+                                    onClick={photoOnDeleteClick}
+                                >
+                                    <ClearRounded sx={{
+                                        width: '30px',
+                                        height: 'auto'
+                                    }} />
+                                </IconButton>}
+                            </Box>
+                        </Stack>
+                    </Box>
 
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    ref={inputFileRef}
-                    style={{ display: 'none' }}
-                />
-                <Stack>
-                    <Button size="small" variant="text" onClick={photoOnEdit}>Change photo</Button>
-                    {avatarErrorMessage && <Typography color="error" textAlign="center">{avatarErrorMessage}</Typography>}
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileSelect}
+                        ref={inputFileRef}
+                        style={{ display: 'none' }}
+                    />
+                    <Stack>
+                        <Button size="small" variant="text" onClick={photoOnEdit}>Change photo</Button>
+                        {avatarErrorMessage && <Typography color="error" textAlign="center">{avatarErrorMessage}</Typography>}
+                    </Stack>
+                </Stack>
+                <Stack maxWidth={'300px'} gap="10px">
+                    <Grid container>
+                        <GridRow mb="10px">
+                            <Grid {...colLabel}><Typography color="grey">Name</Typography></Grid>
+                            <Grid  {...colData}>{userProfile?.first_name ? `${userProfile?.first_name} ${userProfile?.last_name}` : 'Not set'}</Grid>
+                        </GridRow>
+                        <GridRow mb="10px">
+                            <Grid {...colLabel}><Typography color="grey">Birthday</Typography></Grid>
+                            <Grid {...colData}>{userProfile?.date_of_birth ? formatDateTime(userProfile.date_of_birth, navigator.language, { date_only: true }) : 'Not set'}</Grid>
+                        </GridRow>
+                        <GridRow mb="10px">
+                            <Grid {...colLabel}><Typography color="grey">Gender</Typography></Grid>
+                            <Grid {...colData}>{userProfile?.gender ? genderText((userProfile.gender) as Gender) : 'Not set'}</Grid>
+                        </GridRow>
+                        <GridRow mb="10px">
+                            <Grid {...colLabel}><Typography color="grey">Phone</Typography></Grid>
+                            <Grid  {...colData}>{userProfile?.phone_number ? `${userProfile.phone_number}` : 'Not set'}</Grid>
+                        </GridRow>
+                        <GridRow mb="10px">
+                            <Grid {...colLabel}><Typography color="grey">About You</Typography></Grid>
+                            <Grid {...colData}>{userProfile?.bio ? `${userProfile.bio}` : 'Not set'}</Grid>
+                        </GridRow>
+                    </Grid>
+                    <Button size="small" variant="text" onClick={editOnClick}>Edit</Button>
                 </Stack>
             </Stack>
-            <Stack maxWidth={'300px'} gap="10px">
-                <Grid container>
-                    <GridRow mb="10px">
-                        <Grid {...colLabel}><Typography color="grey">Name</Typography></Grid>
-                        <Grid  {...colData}>{userProfile?.first_name ? `${userProfile?.first_name} ${userProfile?.last_name}` : 'Not set'}</Grid>
-                    </GridRow>
-                    <GridRow mb="10px">
-                        <Grid {...colLabel}><Typography color="grey">Birthday</Typography></Grid>
-                        <Grid {...colData}>{userProfile?.date_of_birth ? formatDateTime(userProfile.date_of_birth, navigator.language, { date_only: true }) : 'Not set'}</Grid>
-                    </GridRow>
-                    <GridRow mb="10px">
-                        <Grid {...colLabel}><Typography color="grey">Gender</Typography></Grid>
-                        <Grid {...colData}>{userProfile?.gender ? genderText((userProfile.gender) as Gender) : 'Not set'}</Grid>
-                    </GridRow>
-                    <GridRow mb="10px">
-                        <Grid {...colLabel}><Typography color="grey">Phone</Typography></Grid>
-                        <Grid  {...colData}>{userProfile?.phone_number ? `${userProfile.phone_number}` : 'Not set'}</Grid>
-                    </GridRow>
-                    <GridRow mb="10px">
-                        <Grid {...colLabel}><Typography color="grey">About You</Typography></Grid>
-                        <Grid {...colData}>{userProfile?.bio ? `${userProfile.bio}` : 'Not set'}</Grid>
-                    </GridRow>
-                </Grid>
-                <Button size="small" variant="text" onClick={editOnClick}>Edit</Button>
-            </Stack>
-        </Stack>
 
-        <Dialog
-            open={dialogOpen}
-            onClose={dialogOnClose}>
-            <DialogTitle>Edit profile</DialogTitle>
-            <DialogContent>
-                <form id="profile-form"
-                    noValidate
-                    onSubmit={handleSubmit(submitHandler)}>
-                    <Stack gap={2}>
-                        <TextField label="First name"
-                            {...register('first_name')}
-                            fullWidth />
-                        <TextField label="Last name"
-                            {...register('last_name')}
-                            fullWidth />
-                        <Stack direction={'row'} gap={2}>
-                            <Stack flex={1} width={'50%'}>
-                                <Select
-                                    label="Gender"
-                                    control={control}
-                                    fullWidth
-                                    {...register('gender')}
-                                >
-                                    {Object.values(Gender).map(item => (
-                                        <MenuItem key={item.value} value={item.value}>{item.text}</MenuItem>
-                                    ))}
-                                </Select>
+            <Dialog
+                open={dialogOpen}
+                onClose={dialogOnClose}>
+                <DialogTitle>Edit profile</DialogTitle>
+                <DialogContent>
+                    <form id="profile-form"
+                        noValidate
+                        onSubmit={handleSubmit(submitHandler)}>
+                        <Stack gap={2}>
+                            <TextField label="First name"
+                                {...register('first_name')}
+                                fullWidth />
+                            <TextField label="Last name"
+                                {...register('last_name')}
+                                fullWidth />
+                            <Stack direction={'row'} gap={2}>
+                                <Stack flex={1} width={'50%'}>
+                                    <Select
+                                        label="Gender"
+                                        control={control}
+                                        fullWidth
+                                        {...register('gender')}
+                                    >
+                                        {Object.values(Gender).map(item => (
+                                            <MenuItem key={item.value} value={item.value}>{item.text}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </Stack>
+                                <Stack flex={1} width={'50%'} gap="4px">
+                                    <DatePicker
+                                        label="Birthday"
+                                        control={control}
+                                        name="date_of_birth"
+                                    />
+                                </Stack>
                             </Stack>
-                            <Stack flex={1} width={'50%'} gap="4px">
-                                <DatePicker
-                                    label="Birthday"
-                                    control={control}
-                                    name="date_of_birth"
+                            <Stack>
+                                <TextField label="Phone Number"
+                                    {...register('phone_number')}
+                                    fullWidth />
+                            </Stack>
+                            <Stack>
+                                <TextField label="About You"
+                                    multiline
+                                    rows={3}
+                                    {...register('bio')}
                                 />
                             </Stack>
                         </Stack>
-                        <Stack>
-                            <TextField label="Phone Number"
-                                {...register('phone_number')}
-                                fullWidth />
+                    </form>
+                </DialogContent>
+                <DialogActions sx={{ padding: '25px' }}>
+                    <Stack gap={1} flex={1}>
+                        <Stack direction={'row'} justifyContent={'end'} gap={1}>
+                            <Button
+                                variant="text"
+                                onClick={cancelOnClick}
+                                size="small"
+                            >Cancel</Button>
+                            <Button
+                                type="submit"
+                                form="profile-form"
+                                loading={isSubmitting}
+                                variant="contained"
+                                size="small"
+                            >Save</Button>
                         </Stack>
-                        <Stack>
-                            <TextField label="About You"
-                                multiline
-                                rows={3}
-                                {...register('bio')}
-                            />
-                        </Stack>
+                        {errorMessage && <Typography color="error" textAlign="center">{errorMessage}</Typography>}
                     </Stack>
-                </form>
-            </DialogContent>
-            <DialogActions sx={{ padding: '25px' }}>
-                <Stack gap={1} flex={1}>
-                    <Stack direction={'row'} justifyContent={'end'} gap={1}>
-                        <Button
-                            variant="text"
-                            onClick={cancelOnClick}
-                            size="small"
-                        >Cancel</Button>
-                        <Button
-                            type="submit"
-                            form="profile-form"
-                            loading={isSubmitting}
-                            variant="contained"
-                            size="small"
-                        >Save</Button>
-                    </Stack>
-                    {errorMessage && <Typography color="error" textAlign="center">{errorMessage}</Typography>}
-                </Stack>
-            </DialogActions>
-        </Dialog>
-    </Paper>
+                </DialogActions>
+            </Dialog>
+        </Paper>
+    </Container>
 }

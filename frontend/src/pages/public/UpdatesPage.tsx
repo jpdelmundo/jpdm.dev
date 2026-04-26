@@ -5,6 +5,7 @@ import { PostDialog } from '@/components/PostDialog';
 import { PostSkeleton } from '@/components/skeleton/PostSkeleton';
 import { useAuthStore } from '@/store/useAuthStore';
 import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import type PostDTO from '@shared/models/dto/PostDTO.ts';
@@ -73,47 +74,50 @@ export const UpdatesPage = () => {
         ready && getData();
     }, [ready]);
 
-    return (<Box mt={1}>
-        {user?.username == 'jp'
-            && <Paper
-                elevation={0}
-                onClick={() => setPostDialogOpen(true)}
-                sx={{
-                    borderRadius: '16px',
-                    padding: '15px',
-                    cursor: 'text',
-                    '&:hover': {
-                        transition: 'box-shadow 0.25s ease',
-                        boxShadow: '0 0 0 3px rgba(25, 118, 210, 0.20)',
-                    }
-                }}
-            >
-                <Typography>What's on you mind?</Typography>
-            </Paper>}
+    return (
+        <Container component={'main'} maxWidth="sm" sx={{ pt: '60px' }}>
+            <Box mt={'5px'}>
+                {user?.username == 'jp'
+                    && <Paper
+                        elevation={0}
+                        onClick={() => setPostDialogOpen(true)}
+                        sx={{
+                            borderRadius: '16px',
+                            padding: '15px',
+                            cursor: 'text',
+                            '&:hover': {
+                                transition: 'box-shadow 0.25s ease',
+                                boxShadow: '0 0 0 3px rgba(25, 118, 210, 0.20)',
+                            }
+                        }}
+                    >
+                        <Typography>What's on you mind?</Typography>
+                    </Paper>}
 
-        {isLoading
-            ? <PostSkeleton />
-            : posts && posts.map(post => (
-                <Post
-                    key={post.id}
-                    post={post}
-                    onDeleted={handlePostDeleted}
-                    onUpdated={handlePostUpdated}
-                    onImageClick={handlePostImageClick}
+                {isLoading
+                    ? <PostSkeleton />
+                    : posts && posts.map(post => (
+                        <Post
+                            key={post.id}
+                            post={post}
+                            onDeleted={handlePostDeleted}
+                            onUpdated={handlePostUpdated}
+                            onImageClick={handlePostImageClick}
+                        />
+                    ))}
+
+                <PostDialog
+                    open={postDialogOpen}
+                    closeDialog={() => setPostDialogOpen(false)}
+                    onCreated={onPosted}
                 />
-            ))}
 
-        <PostDialog
-            open={postDialogOpen}
-            closeDialog={() => setPostDialogOpen(false)}
-            onCreated={onPosted}
-        />
-
-        {viewer && <ImageDialog
-            open
-            imageId={viewer.imageId}
-            images={viewer.images}
-            closeDialog={closeImageDialog}
-        />}
-    </Box>);
+                {viewer && <ImageDialog
+                    open
+                    imageId={viewer.imageId}
+                    images={viewer.images}
+                    closeDialog={closeImageDialog}
+                />}
+            </Box>
+        </Container>);
 }

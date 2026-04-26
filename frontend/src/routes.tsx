@@ -1,10 +1,10 @@
 import { useRoutes } from 'react-router-dom';
 import { RequireAuth } from './components/RequireAuth';
-import { PostComments } from './pages/dashboard/PostComments.tsx';
 import { DashboardHome } from './pages/dashboard/DashboardHome.tsx';
 import { DashboardLayout } from './pages/dashboard/DashboardLayout.tsx';
+import { PostComments } from './pages/dashboard/PostComments.tsx';
 import { Users } from './pages/dashboard/Users';
-import { About } from './pages/public/About';
+import { About } from './pages/public/About.tsx';
 import { AuthCallbackPage } from './pages/public/AuthCallback';
 import { ForgotPasswordPage } from './pages/public/ForgotPasswordPage';
 import { Home } from './pages/public/Home';
@@ -12,6 +12,7 @@ import { ImagePage } from './pages/public/ImagePage';
 import { Layout } from './pages/public/Layout';
 import { NotFoundPage } from './pages/public/NotFoundPage';
 import { PostPage } from './pages/public/PostPage';
+import { ProjectsPage } from './pages/public/ProjectsPage.tsx';
 import { ResetPasswordPage } from './pages/public/ResetPasswordPage';
 import { SignInPage } from './pages/public/SignInPage';
 import { SignUpPage } from './pages/public/SignUpPage';
@@ -29,6 +30,7 @@ const routes = [
             { path: 'auth/callback', element: <AuthCallbackPage /> },
             { path: 'signin', element: <SignInPage /> },
             { path: 'about', element: <About /> },
+            { path: 'projects', element: <ProjectsPage /> },
             { path: 'signup', element: <SignUpPage /> },
             //{ path: 'signout', element: <SignOut /> },
             {
