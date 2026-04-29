@@ -8,6 +8,7 @@ import { About } from './pages/public/About.tsx';
 import { AuthCallbackPage } from './pages/public/AuthCallback';
 import { ForgotPasswordPage } from './pages/public/ForgotPasswordPage';
 import { Home } from './pages/public/Home';
+import { HomelabPage } from './pages/public/HomelabPage.tsx';
 import { ImagePage } from './pages/public/ImagePage';
 import { Layout } from './pages/public/Layout';
 import { NotFoundPage } from './pages/public/NotFoundPage';
@@ -31,6 +32,7 @@ const routes = [
             { path: 'signin', element: <SignInPage /> },
             { path: 'about', element: <About /> },
             { path: 'projects', element: <ProjectsPage /> },
+            { path: 'homelab', element: <HomelabPage /> },
             { path: 'signup', element: <SignUpPage /> },
             //{ path: 'signout', element: <SignOut /> },
             {

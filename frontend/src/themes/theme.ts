@@ -8,7 +8,7 @@ export const theme = createTheme({
         values: {
             xs: 0,
             sm: 680,
-            md: 900,
+            md: 1024,
             lg: 1200,
             xl: 1536,
         },
@@ -39,7 +39,8 @@ export const theme = createTheme({
         MuiCssBaseline: {
             styleOverrides: () => ({
                 ':root': {
-                    '--shadow-paper': '0 4px 1px -2px #00000022'
+                    //'--shadow-paper': '0 4px 1px -2px #00000022'
+                    '--shadow-paper': '0 2px 2px 0px #00000022'
                 },
                 html: {
                     '&.modal-dialog-open': {
@@ -467,6 +468,7 @@ export const theme = createTheme({
             styleOverrides: {
                 root: () => ({
                     '&.header-container': {
+                        top: 0,
                         padding: '10px',
                         backgroundColor: '#f3f3f391',
                         backdropFilter: 'saturate(180%) blur(20px)',
