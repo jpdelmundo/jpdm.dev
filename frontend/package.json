@@ -29,6 +29,7 @@
     "jwt-decode": "^4.0.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-ga4": "^3.0.1",
     "react-google-recaptcha-v3": "^1.11.0",
     "react-hook-form": "^7.65.0",
     "react-router-dom": "^7.7.1",
