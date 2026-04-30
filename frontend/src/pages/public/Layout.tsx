@@ -35,9 +35,9 @@ export const Layout = () => {
                         <Divider orientation="vertical" flexItem />
                         <Link component={RLink} to="/homelab" sx={linkSx}>Homelab</Link>
                         <Divider orientation="vertical" flexItem />
-                        <Link component={RLink} to="/services" sx={linkSx}>About</Link>
-                        <Divider orientation="vertical" flexItem />
-                        <Link component={RLink} to="/services" sx={linkSx}>Hire Me</Link>
+                        <Link component={RLink} to="/about" sx={linkSx}>About</Link>
+                        {/* <Divider orientation="vertical" flexItem />
+                        <Link component={RLink} to="/services" sx={linkSx}>Hire Me</Link> */}
                     </Stack>
                     <UserPanel sx={{ ml: 'auto', width: '55px' }} />
                 </Stack>
