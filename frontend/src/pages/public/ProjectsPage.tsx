@@ -39,6 +39,7 @@ export function ProjectsPage() {
     const containerSx = {
         height: '270px',
         position: 'relative',
+        padding: '20px',
         '&:hover': {
             '&>.MuiBox-root': {
                 'marginTop': '0px',
