@@ -72,7 +72,7 @@ export const Layout = () => {
                 </List>
             </Drawer>
             <Container component="header" className="header-container" sx={{ height: '60px', zIndex: 1000 }}>
-                <Stack direction="row" alignItems="center" maxWidth="md" sx={{ margin: '0 auto', gap: 2 }}>
+                <Stack direction="row" alignItems="center" maxWidth="false" sx={{ margin: '0 auto', gap: 2 }}>
                     <Stack direction="row" gap={2} alignItems={'center'} sx={{ mr: 'auto' }}>
                         <IconButton
                             onClick={onMenuClick}
