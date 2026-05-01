@@ -62,17 +62,12 @@ export const Layout = () => {
                         }}
                         tabIndex={-1}
                     >JPDM</Typography>
-                    {menuItems.filter((item) => item.visible).map((item, index, arr) => (
+                    {menuItems.filter((item) => item.visible).map((item) => (
                         <ListItem disablePadding>
-                            <ListItemButton component={RLink} to={item.to} sx={linkSx} onClick={() => setDrawerOpen(false)} sx={{ px: 4 }}>
+                            <ListItemButton component={RLink} to={item.to} sx={{ ...linkSx, px: 4 }} onClick={() => setDrawerOpen(false)}>
                                 <ListItemText>{item.label}</ListItemText>
                             </ListItemButton>
                         </ListItem>
-
-                        // <>
-                        //     <Link component={RLink} to={item.to} sx={linkSx}>{item.label}</Link>
-                        //     {index < arr.length - 1 && <Divider orientation="vertical" flexItem />}
-                        // </>
                     ))}
                 </List>
             </Drawer>
