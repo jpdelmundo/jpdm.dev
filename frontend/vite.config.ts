@@ -28,10 +28,10 @@ export default defineConfig(({ command }) => {
         output: {
           manualChunks: (id) => {
             if (
-              id.includes('node_modules/react') ||
-              id.includes('node_modules/react-dom') ||
-              id.includes('node_modules/react-router') ||
-              id.includes('node_modules/@emotion')
+              id.includes('node_modules/react/') ||        // trailing slash = exact package
+              id.includes('node_modules/react-dom/') ||
+              id.includes('node_modules/react-router/') ||
+              id.includes('node_modules/scheduler/')        // react-dom peer dep
             ) {
               return 'vendor-react';
             }
@@ -44,8 +44,7 @@ export default defineConfig(({ command }) => {
               return 'vendor-mui-datagrid';
             }
 
-            // All remaining MUI packages in one chunk
-            if (id.includes('@mui')) {
+            if (id.includes('@mui/') || id.includes('@emotion/')) {
               return 'vendor-mui';
             }
           }
