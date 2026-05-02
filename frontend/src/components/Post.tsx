@@ -6,6 +6,7 @@ import { useSnackbarStore } from '@/store/useSnackbarStore';
 import type { CollageImage } from '@/types/CollageImage';
 import type { PostCommentsUpdatedParams } from '@/types/PostCommentsUpdatedParams';
 import { copyToClipboard, formatCounters, getDimensionOrientation, getRelativeTime } from '@/utils/helper';
+import { linkify } from '@/utils/tsxHelper.tsx';
 import ChatBubbleOutlineRounded from '@mui/icons-material/ChatBubbleOutlineRounded';
 import CheckCircleRounded from '@mui/icons-material/CheckCircleRounded';
 import EqualizerRounded from '@mui/icons-material/EqualizerRounded';
@@ -27,8 +28,8 @@ import type { ImageOrientation } from '@shared/types/ImageOrientation';
 import { memo, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Avatar } from './Avatar.tsx';
-import { PostComments } from './PostComments';
 import { ImageCollage } from './ImageCollage';
+import { PostComments } from './PostComments';
 import { PostDialog } from './PostDialog';
 import { Tooltip } from './Tooltip';
 
@@ -196,7 +197,7 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
                 >
                     <ImageCollage orientation={orientation} images={images} onImageClick={handleOnImageClick} />
                 </Box>
-                <Typography className="content" {...(content.length <= 50 && { fontSize: { xs: '20px', sm: '30px' } })}>{content}</Typography>
+                <Typography className="content" {...(content.length <= 50 && { fontSize: { xs: '20px', sm: '30px' } })}>{linkify(content)}</Typography>
                 <Stack direction={'row'} className="controls">
                     <Box className="likes-button-container">
                         <Tooltip title="Like">
