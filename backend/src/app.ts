@@ -31,6 +31,10 @@ app.use('/usercontent', verifySignedUrl, express.static(USERCONTENT_DIR));
 app.use('/api', router);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  if (err instanceof ApiError && err.code === ErrorCode.TOKEN_EXPIRED) {
+    // Expected auth flow — token expired, client should refresh
+    return error(res, err.message, err.code, err.data, err.status);
+  }
   console.error('Server Error:', err);
 
   if (err instanceof ApiError) {

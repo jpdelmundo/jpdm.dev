@@ -4,7 +4,6 @@ import { makeDeps } from '@/infra/makeDeps.js';
 import type { ServiceContext } from '@/infra/serviceContext.js';
 import { createUserService } from '@/services/userService.js';
 import type { AuthorizedRequest } from '@/types/AuthorizedRequest.js';
-import type { Actor } from '@shared/types/Actor.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
 import type { Jwt, PayloadData } from '@shared/types/Jwt.js';
 import type { UserIdentity } from '@shared/types/UserIdentity.js';
@@ -26,14 +25,12 @@ export const currentUser = async (req: Request, res: Response, next: NextFunctio
     const authHeader = req.headers.authorization;
     const token = authHeader?.split(' ')[1];
     const anonUser: UserIdentity = { type: 'anonymous', id: '', username: 'anonymous', email: '', roles: [] };
+    const payload = getJwtPayload(req);
 
-    if (!token) {
+    if (!token || !payload) {
         req.user = anonUser;
         return next();
     }
-
-    const payload = getJwtPayload(req);
-    if (!payload) throw new JsonWebTokenError('Problem decoding payload');
     const user = await createUserService(systemContext).findById(payload.id);
 
     req.user = user
@@ -54,10 +51,15 @@ export const generateJwt = (payload: PayloadData) => {
 }
 
 export const authRequired = async (req: Request, res: Response, next: NextFunction) => {
-    const authUser = req.user;
-    if (!authUser || authUser.type == 'anonymous') throw new Error('Unauthorized request');
-
+    const authHeader = req.headers.authorization;
     const payload = getJwtPayload(req);
+    if (!payload && authHeader) {
+        throw new ApiError('Expired token', 401, ErrorCode.TOKEN_EXPIRED);
+    }
+
+    const authUser = req.user;
+    if (!authUser || authUser.type == 'anonymous') throw new ApiError('Unauthorized', 401, ErrorCode.TOKEN_MISSING);
+
     if (!payload) throw new JsonWebTokenError('Problem decoding payload');
 
     const user = await createUserService(systemContext).findById(authUser.id);
@@ -82,7 +84,7 @@ export const getJwtPayload = (req: Request) => {
     } catch (err) {
         const e = err as Error;
         if (e.name == 'TokenExpiredError') {
-            throw new ApiError('Expired token', 401, ErrorCode.TOKEN_EXPIRED);
+            return null;
         } else if (e.name == 'JsonWebTokenError' || e.name == 'NotBeforeError') {
             throw new ApiError(e.message, 401, ErrorCode.TOKEN_INVALID);
         }
@@ -92,15 +94,6 @@ export const getJwtPayload = (req: Request) => {
 
 export const getCurrentUser = (req: Request) => {
     return (req as AuthorizedRequest).user;
-}
-
-export const getActor = (req: Request) => {
-    const payload = getJwtPayload(req);
-    return payload ? {
-        type: 'user',
-        id: payload?.id,
-        roles: payload?.roles
-    } as Actor : null;
 }
 
 export const verifySignedUrl = (req: Request, res: Response, next: NextFunction) => {

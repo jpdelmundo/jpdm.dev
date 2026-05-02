@@ -2,6 +2,7 @@ import { getNewToken, waitForRefreshIfNeeded } from '@/auth/tokenManager';
 import { useAuthStore } from '@/store/useAuthStore';
 import type { ApiErrorDetail, ApiResult } from '@shared/types/ApiResult';
 import { ErrorCode } from '@shared/types/ErrorCode';
+import { jwtDecode } from 'jwt-decode';
 
 export class ClientApiError extends Error {
     public status: number;
@@ -105,6 +106,19 @@ export async function apiPost<T>(url: string, body?: ApiRequestBody, onProgress?
     if (isFormData) {
         await waitForRefreshIfNeeded();
 
+        //Pre-check token expiry so we don't start an upload with an expired token
+        //(Vite proxy can't forward 401 while the upload body is still in flight, doesn't matter on prod)
+        const token = useAuthStore.getState().token;
+        if (token) {
+            try {
+                const { exp } = jwtDecode<{ exp: number }>(token);
+                if (exp && Date.now() >= exp * 1000) {
+                    const newToken = await getNewToken();
+                    if (newToken) useAuthStore.getState().setToken(newToken);
+                }
+            } catch { /* will fail at server */ }
+        }
+
         //when uploading a file this is used
         return new Promise<ApiResult<T>>((resolve, reject) => {
             const token = useAuthStore.getState().token;
@@ -151,7 +165,12 @@ export async function apiPost<T>(url: string, body?: ApiRequestBody, onProgress?
                 }
             };
 
-            xhr.onerror = () => reject(new Error('Unable to connect to the server. Please check your internet connection.'));
+            xhr.onerror = () => {
+                const errMsg = xhr.status
+                    ? `Request to ${requestUrl} failed with status ${xhr.status}`
+                    : `Request to ${requestUrl} failed to connect`;
+                reject(new Error(errMsg));
+            };
 
             if (xhr.upload && onProgress) {
                 xhr.upload.onprogress = (ev) => {
