@@ -13,7 +13,7 @@ export const compress = async (input: Buffer | string, options: CompressOptions)
     let output: Buffer;
 
     do {
-        const resized = sharp(input).resize({
+        const resized = sharp(input).rotate().resize({
             width: maxWidth as number,
             height: maxHeight as number,
             fit: 'inside',
