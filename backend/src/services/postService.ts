@@ -286,8 +286,6 @@ export const createPostService = (ctx: ServiceContext) => {
             fs.mkdirSync(destDir, { recursive: true });
         }
 
-        const dimensions = type.mime.startsWith('image/') ? await imageSizeFromFile(`${file.path}`) : null;
-
         //compress uploaded file
         const parsed = path.parse(file.path);
         const compressed = await compress(file.path, { format: 'webp' });
@@ -296,6 +294,7 @@ export const createPostService = (ctx: ServiceContext) => {
         fs.writeFileSync(compressedFilePath, compressed);
         fs.unlinkSync(file.path);
 
+        const dimensions = type.mime.startsWith('image/') ? await imageSizeFromFile(compressedFilePath) : null;
         const newFile: FileInitializer = {
             user_id: actor.type == 'user' ? actor.id : '',
             filename: path.basename(compressedFilePath),

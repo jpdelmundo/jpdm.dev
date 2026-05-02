@@ -58,8 +58,6 @@ export const createFileService = ({ deps, actor }: ServiceContext) => {
             fs.mkdirSync(destDir, { recursive: true });
         }
 
-        const dimensions = type.mime.startsWith('image/') ? await imageSizeFromFile(`${file.path}`) : null;
-
         // compress uploaded file
         const parsed = path.parse(file.path);
         const compressed = await compress(file.path, { format: 'webp' });
@@ -68,6 +66,7 @@ export const createFileService = ({ deps, actor }: ServiceContext) => {
         fs.writeFileSync(compressedFilePath, compressed);
         fs.unlink(file.path, (err) => err && console.warn(`Failed to unlink temp file: ${file.path}`));
 
+        const dimensions = type.mime.startsWith('image/') ? await imageSizeFromFile(compressedFilePath) : null;
         const newFile: FileInitializer = {
             user_id: isAuthenticatedUser(actor) ? actor.id : '',
             filename: path.basename(compressedFilePath),
