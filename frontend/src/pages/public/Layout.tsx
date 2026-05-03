@@ -63,7 +63,7 @@ export const Layout = () => {
                     >JPDM</Typography>
                     {menuItems.filter((item) => item.visible).map((item) => (
                         <ListItem disablePadding>
-                            <ListItemButton component={RLink} to={item.to} sx={{ ...linkSx, px: 4, py: 1 }} onClick={() => setDrawerOpen(false)}>
+                            <ListItemButton component={RLink} to={item.to} sx={{ ...linkSx, px: 4 }} onClick={() => setDrawerOpen(false)}>
                                 <Typography sx={{ fontWeight: 'bold', fontSize: '28px' }}>{item.label}</Typography>
                             </ListItemButton>
                         </ListItem>
