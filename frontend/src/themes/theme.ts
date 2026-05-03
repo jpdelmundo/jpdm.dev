@@ -250,6 +250,7 @@ export const theme = createTheme({
                             lineHeight: 1
                         },
                         '& .content': {
+                            whiteSpace: 'pre-wrap',
                             marginTop: '10px',
                             marginBottom: '10px',
                             [theme.breakpoints.down('sm')]: {
