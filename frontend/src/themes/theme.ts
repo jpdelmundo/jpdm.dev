@@ -226,7 +226,7 @@ export const theme = createTheme({
                             overflow: 'hidden'
                         },
                         borderRadius: '20px',
-                        margin: '25px 0',
+                        marginBottom: '25px',
                         '& .header': {
                             marginBottom: '10px',
                             gap: '10px',
