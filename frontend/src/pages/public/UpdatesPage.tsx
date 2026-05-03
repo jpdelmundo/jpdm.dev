@@ -76,16 +76,17 @@ export const UpdatesPage = () => {
 
     return (
         <Container component={'main'} maxWidth="sm" sx={{ pt: '60px' }}>
-            <Box mt={'5px'}>
+            <Box>
                 {user?.username == 'jp'
                     && <Paper
                         elevation={0}
                         onClick={() => setPostDialogOpen(true)}
                         sx={{
                             border: 'var(--border)',
-                            boxShadow: 'var(--shadow-paper)',
+                            boxShadow: '0 2px 2px -1px #00000011',
                             borderRadius: '16px',
                             padding: '15px',
+                            marginTop: '5px',
                             marginBottom: '25px',
                             cursor: 'text',
                             '&:hover': {

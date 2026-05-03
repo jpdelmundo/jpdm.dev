@@ -12,7 +12,6 @@ import Link from '@mui/material/Link';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import type { SxProps } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
@@ -64,8 +63,8 @@ export const Layout = () => {
                     >JPDM</Typography>
                     {menuItems.filter((item) => item.visible).map((item) => (
                         <ListItem disablePadding>
-                            <ListItemButton component={RLink} to={item.to} sx={{ ...linkSx, px: 4 }} onClick={() => setDrawerOpen(false)}>
-                                <ListItemText>{item.label}</ListItemText>
+                            <ListItemButton component={RLink} to={item.to} sx={{ ...linkSx, px: 4, py: 1 }} onClick={() => setDrawerOpen(false)}>
+                                <Typography sx={{ fontWeight: 'bold', fontSize: '28px' }}>{item.label}</Typography>
                             </ListItemButton>
                         </ListItem>
                     ))}

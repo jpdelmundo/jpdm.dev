@@ -12,6 +12,13 @@ type ImageCollageProps = {
     onImageClick?: (image: CollageImage) => void
 };
 
+const hoverSx = {
+    '&:hover': {
+        filter: 'brightness(0.7)',
+        transition: '0.2s ease-out'
+    }
+};
+
 export const ImageCollage = memo(({ orientation, images, onImageClick }: ImageCollageProps) => {
     const theme = useTheme();
 
@@ -19,16 +26,16 @@ export const ImageCollage = memo(({ orientation, images, onImageClick }: ImageCo
         <>
             {images.length == 1 && (
                 <Stack maxHeight={700} justifyContent="center" overflow="hidden">
-                    <CoverImage onImageClick={onImageClick} image={images[0]} sx={{ maxHeight: 700, objectFit: 'contain' }} />
+                    <CoverImage onImageClick={onImageClick} image={images[0]} sx={{ maxHeight: 700, objectFit: 'contain', ...hoverSx }} />
                 </Stack>
             )}
 
             {images.length == 2 && (
                 <Stack direction={orientation == 'landscape' ? 'column' : 'row'} gap="2px" justifyContent="center" sx={{ aspectRatio: 1.11 }}>
-                    <Box sx={{ minHeight: 0, flex: 1, overflow: 'hidden', justifyContent: 'center', alignItems: 'center', display: 'flex' }} >
+                    <Box sx={{ minHeight: 0, flex: 1, overflow: 'hidden', justifyContent: 'center', alignItems: 'center', display: 'flex', ...hoverSx }} >
                         <CoverImage onImageClick={onImageClick} image={images[0]} />
                     </Box>
-                    <Box sx={{ minHeight: 0, flex: 1, overflow: 'hidden', justifyContent: 'center', alignItems: 'center', display: 'flex' }} >
+                    <Box sx={{ minHeight: 0, flex: 1, overflow: 'hidden', justifyContent: 'center', alignItems: 'center', display: 'flex', ...hoverSx }} >
                         <CoverImage onImageClick={onImageClick} image={images[1]} />
                     </Box>
                 </Stack>
@@ -37,15 +44,15 @@ export const ImageCollage = memo(({ orientation, images, onImageClick }: ImageCo
             {images.length == 3 && (
                 <Stack direction={orientation == 'landscape' ? 'column' : 'row'} gap="2px" sx={{ aspectRatio: 1.11 }}>
                     <Stack gap="2px" direction={orientation == 'landscape' ? 'row' : 'column'} sx={{ flex: 1 }} justifyContent="center" overflow="hidden">
-                        <Box sx={{ minHeight: 0, flex: 1 }}>
+                        <Box sx={{ minHeight: 0, flex: 1, ...hoverSx }}>
                             <CoverImage onImageClick={onImageClick} image={images[0]} />
                         </Box>
                     </Stack>
                     <Stack gap="2px" direction={orientation == 'landscape' ? 'row' : 'column'} sx={{ flex: 1 }} justifyContent="center" overflow="hidden">
-                        <Box sx={{ minHeight: 0, flex: 1 }}>
+                        <Box sx={{ minHeight: 0, flex: 1, ...hoverSx }}>
                             <CoverImage onImageClick={onImageClick} image={images[1]} />
                         </Box>
-                        <Box sx={{ minHeight: 0, flex: 1 }}>
+                        <Box sx={{ minHeight: 0, flex: 1, ...hoverSx }}>
                             <CoverImage onImageClick={onImageClick} image={images[2]} />
                         </Box>
                     </Stack>
@@ -55,18 +62,18 @@ export const ImageCollage = memo(({ orientation, images, onImageClick }: ImageCo
             {images.length == 4 && (
                 <Stack direction={orientation == 'landscape' ? 'column' : 'row'} gap="2px" sx={{ aspectRatio: 1.11 }}>
                     <Stack gap="2px" direction={orientation == 'landscape' ? 'row' : 'column'} sx={{ flex: 1 }} justifyContent="center" overflow="hidden">
-                        <Box sx={{ minHeight: 0, flex: 1 }}>
+                        <Box sx={{ minHeight: 0, flex: 1, ...hoverSx }}>
                             <CoverImage onImageClick={onImageClick} image={images[0]} />
                         </Box>
-                        <Box sx={{ minHeight: 0, flex: 1 }}>
+                        <Box sx={{ minHeight: 0, flex: 1, ...hoverSx }}>
                             <CoverImage onImageClick={onImageClick} image={images[1]} />
                         </Box>
                     </Stack>
                     <Stack gap="2px" direction={orientation == 'landscape' ? 'row' : 'column'} sx={{ flex: 1 }} justifyContent="center" overflow="hidden">
-                        <Box sx={{ minHeight: 0, flex: 1 }}>
+                        <Box sx={{ minHeight: 0, flex: 1, ...hoverSx }}>
                             <CoverImage onImageClick={onImageClick} image={images[2]} />
                         </Box>
-                        <Box sx={{ minHeight: 0, flex: 1 }}>
+                        <Box sx={{ minHeight: 0, flex: 1, ...hoverSx }}>
                             <CoverImage onImageClick={onImageClick} image={images[3]} />
                         </Box>
                     </Stack>
@@ -87,21 +94,21 @@ export const ImageCollage = memo(({ orientation, images, onImageClick }: ImageCo
                     }}
                 >
                     <Stack gap="2px" direction={orientation == 'landscape' ? 'row' : 'column'} sx={{ flex: orientation == 'landscape' ? 1.6 : 1.3 }} justifyContent="center" overflow="hidden">
-                        <Box sx={{ minHeight: 0, flex: 1 }}>
+                        <Box sx={{ minHeight: 0, flex: 1, ...hoverSx }}>
                             <CoverImage onImageClick={onImageClick} image={images[0]} />
                         </Box>
-                        <Box sx={{ minHeight: 0, flex: 1 }}>
+                        <Box sx={{ minHeight: 0, flex: 1, ...hoverSx }}>
                             <CoverImage onImageClick={onImageClick} image={images[1]} />
                         </Box>
                     </Stack>
                     <Stack gap="2px" direction={orientation == 'landscape' ? 'row' : 'column'} sx={{ flex: 1 }} justifyContent="center" overflow="hidden">
-                        <Box sx={{ minHeight: 0, flex: 1 }}>
+                        <Box sx={{ minHeight: 0, flex: 1, ...hoverSx }}>
                             <CoverImage onImageClick={onImageClick} image={images[2]} />
                         </Box>
-                        <Box sx={{ minHeight: 0, flex: 1 }}>
+                        <Box sx={{ minHeight: 0, flex: 1, ...hoverSx }}>
                             <CoverImage onImageClick={onImageClick} image={images[3]} />
                         </Box>
-                        <Box sx={{ minHeight: 0, flex: 1 }}>
+                        <Box sx={{ minHeight: 0, flex: 1, ...hoverSx }}>
                             <CoverImage onImageClick={onImageClick} image={images[4]} />
                         </Box>
                     </Stack>
@@ -122,21 +129,21 @@ export const ImageCollage = memo(({ orientation, images, onImageClick }: ImageCo
                     }}
                 >
                     <Stack gap="2px" direction={orientation == 'landscape' ? 'row' : 'column'} sx={{ flex: orientation == 'landscape' ? 1.6 : 1.3 }} justifyContent="center" overflow="hidden">
-                        <Box sx={{ minHeight: 0, flex: 1 }}>
+                        <Box sx={{ minHeight: 0, flex: 1, ...hoverSx }}>
                             <CoverImage onImageClick={onImageClick} image={images[0]} />
                         </Box>
-                        <Box sx={{ minHeight: 0, flex: 1 }}>
+                        <Box sx={{ minHeight: 0, flex: 1, ...hoverSx }}>
                             <CoverImage onImageClick={onImageClick} image={images[1]} />
                         </Box>
                     </Stack>
                     <Stack gap="2px" direction={orientation == 'landscape' ? 'row' : 'column'} sx={{ flex: 1 }} justifyContent="center" overflow="hidden">
-                        <Box sx={{ minHeight: 0, flex: 1 }}>
+                        <Box sx={{ minHeight: 0, flex: 1, ...hoverSx }}>
                             <CoverImage onImageClick={onImageClick} image={images[2]} />
                         </Box>
-                        <Box sx={{ minHeight: 0, flex: 1 }}>
+                        <Box sx={{ minHeight: 0, flex: 1, ...hoverSx }}>
                             <CoverImage onImageClick={onImageClick} image={images[3]} />
                         </Box>
-                        <Box sx={{ minHeight: 0, flex: 1 }} position="relative">
+                        <Box sx={{ minHeight: 0, flex: 1, ...hoverSx }} position="relative">
                             <CoverImage onImageClick={onImageClick} image={images[4]} />
                             <div
                                 style={{
