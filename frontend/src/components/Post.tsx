@@ -176,7 +176,8 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
                 sx={{
                     opacity: isDeleting ? 0.8 : 1,
                     pointerEvents: isDeleting ? 'none' : '',
-                    filter: isDeleting ? 'grayscale(1)' : ''
+                    filter: isDeleting ? 'grayscale(1)' : '',
+                    border: 'var(--border)'
                 }}
             >
                 <Stack direction={'row'}>

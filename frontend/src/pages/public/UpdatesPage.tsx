@@ -82,6 +82,8 @@ export const UpdatesPage = () => {
                         elevation={0}
                         onClick={() => setPostDialogOpen(true)}
                         sx={{
+                            border: 'var(--border)',
+                            boxShadow: 'var(--shadow-paper)',
                             borderRadius: '16px',
                             padding: '15px',
                             marginBottom: '25px',
