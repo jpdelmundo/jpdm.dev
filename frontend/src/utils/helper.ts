@@ -78,7 +78,7 @@ export const getRelativeTime = (dateTime: string, locale: string = navigator.lan
     const days = diff / 86400;
 
     if (Math.abs(days) >= 1) {
-        return past.toLocaleString(locale);
+        return formatDateTime(past, locale, { short_month: true });
     }
 
     const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
