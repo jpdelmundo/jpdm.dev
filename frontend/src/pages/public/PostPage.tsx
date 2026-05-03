@@ -5,6 +5,7 @@ import { Post } from '@/components/Post';
 import { PostSkeleton } from '@/components/skeleton/PostSkeleton';
 import { useAuthStore } from '@/store/useAuthStore';
 import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
 import type PostDTO from '@shared/models/dto/PostDTO.ts';
 import type PostImageExtended from '@shared/models/extensions/PostImageExtended';
 import type { PostImageId } from '@shared/models/generated/PostImage';
@@ -76,21 +77,23 @@ export function PostPage() {
 
     if (!id) return <Navigate to="/" replace />;
     if (error) return <Error error={error} />;
-    return (<Box mt={1}>
-        {!post || isLoading
-            ? <PostSkeleton />
-            : <Post
-                post={post}
-                onDeleted={handlePostDeleted}
-                onUpdated={handlePostUpdated}
-                onImageClick={handlePostImageClick}
-            />}
+    return <Container component={'main'} maxWidth="sm" sx={{ pt: '60px' }}>
+        <Box>
+            {!post || isLoading
+                ? <PostSkeleton />
+                : <Post
+                    post={post}
+                    onDeleted={handlePostDeleted}
+                    onUpdated={handlePostUpdated}
+                    onImageClick={handlePostImageClick}
+                />}
 
-        {viewer && <ImageDialog
-            open
-            imageId={viewer.imageId}
-            images={viewer.images}
-            closeDialog={closeImageDialog}
-        />}
-    </Box>)
+            {viewer && <ImageDialog
+                open
+                imageId={viewer.imageId}
+                images={viewer.images}
+                closeDialog={closeImageDialog}
+            />}
+        </Box>
+    </Container>
 }

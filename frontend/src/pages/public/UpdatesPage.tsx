@@ -84,6 +84,7 @@ export const UpdatesPage = () => {
                         sx={{
                             borderRadius: '16px',
                             padding: '15px',
+                            marginBottom: '25px',
                             cursor: 'text',
                             '&:hover': {
                                 transition: 'box-shadow 0.25s ease',
