@@ -14,6 +14,7 @@ import Paper, { type PaperProps } from '@mui/material/Paper';
 import Slide, { type SlideProps } from '@mui/material/Slide';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import { useMediaQuery } from '@mui/material';
 import { useRef, useState } from 'react';
 import projectData from '../../data/projects.json';
 
@@ -31,6 +32,7 @@ const SlideTransition = (props: SlideProps) => {
 }
 
 export function ProjectsPage() {
+    const isWide = useMediaQuery('(min-width:420px)');
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
     //const [previewImage, setPreviewImage] = useState<string | null>(null);
     const previewImageSrcRef = useRef<{ open: (src: string) => void }>(null);
@@ -89,7 +91,7 @@ export function ProjectsPage() {
                 spacing={1}
                 sx={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))'
+                    gridTemplateColumns: isWide ? 'repeat(auto-fit, minmax(420px, 1fr))' : '1fr'
                 }}>
                 {projects.map(project => {
                     const firstImage = project.media?.find(m => m.type === 'image');
