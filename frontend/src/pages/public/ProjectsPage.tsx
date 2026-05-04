@@ -14,7 +14,8 @@ import Slide, { type SlideProps } from '@mui/material/Slide';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import projectData from '../../data/projects.json';
 
 const projects = projectData as Project[];
@@ -24,9 +25,11 @@ const SlideTransition = (props: SlideProps) => {
 
 export function ProjectsPage() {
     const isWide = useMediaQuery('(min-width:420px)');
-    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
     //const [previewImage, setPreviewImage] = useState<string | null>(null);
     const previewImageSrcRef = useRef<{ open: (src: string) => void }>(null);
+    const selectedProjectId = searchParams.get('dialog');
     const project = projects.find(project => project.id === selectedProjectId);
     const isTouchDevice = useMediaQuery('(pointer: coarse)');
 
@@ -95,18 +98,18 @@ export function ProjectsPage() {
                                 <CardMedia
                                     image={firstImageUrl}
                                     sx={containerSx}
-                                    {...(isTouchDevice && { onClick: () => setSelectedProjectId(project.id) })}
+                                    {...(isTouchDevice && { onClick: () => setSearchParams({ dialog: project.id }) })}
                                 >
-                                    {!isTouchDevice && <ProjectOverlay project={project} onClick={() => setSelectedProjectId(project.id)} />}
+                                    {!isTouchDevice && <ProjectOverlay project={project} onClick={() => setSearchParams({ dialog: project.id })} />}
                                 </CardMedia>
                             ) : (
                                 <Box sx={{ ...containerSx, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#ffffff' }}
-                                    {...(isTouchDevice && { onClick: () => setSelectedProjectId(project.id) })}
+                                    {...(isTouchDevice && { onClick: () => setSearchParams({ dialog: project.id }) })}
                                 >
                                     <Typography fontWeight={'bold'} fontSize={'20px'}>
                                         {project.name}
                                     </Typography>
-                                    {!isTouchDevice && <ProjectOverlay project={project} onClick={() => setSelectedProjectId(project.id)} />}
+                                    {!isTouchDevice && <ProjectOverlay project={project} onClick={() => setSearchParams({ dialog: project.id })} />}
                                 </Box>
                             )}
                         </Card>
@@ -117,14 +120,14 @@ export function ProjectsPage() {
             <Dialog
                 fullScreen
                 open={Boolean(project)}
-                onClose={() => setSelectedProjectId(null)}
+                onClose={() => navigate(-1)}
                 slots={{ transition: SlideTransition }}
                 slotProps={{ paper: { sx: { margin: '0 !important' } } }}
             >
                 <Stack>
                     <Stack direction={'row'} sx={{ position: 'fixed', right: '20px', top: '10px', alignItems: 'center', gap: '10px' }}>
                         <Typography color="#00000088">Esc</Typography>
-                        <IconButton onClick={() => setSelectedProjectId(null)}>
+                        <IconButton onClick={() => navigate(-1)}>
                             <CloseIcon />
                         </IconButton>
                     </Stack>

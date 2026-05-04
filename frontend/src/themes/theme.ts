@@ -246,7 +246,7 @@ export const theme = createTheme({
                             marginTop: '10px',
                             marginBottom: '10px',
                             [theme.breakpoints.down('sm')]: {
-                                fontSize: '14px',
+                                fontSize: '15px',
                             },
                             [theme.breakpoints.up('sm')]: {
                                 fontSize: '16px',
