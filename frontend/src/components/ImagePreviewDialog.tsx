@@ -3,27 +3,18 @@ import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { useImperativeHandle, useState, type Ref } from 'react';
-
-type Handle = {
-    open: (src: string) => void;
-}
 
 type ImagePreviewDialogProps = {
-    ref: Ref<Handle>;
+    open: boolean;
+    src: string;
+    onClose: () => void;
 }
 
-export function ImagePreviewDialog({ ref }: ImagePreviewDialogProps) {
-    const [imgSrc, setImgSrc] = useState<string | null>(null);
-    const open = Boolean(imgSrc);
-
-    useImperativeHandle(ref, () => ({
-        open: (src: string) => setImgSrc(src)
-    }), []);
+export function ImagePreviewDialog({ open, src, onClose }: ImagePreviewDialogProps) {
 
     return <Dialog
         open={open}
-        onClose={() => setImgSrc(null)}
+        onClose={onClose}
         maxWidth={false}
         sx={{
             '& .MuiPaper-root': {
@@ -42,12 +33,12 @@ export function ImagePreviewDialog({ ref }: ImagePreviewDialogProps) {
     >
         <Stack direction={'row'} sx={{ position: 'fixed', right: '20px', top: '10px', alignItems: 'center', gap: '10px' }}>
             <Typography color="#ffffff">Esc</Typography>
-            <IconButton sx={{ color: '#ffffff', backgroundColor: '#ffffff33' }} onClick={() => setImgSrc(null)}>
+            <IconButton sx={{ color: '#ffffff', backgroundColor: '#ffffff33' }} onClick={onClose}>
                 <CloseIcon />
             </IconButton>
         </Stack>
         <img
-            src={imgSrc || ''}
+            src={src || ''}
             style={{
                 width: '100%',
                 maxHeight: '100vh',

@@ -14,7 +14,6 @@ import Slide, { type SlideProps } from '@mui/material/Slide';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import projectData from '../../data/projects.json';
 
@@ -27,9 +26,8 @@ export function ProjectsPage() {
     const isWide = useMediaQuery('(min-width:420px)');
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
-    //const [previewImage, setPreviewImage] = useState<string | null>(null);
-    const previewImageSrcRef = useRef<{ open: (src: string) => void }>(null);
     const selectedProjectId = searchParams.get('dialog');
+    const previewImageId = searchParams.get('image');
     const project = projects.find(project => project.id === selectedProjectId);
     const isTouchDevice = useMediaQuery('(pointer: coarse)');
 
@@ -163,7 +161,7 @@ export function ProjectsPage() {
                                                 filter: 'brightness(0.7)'
                                             }
                                         }}
-                                        onClick={() => previewImageSrcRef.current?.open(src)}
+                                        onClick={() => setSearchParams({ dialog: project.id, image: src })}
                                     />
                                 }
                                 case 'youtube-embed':
@@ -173,7 +171,7 @@ export function ProjectsPage() {
                     </Stack>
                 </Stack>
             </Dialog>
-            <ImagePreviewDialog ref={previewImageSrcRef} />
+            <ImagePreviewDialog open={Boolean(previewImageId)} src={previewImageId || ''} onClose={() => navigate(-1)} />
         </Container>
     );
 }
