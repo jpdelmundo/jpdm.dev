@@ -15,7 +15,7 @@ export const theme = createTheme({
     },
     palette: {
         primary: {
-            main: '#1b54a5ff'
+            main: '#0c66e4'
         },
         background: {
             default: '#f3f3f3'
@@ -143,13 +143,18 @@ export const theme = createTheme({
         MuiButton: {
             styleOverrides: {
                 containedPrimary: {
-                    backgroundColor: '#1b54a5ff',
+                    backgroundColor: '#0c66e4',
+                    border: 'solid 1px #0a56c0',
                     '&:hover': {
-                        backgroundColor: '#2e70ffff'
+                        backgroundColor: '#0a56c0'
                     }
                 },
+                outlinedPrimary: {
+                    border: 'solid 1px #c9c9c9',
+                    color: '#5e6a79'
+                },
                 root: () => ({
-                    fontSize: 15,
+                    fontSize: 14,
                     textTransform: 'none',
                     boxShadow: 'none',
                     '&:hover': { boxShadow: 'none', },

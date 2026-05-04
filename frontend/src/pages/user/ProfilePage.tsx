@@ -9,8 +9,11 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useUserProfileStore } from "@/store/useUserProfileStore";
 import { getFingerprint } from "@/utils/device";
 import { formatDateTime, getErrorMessage } from "@/utils/helper";
+import CakeRoundedIcon from '@mui/icons-material/CakeRounded';
 import ClearRounded from '@mui/icons-material/ClearRounded';
 import FileUploadRounded from '@mui/icons-material/FileUploadRounded';
+import LocalPhoneRoundedIcon from '@mui/icons-material/LocalPhoneRounded';
+import WcRoundedIcon from '@mui/icons-material/WcRounded';
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -18,6 +21,7 @@ import Container from '@mui/material/Container';
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
+import Divider from '@mui/material/Divider';
 import Grid, { type GridProps } from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import MenuItem from "@mui/material/MenuItem";
@@ -183,20 +187,17 @@ export const ProfilePage = () => {
 
     return <Container component={'main'} maxWidth="sm" sx={{ pt: '60px' }}>
         <Paper
-            elevation={0}
             className="page"
             onDragOver={avatarOnDragOver}
             onDragEnter={avatarOnDragEnter}
             onDragLeave={avatarOnDragLeave}
             onDrop={avatarOnDrop}
-            sx={{
-                border: avatarIsDragging ? 'dashed 5px #dddddd' : 'solid 5px #dddddd00'
-            }}
+            sx={{ filter: avatarIsDragging ? 'brightness(0.7)' : '' }}
         >
             <Stack mb={2} direction={'row'}>
                 <Typography variant="h5" fontWeight={'bold'}>Profile</Typography>
             </Stack>
-            <Stack gap="25px" alignItems={'center'}>
+            <Stack gap="10px" alignItems={'center'}>
                 <Stack gap={'10px'} alignItems={'center'}>
                     <Box sx={{ position: 'relative' }}>
                         {avatarIsUploading && <CircularProgress
@@ -289,35 +290,30 @@ export const ProfilePage = () => {
                         style={{ display: 'none' }}
                     />
                     <Stack>
-                        <Button size="small" variant="text" onClick={photoOnEdit}>Change photo</Button>
+                        {/* <Button size="small" variant="text" onClick={photoOnEdit}>Change photo</Button> */}
                         {avatarErrorMessage && <Typography color="error" textAlign="center">{avatarErrorMessage}</Typography>}
                     </Stack>
                 </Stack>
-                <Stack maxWidth={'300px'} gap="10px">
-                    <Grid container>
-                        <GridRow mb="10px">
-                            <Grid {...colLabel}><Typography color="grey">Name</Typography></Grid>
-                            <Grid  {...colData}>{userProfile?.first_name ? `${userProfile?.first_name} ${userProfile?.last_name}` : 'Not set'}</Grid>
-                        </GridRow>
-                        <GridRow mb="10px">
-                            <Grid {...colLabel}><Typography color="grey">Birthday</Typography></Grid>
-                            <Grid {...colData}>{userProfile?.date_of_birth ? formatDateTime(userProfile.date_of_birth, navigator.language, { date_only: true }) : 'Not set'}</Grid>
-                        </GridRow>
-                        <GridRow mb="10px">
-                            <Grid {...colLabel}><Typography color="grey">Gender</Typography></Grid>
-                            <Grid {...colData}>{userProfile?.gender ? genderText((userProfile.gender) as Gender) : 'Not set'}</Grid>
-                        </GridRow>
-                        <GridRow mb="10px">
-                            <Grid {...colLabel}><Typography color="grey">Phone</Typography></Grid>
-                            <Grid  {...colData}>{userProfile?.phone_number ? `${userProfile.phone_number}` : 'Not set'}</Grid>
-                        </GridRow>
-                        <GridRow mb="10px">
-                            <Grid {...colLabel}><Typography color="grey">About You</Typography></Grid>
-                            <Grid {...colData}>{userProfile?.bio ? `${userProfile.bio}` : 'Not set'}</Grid>
-                        </GridRow>
-                    </Grid>
-                    <Button size="small" variant="text" onClick={editOnClick}>Edit</Button>
+                <Box sx={{ width: '100%' }}>
+                    <Divider><Typography textAlign={'center'} fontWeight={'bold'} fontSize={'20px'}>{userProfile?.first_name ? `${userProfile?.first_name} ${userProfile?.last_name}` : ''}</Typography></Divider>
+                </Box>
+                {userProfile?.bio && <Typography sx={{ textAlign: 'center', color: '#888888' }}>{userProfile.bio}</Typography>}
+
+                <Stack sx={{ flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: '20px', sm: '40px' }, alignItems: { xs: '', sm: 'center' }, p: '20px 0' }}>
+                    {userProfile?.date_of_birth && <Stack sx={{ flexDirection: 'row', gap: '10px', alignItems: 'center' }}>
+                        <CakeRoundedIcon color="info" />
+                        <Typography textAlign={'center'}>{formatDateTime(userProfile.date_of_birth, navigator.language, { date_only: true })}</Typography>
+                    </Stack>}
+                    {userProfile?.gender && <Stack sx={{ flexDirection: 'row', gap: '10px', alignItems: 'center' }}>
+                        <WcRoundedIcon color="info" />
+                        <Typography textAlign={'center'}>{genderText((userProfile.gender) as Gender)}</Typography>
+                    </Stack>}
+                    {userProfile?.phone_number && <Stack sx={{ flexDirection: 'row', gap: '10px', alignItems: 'center' }}>
+                        <LocalPhoneRoundedIcon color="info" />
+                        <Typography textAlign={'center'}>{userProfile.phone_number}</Typography>
+                    </Stack>}
                 </Stack>
+                <Button size="small" variant="text" onClick={editOnClick}>Edit</Button>
             </Stack>
 
             <Dialog

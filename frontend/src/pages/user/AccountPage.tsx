@@ -4,7 +4,9 @@ import PasswordField from '@/components/PasswordField';
 import { PageLoading } from '@/components/skeleton/PageLoading';
 import { useAuthStore } from '@/store/useAuthStore';
 import { formatDateTime, getErrorMessage, scrollbarWidthAware } from '@/utils/helper';
+import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
 import MailOutlineRounded from '@mui/icons-material/MailOutlineRounded';
+import PasswordRoundedIcon from '@mui/icons-material/PasswordRounded';
 import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
@@ -22,7 +24,7 @@ import type { ApiErrorDetail } from '@shared/types/ApiResult';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const boxProps = { padding: '10px 25px', margin: '10px 0' };
+const boxProps = { padding: '10px 0', marginBottom: '20px' };
 
 export const AccountPage = () => {
     const user = useAuthStore(s => s.user);
@@ -115,27 +117,27 @@ export const AccountPage = () => {
     if (error) return <Error error={error} />;
 
     return <Container component={'main'} maxWidth="sm" sx={{ pt: '60px' }}>
-        <Paper elevation={0} className="page">
+        <Paper className="page">
             <Box mb={2}>
                 <Typography variant="h5" fontWeight={'bold'}>Account & Security</Typography>
                 <Typography fontSize={'small'} color="textDisabled">Created on {formatDateTime(data.created_at)}</Typography>
             </Box>
-            <Typography>Email</Typography>
+            <Stack direction={'row'} alignContent={'center'} gap={'5px'}><MailOutlineRounded sx={{ color: '#adb0b4' }} /><Typography>Email</Typography></Stack>
             <Box {...boxProps}>
                 {
                     user?.email
                         ? <Stack gap={1}>
-                            <Stack direction={'row'} gap={1}><MailOutlineRounded />  <Typography>{user?.email}</Typography></Stack>
-                            <Box><Button variant="contained" size="small" sx={{ width: '150px' }} onClick={updateEmailOnClick}>Change email</Button></Box>
+                            <Stack direction={'row'} gap={1}><Typography fontWeight={'bold'}>{user?.email}</Typography></Stack>
+                            <Box><Button variant="outlined" size="small" sx={{ width: '150px' }} onClick={updateEmailOnClick}>Change email</Button></Box>
                         </Stack>
-                        : <Button variant="contained" size="small" sx={{ width: '150px' }} onClick={updateEmailOnClick}>Add email</Button>
+                        : <Button variant="outlined" size="small" sx={{ width: '150px' }} onClick={updateEmailOnClick}>Add email</Button>
                 }
             </Box>
-            <Typography>Password</Typography>
+            <Stack direction={'row'} alignContent={'center'} gap={'5px'}><PasswordRoundedIcon sx={{ color: '#adb0b4' }} /><Typography>Password</Typography></Stack>
             <Box {...boxProps}>
-                <Button variant="contained" size="small" sx={{ width: '150px' }} onClick={changePasswordOnClick}>Change password</Button>
+                <Button variant="outlined" size="small" sx={{ width: '150px' }} onClick={changePasswordOnClick}>Change password</Button>
             </Box>
-            <Typography>Delete account</Typography>
+            <Stack direction={'row'} alignContent={'center'} gap={'5px'}><DeleteForeverRoundedIcon sx={{ color: '#adb0b4' }} /><Typography>Delete account</Typography></Stack>
             <Box {...boxProps}>
                 <Button variant="contained" size="small" color="error" sx={{ width: '150px' }} onClick={deleteOnClick}>Delete</Button>
             </Box>

@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
+import Container from '@mui/material/Container';
 import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
@@ -24,17 +25,19 @@ export const ChangePasswordPage = () => {
         signOut('password_changed');
     }
 
-    return <Box
-        display={'flex'}
-        justifyContent={'center'}
-        alignItems={'center'}
-    ><Paper elevation={0} sx={{ p: 6, maxWidth: 400 }}>
-            <Stack sx={{ maxWidth: 400 }}>
-                <Typography variant="h5" fontWeight="bold" mb={2}>Change password</Typography>
-                <Alert severity="warning" icon={<WarningRoundedIcon />} sx={{ mb: 2 }}><Typography sx={{ fontSize: { xs: 'small', sm: '15px' } }}>You will be signed-out on all your devices after changing your password.</Typography></Alert>
-                <ChangePasswordForm onSubmit={onSubmit} onCompleted={onCompleted} />
-                <Link component={RouterLink} to="/user/account" textAlign={'center'} mt={2}>Cancel</Link>
-            </Stack>
-        </Paper>
-    </Box>
+    return <Container component={'main'} maxWidth="sm" sx={{ pt: '60px' }}>
+        <Box
+            display={'flex'}
+            justifyContent={'center'}
+            alignItems={'center'}
+        ><Paper sx={{ p: 6, maxWidth: 400 }}>
+                <Stack sx={{ maxWidth: 400 }}>
+                    <Typography variant="h5" fontWeight="bold" mb={2}>Change password</Typography>
+                    <Alert severity="warning" icon={<WarningRoundedIcon />} sx={{ mb: 2 }}><Typography sx={{ fontSize: { xs: 'small', sm: '15px' } }}>You will be signed-out on all your devices after changing your password.</Typography></Alert>
+                    <ChangePasswordForm onSubmit={onSubmit} onCompleted={onCompleted} />
+                    <Link component={RouterLink} to="/user/account" textAlign={'center'} mt={2}>Cancel</Link>
+                </Stack>
+            </Paper>
+        </Box>
+    </Container>
 }
