@@ -11,9 +11,10 @@ import { ConfirmDialog } from './components/ConfirmDialog';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { GlobalErrorHandler } from './components/GlobalErrorHandler';
 import { PageViewTracker } from './components/PageViewTracker.tsx';
+import { ScrollToTop } from './components/ScrollToTop';
 import { Snackbar } from './components/Snackbar';
 import { UserProfileInitializer } from './components/UserProfileInitializer';
-import { AppRoutes } from './routes';
+import { AppRoutes } from './routes.tsx';
 import { theme } from './themes/theme';
 import { isUS } from './utils/helper.ts';
 
@@ -26,6 +27,7 @@ function App() {
   return (<>
     <ThemeProvider theme={theme}>
       <BrowserRouter>
+        <ScrollToTop />
         <PageViewTracker />
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={isUS() ? 'en' : 'en-gb'}>
           <Snackbar />
