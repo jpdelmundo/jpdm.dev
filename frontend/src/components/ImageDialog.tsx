@@ -22,8 +22,10 @@ const buttonStyle = {
     color: 'white',
     opacity: 0.4,
     '&:hover': {
-        opacity: 0.8
-    }
+        opacity: 0.8,
+        backgroundColor: '#000000'
+    },
+    backgroundColor: '#000000'
 };
 
 const iconStyle = {
