@@ -24,7 +24,7 @@ export const AboutPage = () => {
 
                 <Typography variant="h5" fontWeight="bold" sx={{ mt: '30px' }}>What I Work With</Typography>
                 <Stack direction="row" sx={{ mt: '10px', flexWrap: 'wrap', gap: 1 }}>
-                    {['PHP', 'JavaScript', 'TypeScript', 'React', 'Node.js', 'Express', 'MySQL', 'PostgreSQL', 'Docker', 'Git'].map(skill => (
+                    {['PHP', 'JavaScript', 'TypeScript', 'C#', 'React', 'Node.js', 'Express', 'MySQL', 'PostgreSQL', 'Docker', 'Git'].map(skill => (
                         <Chip label={skill} key={skill} />
                     ))}
                 </Stack>
