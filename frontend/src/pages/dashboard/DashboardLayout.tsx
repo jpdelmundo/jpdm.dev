@@ -1,7 +1,7 @@
 import { UserPanel } from '@/components/UserPanel';
 import ForumRoundedIcon from '@mui/icons-material/ForumRounded';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
-import SpaceDashboardRoundedIcon from '@mui/icons-material/SpaceDashboardRounded';
+import SpaceDashboardOutlinedIcon from '@mui/icons-material/SpaceDashboardOutlined';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Drawer from '@mui/material/Drawer';
@@ -42,7 +42,7 @@ export const DashboardLayout = () => {
     }
 
     const menuItems = [
-        { text: 'Home', path: '/dashboard', icon: SpaceDashboardRoundedIcon },
+        { text: 'Home', path: '/dashboard', icon: SpaceDashboardOutlinedIcon },
         { text: 'Comments', path: '/dashboard/comments', icon: ForumRoundedIcon },
     ];
 

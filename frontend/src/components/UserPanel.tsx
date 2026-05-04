@@ -7,6 +7,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useAvatarProps } from '@/hooks/useAvatarProps';
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
+import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded';
+import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
+import SpaceDashboardOutlinedIcon from '@mui/icons-material/SpaceDashboardOutlined';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
@@ -14,6 +18,7 @@ import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import type { SxProps } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import { Avatar } from './Avatar';
 
 type Props = {
@@ -121,10 +126,18 @@ export const UserPanel = ({ sx }: Props) => {
                         }
                     }}
                 >
-                    <MenuItem onClick={profileOnClick}>Profile</MenuItem>
-                    <MenuItem onClick={accountOnClick}>Account & Security</MenuItem>
-                    <MenuItem onClick={dashboardClick}>Dashboard</MenuItem>
-                    <MenuItem onClick={signOut}>Sign Out</MenuItem>
+                    <MenuItem onClick={profileOnClick}>
+                        <AccountCircleRoundedIcon sx={{ mr: '10px' }} /> <Typography>Profile</Typography>
+                    </MenuItem>
+                    <MenuItem onClick={accountOnClick}>
+                        <AdminPanelSettingsRoundedIcon sx={{ mr: '10px' }} /> <Typography>Account & Security</Typography>
+                    </MenuItem>
+                    <MenuItem onClick={dashboardClick}>
+                        <SpaceDashboardOutlinedIcon sx={{ mr: '10px' }} /> <Typography>Dashboard</Typography>
+                    </MenuItem>
+                    <MenuItem onClick={signOut}>
+                        <LogoutRoundedIcon sx={{ mr: '10px' }} /> <Typography>Sign Out</Typography>
+                    </MenuItem>
                 </Menu>
             </Grid>
         }

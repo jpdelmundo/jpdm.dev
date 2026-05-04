@@ -40,7 +40,7 @@ export function ResetPasswordPage() {
             height={'70vh'}
             mt={'60px'}
         >
-            <Paper elevation={0} sx={{ p: 6, maxWidth: 400, mx: 'auto' }}>
+            <Paper sx={{ p: 6, maxWidth: 400, mx: 'auto' }}>
                 {step == 'checking_token'
                     && <Stack direction={'row'} alignItems={'center'} gap={2}>
                         <CircularProgress />

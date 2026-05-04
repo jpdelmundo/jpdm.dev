@@ -57,7 +57,7 @@ function SignUpContent() {
         //redirect or add link to home?
     }
 
-    return <Paper elevation={0} sx={{ p: 6, maxWidth: 400, mx: 'auto' }}>
+    return <Paper sx={{ p: 6, maxWidth: 400, mx: 'auto' }}>
         {step == 'create_user' && <SignUpForm onSubmit={submit} onSignUpSuccess={signUpSuccess} />}
 
         {step == 'update_email' && <>

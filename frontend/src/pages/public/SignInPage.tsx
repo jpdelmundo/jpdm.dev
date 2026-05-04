@@ -56,7 +56,7 @@ export const SignInPage = () => {
             height={'70vh'}
             mt={'60px'}
         >
-            <Paper elevation={0} sx={{ p: 6, maxWidth: 400, mx: 'auto' }}>
+            <Paper sx={{ p: 6, maxWidth: 400, mx: 'auto' }}>
                 {message && <Alert severity="info" sx={{ mb: 1, fontSize: theme.typography.body1 }}>{message}</Alert>}
                 {location.state?.error && <Typography mb={1} color="error" textAlign="center">{location.state?.error}</Typography>}
                 <SignInForm onSubmit={submit} onSignInSuccess={signInSuccess} />

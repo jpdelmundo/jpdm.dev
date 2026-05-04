@@ -180,7 +180,7 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
                 }}
             >
                 <Stack direction={'row'}>
-                    {title && <Typography className="title"  {...(title.length <= 150 && { fontSize: { xs: '30px', sm: '40px' } })}>{title}</Typography>}
+                    {title && <Typography className="title" fontSize={'17px'} maxWidth={'93%'} {...(title.length <= 150 && { fontSize: { xs: '30px', sm: '40px' } })}>{title}</Typography>}
                     {user?.id == post.user_id && <IconButton sx={{ marginLeft: 'auto', position: 'absolute', right: '25px', top: '20px', padding: '2px' }} onClick={postOptionsOnClick}><MoreHorizRounded /></IconButton>}
                 </Stack>
                 <Stack direction={'row'} className="header">

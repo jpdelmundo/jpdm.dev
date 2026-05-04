@@ -26,7 +26,7 @@ function CaptchaUser() {
         return res;
     }
 
-    return <Paper elevation={0} sx={{ p: 6, maxWidth: 400, mx: 'auto' }}>
+    return <Paper sx={{ p: 6, maxWidth: 400, mx: 'auto' }}>
         <ForgotPasswordForm onEmailSubmit={emailSubmit} />
     </Paper>;
 }

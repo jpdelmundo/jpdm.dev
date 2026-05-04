@@ -252,7 +252,7 @@ export const theme = createTheme({
                                 fontSize: '16px',
                             },
                             [theme.breakpoints.up('md')]: {
-                                fontSize: '18px',
+                                fontSize: '17px',
                             },
                         },
                         '& .date': {
