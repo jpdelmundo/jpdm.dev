@@ -1,7 +1,6 @@
 import { apiGet } from '@/api/apiClient';
-import ArrowCircleLeftRounded from '@mui/icons-material/ArrowCircleLeftRounded';
-import ArrowCircleRightRounded from '@mui/icons-material/ArrowCircleRightRounded';
-import HighlightOffRounded from '@mui/icons-material/HighlightOffRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Dialog from '@mui/material/Dialog';
@@ -21,7 +20,7 @@ const buttonStyle = {
     position: 'absolute',
     top: '50%',
     color: 'white',
-    opacity: 0.5,
+    opacity: 0.4,
     '&:hover': {
         opacity: 0.8
     }
@@ -42,6 +41,7 @@ export function ImageDialog({ open, closeDialog, imageId, images }: ImageDialogP
     const [isLoading, setIsLoading] = useState(false);
     const [selectedImage, setSelectedImage] = useState<PostImageExtended | null>(null);
     const [imageSet, setImageSet] = useState<PostImageExtended[] | null>(images || null);
+    const [controlsVisible, setControlsVisible] = useState(true);
 
     const getData = async ({ include_set }: { include_set?: boolean } = {}) => {
         setIsLoading(true);
@@ -102,19 +102,21 @@ export function ImageDialog({ open, closeDialog, imageId, images }: ImageDialogP
                         sx={{
                             ...buttonStyle,
                             left: '16px',
-                            transform: 'translateY(-50%)'
+                            transform: 'translateY(-50%)',
+                            display: controlsVisible ? '' : 'none'
                         }}
-                    ><ArrowCircleLeftRounded sx={iconStyle} /></IconButton>
+                    ><PlayArrowRoundedIcon sx={{ ...iconStyle, transform: 'scaleX(-1)' }} /></IconButton>
                     <IconButton
                         onClick={nextOnClick}
                         sx={{
                             ...buttonStyle,
                             right: '16px',
-                            transform: 'translateY(-50%)'
+                            transform: 'translateY(-50%)',
+                            display: controlsVisible ? '' : 'none'
                         }}
-                    ><ArrowCircleRightRounded sx={iconStyle} /></IconButton>
+                    ><PlayArrowRoundedIcon sx={iconStyle} /></IconButton>
 
-                    {isLoading || !selectedImage ? <CircularProgress /> : <img src={selectedImage.url} />}
+                    {isLoading || !selectedImage ? <CircularProgress /> : <img src={selectedImage.url} onClick={() => setControlsVisible(prev => !prev)} />}
 
                     <IconButton
                         onClick={closeDialog}
@@ -122,9 +124,14 @@ export function ImageDialog({ open, closeDialog, imageId, images }: ImageDialogP
                             ...buttonStyle,
                             top: '16px',
                             right: '16px',
-                            color: 'white'
+                            backgroundColor: '#ff0000',
+                            '&:hover': {
+                                backgroundColor: '#ff0000',
+                                opacity: 1
+                            },
+                            display: controlsVisible ? '' : 'none'
                         }}
-                    ><HighlightOffRounded sx={iconStyle} /></IconButton>
+                    ><CloseRoundedIcon sx={iconStyle} /></IconButton>
                 </Box>
             </Dialog>
         </>
