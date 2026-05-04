@@ -22,7 +22,6 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Divider from '@mui/material/Divider';
-import Grid, { type GridProps } from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
@@ -38,16 +37,16 @@ import dayjs, { Dayjs } from "dayjs";
 import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 
-const GridRow = (props: GridProps) => {
-    return <Grid container size={{ xs: 12 }} {...props} />
-}
+// const GridRow = (props: GridProps) => {
+//     return <Grid container size={{ xs: 12 }} {...props} />
+// }
 
 // const GridCell = (props: GridProps) => {
 //     return <Grid size={{ xs: 12, sm: 6 }} {...props} />
 // }
 
-const colLabel = { size: { xs: 12, sm: 6 } };
-const colData = { size: { xs: 12, sm: 6 } };
+// const colLabel = { size: { xs: 12, sm: 6 } };
+// const colData = { size: { xs: 12, sm: 6 } };
 
 type FormInput = {
     first_name: string | null;
