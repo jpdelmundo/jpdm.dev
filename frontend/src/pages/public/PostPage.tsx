@@ -11,7 +11,7 @@ import type PostImageExtended from '@shared/models/extensions/PostImageExtended'
 import type { PostImageId } from '@shared/models/generated/PostImage';
 import type { ApiErrorDetail } from '@shared/types/ApiResult';
 import { useEffect, useRef, useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate, useParams, type Location } from 'react-router-dom';
 
 type ImageDialogState = {
     imageId: PostImageId;
@@ -24,6 +24,7 @@ export function PostPage() {
     const [post, setPost] = useState<PostDTO | null>(null);
     const [error, setError] = useState<ApiErrorDetail | null>(null);
     const { id } = useParams();
+    const location = useLocation();
     const navigate = useNavigate();
     const origLocation = useRef<Location | null>(null);
     const [viewer, setViewer] = useState<ImageDialogState>(null);
@@ -65,6 +66,12 @@ export function PostPage() {
         origLocation.current = location;
         window.history.pushState({}, '', `/images/${imageId}`);
     };
+
+    useEffect(() => {
+        const onPopState = () => setViewer(null);
+        window.addEventListener('popstate', onPopState);
+        return () => window.removeEventListener('popstate', onPopState);
+    }, []);
 
     const closeImageDialog = () => {
         setViewer(null);

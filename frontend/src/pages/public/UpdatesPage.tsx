@@ -57,6 +57,12 @@ export const UpdatesPage = () => {
         setViewer({ imageId, images });
         origLocation.current = location;
         window.history.pushState({}, '', `/images/${imageId}`);
+    }, [location]);
+
+    useEffect(() => {
+        const onPopState = () => setViewer(null);
+        window.addEventListener('popstate', onPopState);
+        return () => window.removeEventListener('popstate', onPopState);
     }, []);
 
     // const handlePostImageClick = useCallback((imageId: PostImageId, images: PostImageExtended[]) => {
