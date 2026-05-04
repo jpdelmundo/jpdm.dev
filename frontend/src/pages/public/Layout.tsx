@@ -16,7 +16,7 @@ import Stack from '@mui/material/Stack';
 import type { SxProps } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 
 type MenuItem = { label: string; to: string; visible: boolean };
 
@@ -95,10 +95,10 @@ export const Layout = () => {
                         sx={{ display: isSmDown ? 'none' : '' }}
                     >
                         {menuItems.filter((item) => item.visible).map((item, index, arr) => (
-                            <>
+                            <Fragment key={index}>
                                 <Link component={RLink} to={item.to} sx={linkSx}>{item.label}</Link>
                                 {index < arr.length - 1 && <Divider orientation="vertical" flexItem />}
-                            </>
+                            </Fragment>
                         ))}
                     </Stack>
                     <UserPanel sx={{ ml: 'auto', width: '55px' }} />
