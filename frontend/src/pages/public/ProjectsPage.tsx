@@ -28,6 +28,7 @@ export function ProjectsPage() {
     //const [previewImage, setPreviewImage] = useState<string | null>(null);
     const previewImageSrcRef = useRef<{ open: (src: string) => void }>(null);
     const project = projects.find(project => project.id === selectedProjectId);
+    const isTouchDevice = useMediaQuery('(pointer: coarse)');
 
     const containerSx = {
         height: '270px',
@@ -94,15 +95,18 @@ export function ProjectsPage() {
                                 <CardMedia
                                     image={firstImageUrl}
                                     sx={containerSx}
+                                    {...(isTouchDevice && { onClick: () => setSelectedProjectId(project.id) })}
                                 >
-                                    <ProjectOverlay project={project} onClick={() => setSelectedProjectId(project.id)} />
+                                    {!isTouchDevice && <ProjectOverlay project={project} onClick={() => setSelectedProjectId(project.id)} />}
                                 </CardMedia>
                             ) : (
-                                <Box sx={{ ...containerSx, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#ffffff' }}>
+                                <Box sx={{ ...containerSx, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#ffffff' }}
+                                    {...(isTouchDevice && { onClick: () => setSelectedProjectId(project.id) })}
+                                >
                                     <Typography fontWeight={'bold'} fontSize={'20px'}>
                                         {project.name}
                                     </Typography>
-                                    <ProjectOverlay project={project} onClick={() => setSelectedProjectId(project.id)} />
+                                    {!isTouchDevice && <ProjectOverlay project={project} onClick={() => setSelectedProjectId(project.id)} />}
                                 </Box>
                             )}
                         </Card>
@@ -126,7 +130,7 @@ export function ProjectsPage() {
                     </Stack>
                     <Stack maxWidth="sm" sx={{ margin: 'auto', mt: '20px', padding: '0 10px', mb: '300px' }}>
                         <Typography color="#aaaaaa">{project?.year}</Typography>
-                        <Typography variant="h4" fontWeight={'bold'}>{project?.name}</Typography>
+                        <Typography variant="h4" fontWeight={'bold'} sx={{ wordBreak: 'break-word' }}>{project?.name}</Typography>
                         <Box>
                             {/* links array below */}
                             {project?.links.map(link => (
