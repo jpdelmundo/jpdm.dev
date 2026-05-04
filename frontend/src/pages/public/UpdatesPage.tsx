@@ -79,10 +79,9 @@ export const UpdatesPage = () => {
             <Box>
                 {user?.username == 'jp'
                     && <Paper
-                        elevation={0}
                         onClick={() => setPostDialogOpen(true)}
                         sx={{
-                            border: 'var(--border)',
+                            border: 'solid 1px #00000011',
                             boxShadow: '0 2px 2px -1px #00000011',
                             borderRadius: '16px',
                             padding: '15px',

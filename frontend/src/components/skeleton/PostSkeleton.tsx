@@ -6,7 +6,7 @@ import { WaveSkeleton } from "./WaveSkeleton";
 
 export function PostSkeleton() {
     return (
-        <Paper className="post" elevation={0} sx={{ border: 'var(--border)', boxShadow: 'var(--paper-shadow)' }}>
+        <Paper className="post">
             <WaveSkeleton variant="rounded" sx={{ height: { xs: '30px', sm: '40px', width: '30%', marginBottom: '10px' } }} />
             <Stack direction={'row'} className="header" alignItems="center">
                 <WaveSkeleton variant="circular"><Avatar /></WaveSkeleton>

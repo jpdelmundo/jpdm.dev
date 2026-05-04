@@ -1,5 +1,6 @@
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
+import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -87,11 +88,12 @@ export function HomelabPage() {
             width: '30%',
             pb: '70px'
         }}>
-            <Box sx={{
+            <Paper sx={{
                 p: '40px',
                 backgroundColor: '#ffffff',
                 borderRadius: '10px',
-                boxShadow: 'var(--shadow-paper)'
+                // boxShadow: 'var(--shadow-paper)',
+                // border: 'var(--border)'
             }}>
                 <Typography variant="h5" fontWeight={'bold'}>The Goal</Typography>
                 <Typography sx={{ margin: '10px 0 20px 0' }}>Securely access my home network from anywhere in the world and reliably host websites and services directly from my own local infrastructure.</Typography>
@@ -351,7 +353,7 @@ export function HomelabPage() {
                         </TableRow>
                     </TableBody>
                 </Table>
-            </Box>
+            </Paper>
         </Box>
     </Container>
 }

@@ -41,7 +41,7 @@ export const theme = createTheme({
                 ':root': {
                     //'--shadow-paper': '0 4px 1px -2px #00000022'
                     '--shadow-paper': '0 2px 2px -1px #00000022',
-                    '--border': 'solid 1px #e5e5e5'
+                    '--border': 'solid 1px #00000020'
                 },
                 html: {
                     '&.modal-dialog-open': {
@@ -208,7 +208,7 @@ export const theme = createTheme({
                         }
                     },
                     '&.post': {
-                        boxShadow: 'var(--shadow-paper)',
+                        //boxShadow: 'var(--shadow-paper)',
                         position: 'relative',
                         background: 'none',
                         backgroundColor: '#ffffffcc',

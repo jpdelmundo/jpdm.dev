@@ -14,7 +14,7 @@ import Paper, { type PaperProps } from '@mui/material/Paper';
 import Slide, { type SlideProps } from '@mui/material/Slide';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { useMediaQuery } from '@mui/material';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { useRef, useState } from 'react';
 import projectData from '../../data/projects.json';
 
@@ -97,25 +97,25 @@ export function ProjectsPage() {
                     const firstImage = project.media?.find(m => m.type === 'image');
                     const firstImageUrl = firstImage ? firstImage?.url.startsWith('http') ? firstImage?.url : `/images/projects/${project.id}${firstImage?.url}` : null;
                     return <Grid>
-                        <Item>
-                            <Card>
-                                {firstImageUrl ? (
-                                    <CardMedia
-                                        image={firstImageUrl}
-                                        sx={containerSx}
-                                    >
-                                        <ProjectOverlay project={project} onClick={() => setSelectedProjectId(project.id)} />
-                                    </CardMedia>
-                                ) : (
-                                    <Box sx={{ ...containerSx, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#ffffff' }}>
-                                        <Typography fontWeight={'bold'} fontSize={'20px'}>
-                                            {project.name}
-                                        </Typography>
-                                        <ProjectOverlay project={project} onClick={() => setSelectedProjectId(project.id)} />
-                                    </Box>
-                                )}
-                            </Card>
-                        </Item>
+
+                        <Card sx={{}}>
+                            {firstImageUrl ? (
+                                <CardMedia
+                                    image={firstImageUrl}
+                                    sx={containerSx}
+                                >
+                                    <ProjectOverlay project={project} onClick={() => setSelectedProjectId(project.id)} />
+                                </CardMedia>
+                            ) : (
+                                <Box sx={{ ...containerSx, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#ffffff' }}>
+                                    <Typography fontWeight={'bold'} fontSize={'20px'}>
+                                        {project.name}
+                                    </Typography>
+                                    <ProjectOverlay project={project} onClick={() => setSelectedProjectId(project.id)} />
+                                </Box>
+                            )}
+                        </Card>
+
                     </Grid>
                 })}
             </Grid >

@@ -171,13 +171,12 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
         <>
             <Paper
                 className="post"
-                elevation={0}
                 ref={ref}
                 sx={{
                     opacity: isDeleting ? 0.8 : 1,
                     pointerEvents: isDeleting ? 'none' : '',
                     filter: isDeleting ? 'grayscale(1)' : '',
-                    border: 'var(--border)'
+                    //border: 'var(--border)'
                 }}
             >
                 <Stack direction={'row'}>
@@ -198,7 +197,11 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
                 >
                     <ImageCollage orientation={orientation} images={images} onImageClick={handleOnImageClick} />
                 </Box>
-                <Typography className="content" {...(content.length <= 50 && { fontSize: { xs: '20px', sm: '30px' } })}>{linkify(content)}</Typography>
+                <Typography
+                    className="content"
+                    {...(content.length <= 50 && { fontSize: { xs: '20px', sm: '30px' } })}
+                    sx={{ mt: '20px !important' }}
+                >{linkify(content)}</Typography>
                 <Stack direction={'row'} className="controls">
                     <Box className="likes-button-container">
                         <Tooltip title="Like">
