@@ -9,7 +9,7 @@ interface CompressOptions {
 
 export const compress = async (input: Buffer | string, options: CompressOptions) => {
     const { maxWidth = 1920, maxHeight = 1080, maxFileSize = (1024 * 150), format } = options;
-    let quality = 85;
+    let quality = 95;
     let output: Buffer;
 
     do {
@@ -25,7 +25,7 @@ export const compress = async (input: Buffer | string, options: CompressOptions)
             : await resized.webp({ quality }).toBuffer();
 
         quality -= 5;
-    } while (output.length > maxFileSize && quality >= 40)
+    } while (output.length > maxFileSize && quality >= 80)
 
     return output;
 }
