@@ -40,7 +40,7 @@ export const SignInPage = () => {
         setToken(result.data);
         navigate(from, { replace: true });
     };
-    console.log({ signOutReason });
+    //console.log({ signOutReason });
     const message = signOutReason == 'password_changed' ? 'Successfully changed password. You have been signed-out on all your devices. Sign in with your new password.' : '';
 
     useEffect(() => {

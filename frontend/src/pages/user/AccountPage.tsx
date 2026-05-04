@@ -85,7 +85,7 @@ export const AccountPage = () => {
 
             window.addEventListener('message', async (event: MessageEvent<unknown>) => {
                 if (event.origin != `${import.meta.env.VITE_API_BASE_URL}`) return;
-                console.log({ event });
+                //console.log({ event });
                 const { token } = (event.data as Record<string, string>);
 
                 setDeleteError('');

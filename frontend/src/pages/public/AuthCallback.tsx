@@ -11,7 +11,7 @@ export const AuthCallbackPage = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        console.log({ ref: document.referrer });
+        //console.log({ ref: document.referrer });
         const token = new URLSearchParams(location.search).get('token');
 
         if (!token) {
@@ -24,7 +24,7 @@ export const AuthCallbackPage = () => {
 
         const from = location.state?.from?.pathname || '/';
         setToken(token);
-        console.log({ state: location.state });
+        //console.log({ state: location.state });
         //remove token from history
         navigate(from, { replace: true });
     }, [location.search]);

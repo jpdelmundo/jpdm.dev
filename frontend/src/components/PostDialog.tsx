@@ -133,7 +133,6 @@ export const PostDialog = ({ post, open, closeDialog, onCreated, onUpdated }: Po
                 setImageFiles([]);
                 setErrorMessage('');
                 setTitleInputHidden(true);
-                console.log({ result, isEdit });
                 !isEdit && onCreated?.();
                 isEdit && result.data && onUpdated?.(result.data);
 

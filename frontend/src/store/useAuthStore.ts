@@ -53,7 +53,7 @@ export const useAuthStore = create<AuthState>()(
             }
         },
         clearToken: () => {
-            console.log('clearToken called');
+            //console.log('clearToken called');
             set({ token: null, isAuthenticated: false, user: null, isSigneOut: true });
         },
         user: null,

@@ -64,7 +64,7 @@ export function SignUpForm({ onSubmit, onSignUpSuccess }: {
         setIsSubmitting(false);
     }
 
-    console.log({ passwordErrors });
+    //console.log({ passwordErrors });
 
     return (
         <Box>

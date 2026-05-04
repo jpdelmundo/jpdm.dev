@@ -151,7 +151,7 @@ export const PostComments = () => {
             flex: 1,
             //valueGetter: (value, row) => row.post,
             renderCell: (params) => {
-                console.log({ row: params.row });
+                //console.log({ row: params.row });
                 if (!params.row.post) return '';
                 const { display_name, content } = params.row.post;
                 return (

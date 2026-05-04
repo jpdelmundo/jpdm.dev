@@ -102,7 +102,7 @@ export const ProfilePage = () => {
     const uploadFile = async (file: File) => {
         setAvatarErrorMessage('');
         if (file) {
-            console.log({ type: file.type });
+            //console.log({ type: file.type });
             if (!file.type.startsWith('image/')) return;
             const url = URL.createObjectURL(file);
             setAvatarSrc(url);

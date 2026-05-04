@@ -48,8 +48,6 @@ export function ChangePasswordForm({ onSubmit, onCompleted }: Props) {
         setIsSubmitting(false);
     }
 
-    console.log({ passwordErrors });
-
     return (
         <form noValidate onSubmit={handleSubmit(submitHandler)}>
             <Stack gap={2}>

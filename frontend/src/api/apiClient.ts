@@ -72,7 +72,7 @@ export async function apiRequest<T>(input: RequestInfo | URL, init?: RequestInit
 
         return { ...(await res.json() as ApiResult<T>), ok: res.ok, status: res.status } as ClientApiResult<T>;
     } catch (error) {
-        console.log('API Error', error);
+        console.error('API Error', error);
         if (error instanceof ClientApiError) throw error;
         if (error instanceof TypeError) throw new Error('Unable to connect to the server. Please check your internet connection.');
 

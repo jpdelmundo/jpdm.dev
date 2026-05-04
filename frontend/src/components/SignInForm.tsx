@@ -54,7 +54,7 @@ export function SignInForm({ onSubmit, onSignInSuccess: onSignInSuccess }: {
             ...formInputRef.current,
             [name]: type == 'checkbox' ? checked : value
         };
-        console.log({ formInputRef, target: e.target });
+        //console.log({ formInputRef, target: e.target });
     };
 
     const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
@@ -67,7 +67,7 @@ export function SignInForm({ onSubmit, onSignInSuccess: onSignInSuccess }: {
         e.preventDefault();
         setIsSubmitted(true);
         if (!validateForm(formInputRef.current) || isLoading) return;
-        console.log("Form submitted with data:", formInputRef.current);
+        //console.log("Form submitted with data:", formInputRef.current);
 
         setErrorMessage('');
         setIsLoading(true);

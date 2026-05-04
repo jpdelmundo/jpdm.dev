@@ -139,7 +139,7 @@ export async function copyToClipboard(text: string) {
     try {
         await navigator.clipboard.writeText(text);
     } catch (error) {
-        console.log('Cannot copy to clipboard');
+        console.error('Cannot copy to clipboard');
     }
 }
 

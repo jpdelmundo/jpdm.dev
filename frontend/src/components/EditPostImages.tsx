@@ -88,7 +88,6 @@ export function EditPostImagesDialog({ images, onChange, open, closeDialog }: Ed
     }
 
     const onRemove = (image: PostImage) => {
-        console.log('onRemove', { image });
         setPostImages(prev => prev.filter(v => v.id !== image.id));
     }
 
@@ -166,7 +165,6 @@ export function EditPostImagesDialog({ images, onChange, open, closeDialog }: Ed
 }
 
 function SortableItem({ image, onRemove }: { image: PostImage, onRemove: (image: PostImage) => void }) {
-    console.log('SortableItem render');
     const { id } = image;
     const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id });
 
@@ -180,7 +178,6 @@ function SortableItem({ image, onRemove }: { image: PostImage, onRemove: (image:
     const removeOnClick = (e: MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log('removeOnClick', { image });
         onRemove(image);
     }
 

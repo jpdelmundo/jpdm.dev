@@ -17,7 +17,7 @@ function CaptchaUser() {
 
     const emailSubmit = async (formInput: FormInput): Promise<ApiResult<never>> => {
         if (!executeRecaptcha) {
-            console.log('Execute recaptcha not yet available');
+            console.error('Execute recaptcha not yet available');
             return { ok: false, error: { message: 'Execute recaptcha not yet available' } };
         }
 

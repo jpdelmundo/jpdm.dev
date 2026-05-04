@@ -116,7 +116,7 @@ export function PostComments({ open, postId, onCommentsUpdated }: PostCommentsPr
     }
 
     const commentsOnExited = () => {
-        console.log('commentsOnExited called');
+        //console.log('commentsOnExited called');
         setComments([]);
         setPageNum(1);
         //setShowComments(false);
@@ -129,7 +129,7 @@ export function PostComments({ open, postId, onCommentsUpdated }: PostCommentsPr
 
     const commentsLoadingOnCollapse = () => {
         //setShowComments(true);
-        console.log('commentsLoadingOnCollapse called');
+        //console.log('commentsLoadingOnCollapse called');
     }
 
     const commentInputOnKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {

@@ -19,10 +19,10 @@ function SignUpContent() {
     const navigate = useNavigate();
 
     const submit = async (formInput: FormInput): Promise<ApiResult<SignUpFormSubmitResult>> => {
-        console.log({ formInput });
+        //console.log({ formInput });
 
         if (!executeRecaptcha) {
-            console.log('Execute recaptcha not yet available');
+            //console.log('Execute recaptcha not yet available');
             return { ok: false, error: { message: 'Execute recaptcha not yet available' } };
         }
 

@@ -21,7 +21,7 @@ type Props = {
 };
 
 export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed, email }: Props) {
-    console.log('UpdateEmailForm render');
+    //console.log('UpdateEmailForm render');
     const { register, handleSubmit, setError, formState: { errors } } = useForm<EmailFormInput>({
         defaultValues: {
             email: email || ''
@@ -55,7 +55,7 @@ export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed,
             }
         } else if (step == 'code') {
             const result = await onCodeSubmit(data);
-            console.log({ error: result.error, code: result.error?.code });
+            //console.log({ error: result.error, code: result.error?.code });
             if (result.ok) {
                 onEmailConfirmed(result);
             } else {
@@ -67,7 +67,7 @@ export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed,
 
     const cooldownOnComplete = () => {
         setCooldown(null);
-        console.log('setCooldown called');
+        //console.log('setCooldown called');
     }
 
     useEffect(() => {

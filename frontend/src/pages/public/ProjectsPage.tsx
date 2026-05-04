@@ -10,7 +10,6 @@ import Dialog from '@mui/material/Dialog';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
-import Paper, { type PaperProps } from '@mui/material/Paper';
 import Slide, { type SlideProps } from '@mui/material/Slide';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -19,14 +18,6 @@ import { useRef, useState } from 'react';
 import projectData from '../../data/projects.json';
 
 const projects = projectData as Project[];
-const Item = ({ sx, ...props }: PaperProps) => {
-    return <Paper sx={{
-        //border: 'solid 1px var(--mui-palette-divider)',
-        boxShadow: 'var(--shadow-paper)',
-        ...sx
-    }} {...props}></Paper>;
-};
-
 const SlideTransition = (props: SlideProps) => {
     return <Slide direction="up" {...props} />;
 }
