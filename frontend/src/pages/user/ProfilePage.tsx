@@ -294,7 +294,7 @@ export const ProfilePage = () => {
                     </Stack>
                 </Stack>
                 <Box sx={{ width: '100%' }}>
-                    <Divider><Typography textAlign={'center'} fontWeight={'bold'} fontSize={'20px'}>{userProfile?.first_name ? `${userProfile?.first_name} ${userProfile?.last_name}` : ''}</Typography></Divider>
+                    <Divider><Typography textAlign={'center'} fontWeight={'bold'} fontSize={'20px'}>{userProfile?.first_name ? `${userProfile?.first_name} ${userProfile?.last_name}` : user?.username}</Typography></Divider>
                 </Box>
                 {userProfile?.bio && <Typography sx={{ textAlign: 'center', color: '#888888' }}>{userProfile.bio}</Typography>}
 
