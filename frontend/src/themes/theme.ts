@@ -50,7 +50,8 @@ export const theme = createTheme({
                             overflowY: 'scroll'
                         }
                     },
-                    paddingBottom: '50px'
+                    paddingBottom: '50px',
+                    overflowX: 'hidden'
                 },
                 main: {
                     '&.MuiContainer-root': {
@@ -472,7 +473,7 @@ export const theme = createTheme({
                         backgroundColor: '#f3f3f391',
                         backdropFilter: 'saturate(180%) blur(20px)',
                         //boxShadow: '0 1px 10px -8px #00000055',
-                        maxWidth: '100vw',
+                        maxWidth: '100%',
                         display: 'block',
                         position: 'fixed',
                         // [theme.breakpoints.down('sm')]: {
