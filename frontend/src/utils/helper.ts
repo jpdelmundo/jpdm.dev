@@ -177,3 +177,11 @@ export function getStartOfWeek() {
 export function getEndOfWeek() {
     return dayjs().endOf(isUS() ? 'week' : 'isoWeek');
 }
+
+export function isFirefoxMobile() {
+    const userAgent = navigator.userAgent.toLocaleLowerCase();
+    const isFirefox = userAgent.includes('firefox');
+    const isMobile = userAgent.includes('mobi');
+
+    return isFirefox && isMobile;
+}

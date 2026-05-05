@@ -3,6 +3,7 @@ import { Outlet, Link as RLink } from 'react-router-dom';
 
 import { GradientBg } from '@/components/GradientBg.tsx';
 import { theme } from '@/themes/theme.ts';
+import { isFirefoxMobile } from '@/utils/helper.ts';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
@@ -32,6 +33,11 @@ const menuItems: MenuItem[] = [
     { label: 'About', to: '/about', visible: true },
     { label: 'Hire Me', to: '/services', visible: false },
 ];
+
+const firefoxMobileSx = isFirefoxMobile() ? {
+    backgroundColor: '#f3f3f3 !important',
+    backdropFilter: 'none !important'
+} : {}
 
 export const Layout = () => {
     const isSmDown = useMediaQuery(theme.breakpoints.down('sm'));
@@ -70,7 +76,7 @@ export const Layout = () => {
                     ))}
                 </List>
             </Drawer>
-            <Container component="header" className="header-container" sx={{ height: '60px', zIndex: 1000 }}>
+            <Container component="header" className="header-container" sx={{ height: '60px', zIndex: 1000, ...firefoxMobileSx }}>
                 <Stack direction="row" alignItems="center" maxWidth="false" sx={{ margin: '0 auto', gap: 2 }}>
                     <Stack direction="row" gap={2} alignItems={'center'} sx={{ mr: 'auto' }}>
                         <IconButton

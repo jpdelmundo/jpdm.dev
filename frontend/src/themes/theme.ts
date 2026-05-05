@@ -466,13 +466,13 @@ export const theme = createTheme({
                         backgroundColor: '#f3f3f391',
                         backdropFilter: 'saturate(180%) blur(20px)',
                         //boxShadow: '0 1px 10px -8px #00000055',
-                        maxWidth: 'unset !important',
+                        maxWidth: '100vw',
                         display: 'block',
                         position: 'fixed',
-                        // [theme.breakpoints.up('md')]: {
+                        // [theme.breakpoints.down('sm')]: {
                         //     //boxShadow: 'none',
-                        //     backgroundColor: '#f3f3f391',
-                        //     backdropFilter: 'saturate(180%) blur(20px)'
+                        //     backgroundColor: '#f3f3f3',
+                        //     backdropFilter: 'none'
                         // }
                     }
                 })
