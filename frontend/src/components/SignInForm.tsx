@@ -88,11 +88,11 @@ export function SignInForm({ onSubmit, onSignInSuccess: onSignInSuccess }: {
                 <Stack gap={2}>
                     <Stack>
                         <Link
-                            href={`${import.meta.env.VITE_API_BASE_URL}/auth/google?fp=${encodeURIComponent(jsonBase64Encode(getFingerprint()))}`}>
+                            href={`${import.meta.env.VITE_API_BASE_PATH}/auth/google?fp=${encodeURIComponent(jsonBase64Encode(getFingerprint()))}`}>
                             <img src={googleButtonImage} style={{ width: '100%' }} alt="Sign In with Google" />
                         </Link>
                         <Link
-                            href={`${import.meta.env.VITE_API_BASE_URL}/auth/facebook?fp=${encodeURIComponent(jsonBase64Encode(getFingerprint()))}`}>
+                            href={`${import.meta.env.VITE_API_BASE_PATH}/auth/facebook?fp=${encodeURIComponent(jsonBase64Encode(getFingerprint()))}`}>
                             <img src={facebookButtonImage} style={{ width: '100%' }} alt="Sign In with Facebook" />
                         </Link>
                     </Stack>

@@ -86,7 +86,7 @@ export const AccountPage = () => {
             //const authWindow = window.open(authUrl, 'reauth', 'width=500,height=600');
 
             window.addEventListener('message', async (event: MessageEvent<unknown>) => {
-                if (event.origin != `${import.meta.env.VITE_API_BASE_URL}`) return;
+                if (event.origin != `${import.meta.env.VITE_API_BASE_PATH}`) return;
                 //console.log({ event });
                 const { token } = (event.data as Record<string, string>);
 
