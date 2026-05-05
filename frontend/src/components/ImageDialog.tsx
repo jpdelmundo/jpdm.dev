@@ -124,7 +124,7 @@ export function ImageDialog({ open, closeDialog, imageId, images }: ImageDialogP
                         onClick={closeDialog}
                         sx={{
                             ...buttonStyle,
-                            top: { xs: 'max(36px, env(safe-area-inset-top))', sm: '16px' },
+                            top: '36px',
                             right: '16px',
                             backgroundColor: '#ff0000',
                             '&:hover': {
@@ -133,7 +133,7 @@ export function ImageDialog({ open, closeDialog, imageId, images }: ImageDialogP
                             },
                             display: controlsVisible ? '' : 'none'
                         }}
-                    ><CloseRoundedIcon sx={{ width: 60, height: 60 }} /></IconButton>
+                    ><CloseRoundedIcon sx={{ width: 35, height: 35 }} /></IconButton>
                 </Box>
             </Dialog>
         </>
