@@ -161,7 +161,7 @@ export class PostRepository extends BaseRepository<Post> {
 
         type PostCommentCount = { post_id: PostId; count: number };
 
-        const sql = `select post_id, count(id) count
+        const sql = `select post_id, count(id)::int count
                     from post_comments
                     ${filter}
                     group by post_id`;
@@ -185,15 +185,15 @@ export class PostRepository extends BaseRepository<Post> {
 
         const sql = `select
 (
-    select count(*) from post_views
+    select count(*)::int from post_views
     ${filter}
 ) post_views_count,
 (
-    select count(*) from post_likes
+    select count(*)::int from post_likes
     ${filter}
 ) post_likes_count,
 (
-    select count(*) from post_comments pc
+    select count(*)::int from post_comments pc
     join posts p on p.id = pc.post_id
     ${filter.replace('user_id', 'p.user_id').replace(/created_at/gi, 'pc.created_at')}
 ) post_comments_count`;
@@ -220,7 +220,7 @@ export class PostRepository extends BaseRepository<Post> {
         const tz_clause = client_tz ? `at time zone '${String(client_tz).replace(/'/g, '')}'` : '';
         const sql = `select
     date_trunc('day', created_at ${tz_clause})::date date,
-    count(*) count
+    count(*)::int count
 from post_views
 ${filter}
 group by 1
