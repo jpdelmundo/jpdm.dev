@@ -3,12 +3,12 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useConfirmStore } from '@/store/useConfirmStore';
 import { getErrorMessage, getRelativeTime } from '@/utils/helper';
 import { formatLineBreaks } from '@/utils/tsxHelper';
-import ClearRounded from '@mui/icons-material/ClearRounded';
+import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import SendRounded from '@mui/icons-material/SendRounded';
 import SmartToyOutlined from '@mui/icons-material/SmartToyOutlined';
 import WarningRounded from '@mui/icons-material/WarningRounded';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -136,16 +136,18 @@ export function PostComment({ comment, index, onDeleted, onUpdated }: PostCommen
                     </Typography>}
                 </Box>
                 : <Box flexGrow={1}>
-                    <Stack direction={'row'} gap={1}>
-                        <Stack className="detail">
-                            <Typography className="user">{display_name}</Typography>
-                            <Typography className="content">{formatLineBreaks(post_comment)}</Typography>
-                        </Stack>
-                        {user?.id == comment.user_id && <Box display={'flex'} alignItems={'center'} gap={1} className="comment-options">
-                            <Button className="edit" onClick={handleEditClick} variant="contained" >Edit</Button>
-                            <IconButton className="delete" onClick={handleDeleteClick}><ClearRounded fontSize="small" /></IconButton>
-                        </Box>}
-                    </Stack>
+                    <Box>
+                        <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                            <Stack className="detail">
+                                <Typography className="user">{display_name}</Typography>
+                                <Typography className="content">{formatLineBreaks(post_comment)}</Typography>
+                            </Stack>
+                            {user?.id == comment.user_id && <Box display={'flex'} alignItems={'center'} gap={'4px'} className="comment-options">
+                                <IconButton className="edit" onClick={handleEditClick} ><EditRoundedIcon sx={{ fontSize: '14px' }} /></IconButton>
+                                <IconButton className="delete" onClick={handleDeleteClick}><ClearRoundedIcon sx={{ fontSize: '14px' }} /></IconButton>
+                            </Box>}
+                        </Box>
+                    </Box>
                     <Stack direction={'row'}>
                         <Typography className="date">{getRelativeTime(String(created_at))}</Typography>
                     </Stack>

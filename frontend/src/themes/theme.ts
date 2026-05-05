@@ -354,6 +354,7 @@ export const theme = createTheme({
                                 }
                             },
                             '& .detail': {
+                                position: 'relative',
                                 justifySelf: 'flex-start',
                                 backgroundColor: '#ffffff',
                                 borderRadius: '20px',
@@ -362,32 +363,37 @@ export const theme = createTheme({
                                 '& .user': {
                                     fontSize: '12px'
                                 },
-                                maxWidth: '80%',
                                 border: 'solid 1px #dddddd'
                             },
                             '& .date': {
                                 padding: '6px 12px'
                             },
                             '& .comment-options': {
-                                display: 'none'
+                                display: 'none',
+                                position: 'absolute',
+                                right: '0',
+                                marginTop: '-17px',
+                                //border: 'var(--border)',
+                                borderRadius: '15px',
+                                backgroundColor: '#ededed',
+                                padding: '4px',
+                                boxShadow: 'var(--shadow-paper)'
                             },
                             '&:hover .comment-options': {
                                 display: 'flex',
                                 '& .edit': {
-                                    padding: '0px 4px',
-                                    fontSize: '12px',
-                                    minWidth: 'unset',
-                                    backgroundColor: '#eeeeeeff',
-                                    color: theme.palette.getContrastText('#eeeeeeff'),
-                                    '&:hover': { backgroundColor: '#ffffffff' }
+                                    padding: '4px',
+                                    fontSize: '10px',
+                                    margin: 'auto 0',
+                                    backgroundColor: '#ededed',
+                                    '&:hover': { backgroundColor: '#e2e2e2' }
                                 },
                                 '& .delete': {
-                                    padding: '0',
+                                    padding: '4px',
                                     margin: 'auto 0',
-                                    color: 'white',
-                                    backgroundColor: '#8d2800ff',
+                                    backgroundColor: '#ededed',
                                     borderRadius: '50%',
-                                    '&:hover': { backgroundColor: '#b32f00' }
+                                    '&:hover': { backgroundColor: '#b32f00', color: '#ffffff' }
                                 }
                             }
                         }

@@ -215,7 +215,7 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
                     </Box>
                     <Box className="stats-button-container">
                         <Tooltip title="Views">
-                            <Stack direction={'row'} className="icon-stats" onClick={statsButtonOnClick}><EqualizerRounded sx={{ color: '#77d2ffff' }} /> <Typography>{formatCounters(views) || ''}</Typography></Stack>
+                            <Stack direction={'row'} className="icon-stats" onClick={statsButtonOnClick}><EqualizerRounded sx={{ color: 'rgb(2, 97, 145)' }} /> <Typography>{formatCounters(views) || ''}</Typography></Stack>
                         </Tooltip>
                     </Box>
                     <Box className="share-button-container">
