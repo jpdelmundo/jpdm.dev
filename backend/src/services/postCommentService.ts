@@ -12,6 +12,7 @@ import type { PostComment, PostCommentId, PostCommentInitializer, PostCommentMut
 import type { Post } from '@shared/models/generated/Post.js';
 import type { UserId } from '@shared/models/generated/User.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
+import { CommentStatus } from '@shared/types/CommentStatus.js';
 
 type CreateParams = PostCommentInitializer;
 type UpdateParams = PostCommentMutator;
@@ -36,11 +37,20 @@ export const createPostCommentService = (ctx: ServiceContext) => {
 
         const moderation = await moderateComment(comment);
         if (!moderation) throw new Error('Invalid AI moderation result');
-        if (!moderation.is_allowed) throw new ServiceError(`AI Moderation: ${moderation.reason}`);
 
-        //create comment
-        const newComment = await deps.postCommentRepo.create({ ...params, comment: String(comment).trim().replace(/\n{3,}/g, "\n\n") });
+        const commentText = String(comment).trim().replace(/\n{3,}/g, "\n\n");
+
+        const newComment = await deps.postCommentRepo.create({
+            ...params,
+            comment: commentText,
+            status: moderation.is_allowed ? CommentStatus.AI_APPROVED : CommentStatus.AI_REJECTED,
+            moderation_notes: moderation.is_allowed ? null : moderation.reason,
+        });
         if (!newComment) throw new Error('Failed creating comment');
+
+        if (!moderation.is_allowed) {
+            throw new ServiceError(`AI Moderation: ${moderation.reason}`);
+        }
 
         const result = (await get({ id: newComment.id })) as PostComments[];
         if (!result[0]) throw new Error(`Comment created but not found: ${newComment.id}`);
@@ -107,14 +117,20 @@ export const createPostCommentService = (ctx: ServiceContext) => {
         if (!comment || comment.trim().length == 0) throw new ServiceError('Content cannot be empty', ErrorCode.MISSING_PARAMETER, { param: 'comment' });
         if (comment.length > 2000) throw new ServiceError('Content too long', ErrorCode.LENGTH_TOO_LONG, { param: 'comment' });
 
-
         const moderation = await moderateComment(comment);
         if (!moderation) throw new Error('Invalid AI moderation result');
-        if (!moderation.is_allowed) throw new ServiceError(`AI Moderation: ${moderation.reason}`);
+
+        const commentText = String(comment).trim().replace(/\n{3,}/g, "\n\n");
 
         const updated = await deps.postCommentRepo.update(id, {
-            ...(comment && { comment: String(comment).trim().replace(/\n{3,}/g, "\n\n") })
+            comment: commentText,
+            status: moderation.is_allowed ? CommentStatus.AI_APPROVED : CommentStatus.AI_REJECTED,
+            moderation_notes: moderation.is_allowed ? null : moderation.reason,
         });
+
+        if (!moderation.is_allowed) {
+            throw new ServiceError(`AI Moderation: ${moderation.reason}`);
+        }
 
         return updated;
     };

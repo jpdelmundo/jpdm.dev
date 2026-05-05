@@ -1,4 +1,4 @@
-import { PostCommentRepository } from "@/repositories/PostCommentRepository.js";
+import { PostCommentRepository } from "@/repositories/postCommentRepository.js";
 import { FileRepository } from "@/repositories/FileRepository.js";
 import { PostImageRepository } from "@/repositories/PostImageRepository.js";
 import { PasswordResetRepository } from "@/repositories/PasswordResetRepository.js";

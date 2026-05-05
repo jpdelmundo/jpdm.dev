@@ -14,6 +14,10 @@ export interface PostComment {
   created_at: Date;
 
   updated_at: Date | null;
+
+  status: string;
+
+  moderation_notes: string | null;
 }
 
 /** Represents the table public.post_comments */
@@ -31,6 +35,11 @@ export interface PostCommentInitializer {
   created_at?: Date;
 
   updated_at?: Date | null;
+
+  /** Default value: 'ai_approved'::character varying */
+  status?: string;
+
+  moderation_notes?: string | null;
 }
 
 /** Represents the table public.post_comments */
@@ -46,6 +55,10 @@ export interface PostCommentMutator {
   created_at?: Date;
 
   updated_at?: Date | null;
+
+  status?: string;
+
+  moderation_notes?: string | null;
 }
 
 export const PostCommentColumns = [
@@ -55,4 +68,6 @@ export const PostCommentColumns = [
   "comment",
   "created_at",
   "updated_at",
+  "status",
+  "moderation_notes",
 ] as const;

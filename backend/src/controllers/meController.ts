@@ -4,6 +4,7 @@ import { createPostCommentService } from '@/services/postCommentService.js';
 import { createPostService } from '@/services/postService.js';
 import type { RouteParams } from '@/types/RouteParams.js';
 import { ok } from '@/utils/apiHelper.js';
+import { CommentStatus } from '@shared/types/CommentStatus.js';
 import type { Request, Response } from 'express';
 
 export const createMeController = (app: AppContext) => {
@@ -22,6 +23,7 @@ export const createMeController = (app: AppContext) => {
                     date_from: { gte: new Date(String(date_from)) },
                 }),
                 ...(date_to && { date_to: { lte: new Date(String(date_to)) } }),
+                status: [CommentStatus.AI_APPROVED, CommentStatus.USER_APPROVED],
                 page_num: page_num ? parseInt(String(page_num)) : 1,
                 page_size: page_size ? parseInt(String(page_size)) : 30,
                 order_by: 'created_at',

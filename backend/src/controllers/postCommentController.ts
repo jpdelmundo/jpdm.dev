@@ -3,6 +3,7 @@ import { bindContext } from '@/infra/bindContext.js';
 import { createPostCommentService } from '@/services/postCommentService.js';
 import type { RouteParams } from '@/types/RouteParams.js';
 import { ok } from '@/utils/apiHelper.js';
+import { CommentStatus } from '@shared/types/CommentStatus.js';
 import type { Request, Response } from 'express';
 
 export const createPostCommentController = (app: AppContext) => {
@@ -25,6 +26,7 @@ export const createPostCommentController = (app: AppContext) => {
             const commentSvc = createPostCommentService(makeCtx(req));
             const result = await commentSvc.get({
                 post_id,
+                status: [CommentStatus.AI_APPROVED, CommentStatus.USER_APPROVED],
                 page_num: page_num ? parseInt(String(page_num)) : 1,
                 page_size: 10,
                 order_by: 'created_at',

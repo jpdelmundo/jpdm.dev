@@ -14,6 +14,7 @@ type FindParams = {
     date_from?: DateComparison;
     date_to?: DateComparison;
     user_id?: UserId;
+    status?: string[];
     page_num?: number;
     page_size?: number;
     order_by?: string;
@@ -23,7 +24,7 @@ type FindParams = {
 
 export class PostCommentRepository extends BaseRepository<PostComment> {
     async find<P extends KeyValue>(params: P & FindParams) {
-        const { id, post_id, comment, date_from, date_to, user_id, order_by, order_dir, prioritize_user_id } = params as FindParams;
+        const { id, post_id, comment, date_from, date_to, user_id, status, order_by, order_dir, prioritize_user_id } = params as FindParams;
         const filters: string[] = [];
         const values: unknown[] = [];
 
@@ -34,6 +35,7 @@ export class PostCommentRepository extends BaseRepository<PostComment> {
         comment && filters.push(`comment ilike $${values.length + 1}`) && values.push(`%${comment}%`);
         date_from && filters.push(getDateParamCondition('created_at', date_from, values));
         date_to && filters.push(getDateParamCondition('created_at', date_to, values));
+        status && filters.push(`status = ANY($${values.length + 1})`) && values.push(status);
 
         if (values.length == 0) {
             throw new Error('At least one filter must be provided');
