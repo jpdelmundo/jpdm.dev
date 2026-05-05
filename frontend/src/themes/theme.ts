@@ -372,11 +372,11 @@ export const theme = createTheme({
                             '& .comment-options': {
                                 display: 'none',
                                 position: 'absolute',
-                                right: '0',
-                                marginTop: '-17px',
-                                //border: 'var(--border)',
+                                right: '-40px',
+                                marginTop: '-32px',
+                                border: 'var(--border)',
                                 borderRadius: '15px',
-                                backgroundColor: '#ededed',
+                                backgroundColor: '#ffffff',
                                 padding: '4px',
                                 boxShadow: 'var(--shadow-paper)'
                             },
@@ -386,13 +386,13 @@ export const theme = createTheme({
                                     padding: '4px',
                                     fontSize: '10px',
                                     margin: 'auto 0',
-                                    backgroundColor: '#ededed',
-                                    '&:hover': { backgroundColor: '#e2e2e2' }
+                                    backgroundColor: '#ffffff',
+                                    '&:hover': { backgroundColor: '#ececec' }
                                 },
                                 '& .delete': {
                                     padding: '4px',
                                     margin: 'auto 0',
-                                    backgroundColor: '#ededed',
+                                    backgroundColor: '#ffffff',
                                     borderRadius: '50%',
                                     '&:hover': { backgroundColor: '#b32f00', color: '#ffffff' }
                                 }

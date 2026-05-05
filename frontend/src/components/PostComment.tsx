@@ -137,7 +137,7 @@ export function PostComment({ comment, index, onDeleted, onUpdated }: PostCommen
                 </Box>
                 : <Box flexGrow={1}>
                     <Box>
-                        <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                        <Box sx={{ position: 'relative', display: 'inline-block', maxWidth: '95%' }}>
                             <Stack className="detail">
                                 <Typography className="user">{display_name}</Typography>
                                 <Typography className="content">{formatLineBreaks(post_comment)}</Typography>
