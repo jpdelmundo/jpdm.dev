@@ -236,11 +236,16 @@ export const theme = createTheme({
                             lineHeight: 1.2
                         },
                         '& .title': {
+                            color: 'var(--mui-palette-text-primary)',
+                            textDecoration: 'none',
                             marginBottom: '5px',
                             fontWeight: 'bold',
                             wordBreak: 'break-word',
                             wordWrap: 'break-word',
-                            lineHeight: 1
+                            lineHeight: 1,
+                            '&:hover': {
+                                textDecoration: 'underline',
+                            }
                         },
                         '& .content': {
                             whiteSpace: 'pre-wrap',

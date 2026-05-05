@@ -16,6 +16,7 @@ import MoreHorizRounded from '@mui/icons-material/MoreHorizRounded';
 import ShareRounded from '@mui/icons-material/ShareRounded';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
+import Link from '@mui/material/Link';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
@@ -180,7 +181,7 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
                 }}
             >
                 <Stack direction={'row'}>
-                    {title && <Typography className="title" fontSize={'17px'} maxWidth={'93%'} {...(title.length <= 150 && { fontSize: { xs: '30px', sm: '40px' } })}>{title}</Typography>}
+                    {title && <Link href={`${window.location.origin}/posts/${post.id}`} target="_blank" className="title" fontSize={'17px'} maxWidth={'93%'} {...(title.length <= 150 && { fontSize: { xs: '30px', sm: '40px' } })}>{title}</Link>}
                     {user?.id == post.user_id && <IconButton sx={{ marginLeft: 'auto', position: 'absolute', right: '25px', top: '20px', padding: '2px' }} onClick={postOptionsOnClick}><MoreHorizRounded /></IconButton>}
                 </Stack>
                 <Stack direction={'row'} className="header">
