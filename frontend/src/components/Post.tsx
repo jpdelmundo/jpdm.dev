@@ -3,7 +3,6 @@ import { usePostViewLogger } from '@/hooks/usePostViewCounter';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useConfirmStore } from '@/store/useConfirmStore';
 import { useSnackbarStore } from '@/store/useSnackbarStore';
-import { theme } from '@/themes/theme.ts';
 import type { CollageImage } from '@/types/CollageImage';
 import type { PostCommentsUpdatedParams } from '@/types/PostCommentsUpdatedParams';
 import { copyToClipboard, formatCounters, getDimensionOrientation, getRelativeTime } from '@/utils/helper';
@@ -22,7 +21,6 @@ import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import type PostDTO from '@shared/models/dto/PostDTO.ts';
 import type PostImageExtended from '@shared/models/extensions/PostImageExtended';
 import type { PostImageId } from '@shared/models/generated/PostImage';
@@ -61,7 +59,6 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
     const [editPost, setEditPost] = useState<PostDTO | null>(null);
     const user = useAuthStore(s => s.user);
     const navigate = useNavigate();
-    const isSmDown = useMediaQuery(theme.breakpoints.down('sm'));
 
     const orientation = useMemo(() => {
         if (!images?.length) return 'portrait';
@@ -179,7 +176,7 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
                     opacity: isDeleting ? 0.8 : 1,
                     pointerEvents: isDeleting ? 'none' : '',
                     filter: isDeleting ? 'grayscale(1)' : '',
-                    backgroundColor: isSmDown ? '#ffffffff !important' : ''
+                    //border: 'var(--border)'
                 }}
             >
                 <Stack direction={'row'}>
