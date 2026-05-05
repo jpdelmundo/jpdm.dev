@@ -124,7 +124,7 @@ export function ImageDialog({ open, closeDialog, imageId, images }: ImageDialogP
                         onClick={closeDialog}
                         sx={{
                             ...buttonStyle,
-                            top: 'max(16px, env(safe-area-inset-top))',
+                            top: { xs: 'max(36px, env(safe-area-inset-top))', sm: '16px' },
                             right: '16px',
                             backgroundColor: '#ff0000',
                             '&:hover': {
