@@ -133,7 +133,7 @@ export function ImageDialog({ open, closeDialog, imageId, images }: ImageDialogP
                             },
                             display: controlsVisible ? '' : 'none'
                         }}
-                    ><CloseRoundedIcon sx={iconStyle} /></IconButton>
+                    ><CloseRoundedIcon sx={{ width: 60, height: 60 }} /></IconButton>
                 </Box>
             </Dialog>
         </>
