@@ -25,7 +25,7 @@ export function linkify(text: string) {
         if (start > last) nodes.push(text.slice(last, start));
 
         nodes.push(
-            <a href={url} target="_blank" rel="noopener noreferrer" style={{ color: 'rgb(29, 155, 240)' }}>
+            <a href={url} target="_blank" rel="noopener noreferrer" style={{ color: 'rgb(29, 155, 240)', overflowWrap: 'break-word' }}>
                 {url}
             </a>
         );
