@@ -8,11 +8,11 @@ import { moderateComment } from '@/utils/llm.js';
 import { canModify as _canModify } from '@/utils/permissions.js';
 import type { PostCommentDTO, PostCommentDTO as PostComments } from '@shared/models/dto/PostCommentDTO.js';
 import type PostDTO from '@shared/models/dto/PostDTO.js';
-import type { PostComment, PostCommentId, PostCommentInitializer, PostCommentMutator } from '@shared/models/generated/PostComment.js';
 import type { Post } from '@shared/models/generated/Post.js';
+import type { PostComment, PostCommentId, PostCommentInitializer, PostCommentMutator } from '@shared/models/generated/PostComment.js';
 import type { UserId } from '@shared/models/generated/User.js';
-import { ErrorCode } from '@shared/types/ErrorCode.js';
 import { CommentStatus } from '@shared/types/CommentStatus.js';
+import { ErrorCode } from '@shared/types/ErrorCode.js';
 
 type CreateParams = PostCommentInitializer;
 type UpdateParams = PostCommentMutator;
@@ -119,18 +119,15 @@ export const createPostCommentService = (ctx: ServiceContext) => {
 
         const moderation = await moderateComment(comment);
         if (!moderation) throw new Error('Invalid AI moderation result');
+        if (!moderation.is_allowed) throw new ServiceError(`AI Moderation: ${moderation.reason}`);
 
         const commentText = String(comment).trim().replace(/\n{3,}/g, "\n\n");
 
         const updated = await deps.postCommentRepo.update(id, {
             comment: commentText,
-            status: moderation.is_allowed ? CommentStatus.AI_APPROVED : CommentStatus.AI_REJECTED,
-            moderation_notes: moderation.is_allowed ? null : moderation.reason,
+            status: CommentStatus.AI_APPROVED,
+            moderation_notes: null
         });
-
-        if (!moderation.is_allowed) {
-            throw new ServiceError(`AI Moderation: ${moderation.reason}`);
-        }
 
         return updated;
     };
