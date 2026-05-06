@@ -3,6 +3,7 @@ import { Error } from '@/components/Error';
 import PasswordField from '@/components/PasswordField';
 import { PageLoading } from '@/components/skeleton/PageLoading';
 import { useAuthStore } from '@/store/useAuthStore';
+import { getFingerprint } from '@/utils/device.ts';
 import { formatDateTime, getErrorMessage, scrollbarWidthAware } from '@/utils/helper';
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
 import MailOutlineRounded from '@mui/icons-material/MailOutlineRounded';
@@ -21,6 +22,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import type { MeDTO } from '@shared/models/dto/MeDTO';
 import type { ApiErrorDetail } from '@shared/types/ApiResult';
+import { jsonBase64Encode } from '@shared/utils/encoding.ts';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -82,8 +84,8 @@ export const AccountPage = () => {
                 setDeleteError(getErrorMessage(result));
             }
         } else if (data?.social_login) {
-            //const authUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/${data?.social_login}?fp=${jsonBase64Encode(getFingerprint())}&intent=get_delete_token`;
-            //const authWindow = window.open(authUrl, 'reauth', 'width=500,height=600');
+            const authUrl = `${import.meta.env.VITE_API_BASE_PATH}/auth/${data?.social_login}?fp=${jsonBase64Encode(getFingerprint())}&intent=get_delete_token`;
+            window.open(authUrl, 'reauth', 'width=500,height=600');
 
             window.addEventListener('message', async (event: MessageEvent<unknown>) => {
                 if (event.origin != `${import.meta.env.VITE_API_BASE_PATH}`) return;
