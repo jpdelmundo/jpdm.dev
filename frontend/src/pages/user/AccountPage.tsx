@@ -88,8 +88,8 @@ export const AccountPage = () => {
             window.open(authUrl, 'reauth', 'width=500,height=600');
 
             window.addEventListener('message', async (event: MessageEvent<unknown>) => {
-                if (event.origin != `${import.meta.env.VITE_API_BASE_PATH}`) return;
-                //console.log({ event });
+                if (event.origin != window.origin) return;
+
                 const { token } = (event.data as Record<string, string>);
 
                 setDeleteError('');
@@ -102,7 +102,7 @@ export const AccountPage = () => {
                 } else {
                     setDeleteError(getErrorMessage(result));
                 }
-            });
+            }, { once: true });
         }
     }
 

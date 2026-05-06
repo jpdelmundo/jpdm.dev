@@ -227,8 +227,8 @@ export const createAuthController = (app: AppContext) => {
     };
 
     const facebookAuth = async (req: Request, res: Response, next: NextFunction) => {
-        const { fp } = req.query;
-        const customData = { fp, ip: req.ip };
+        const { fp, intent } = req.query;
+        const customData = { fp, ip: req.ip, intent };
         const state = jsonBase64Encode(customData);
 
         passport.authenticate('facebook', {
@@ -252,7 +252,7 @@ export const createAuthController = (app: AppContext) => {
                 res.redirect(redirectUrl.toString());
                 return;
             }
-
+            console.log({ state, customData });
             const userSvc = createUserService(makeCtx(req));
 
             switch (intent) {

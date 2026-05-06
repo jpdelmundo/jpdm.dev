@@ -19,7 +19,7 @@ const systemContext: ServiceContext = {
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID!,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    callbackURL: '/api/auth/google/callback'
+    callbackURL: `${process.env.FRONTEND_BASE_URL}/api/auth/google/callback`
 }, async (accessToken: string, refreshToken: string, profile: GoogleProfile, done: GoogleVerifyCallback) => {
     try {
         if (!profile || !profile.emails?.[0]?.value) {
@@ -71,7 +71,7 @@ passport.use(new GoogleStrategy({
 passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID!,
     clientSecret: process.env.FACEBOOK_APP_SECRET!,
-    callbackURL: '/api/auth/facebook/callback',
+    callbackURL: `${process.env.FRONTEND_BASE_URL}/api/auth/facebook/callback`,
     profileFields: ['id', 'email', 'name', 'picture']
 }, async (accessToken: string, refreshToken: string, profile: FacebookProfile, done) => {
     try {

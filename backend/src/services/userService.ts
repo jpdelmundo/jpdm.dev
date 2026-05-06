@@ -446,7 +446,7 @@ The Support Team`
 
     const del = async (id: UserId, params: DeleteParams) => {
         const { password, token } = params;
-        if (!password && !token) throw new ServiceError('Missing or empty require parameter: password or token');
+        if (!password && !token) throw new ServiceError('Missing or empty required parameter: password or token');
         if (!await canModify(id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
         const user = await findById(id);
@@ -454,7 +454,7 @@ The Support Team`
         if (token) {
             const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as Jwt;
             if (!decoded.id || decoded.scope != 'delete_account') throw new ServiceError('Invalid delete token');
-            if (decoded.id != id) throw new ServiceError('Unauthorized request');
+            if (decoded.id != id) throw new ServiceError('Unauthorized request', ErrorCode.NOT_ALLOWED);
         }
 
         const deleted = await deps.userRepo.delete(id);
