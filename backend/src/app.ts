@@ -18,7 +18,7 @@ import './utils/logger.js';
 const app = express();
 const port = process.env.BACKEND_PORT;
 
-app.set('trust proxy', 1); //for cloudflare/proxy
+app.set('trust proxy', 2); //for cloudflare/proxy
 // app.use(cors({
 //   origin: CORS_ORIGINS === '*' ? (origin, callback) => { console.log({ origin }); return callback(null, origin ?? '*') } : CORS_ORIGINS.split(','),
 //   credentials: true
