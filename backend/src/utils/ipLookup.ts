@@ -40,7 +40,7 @@ export const ipGeoLookup = async (ip: string) => {
         console.log('[GeoIP] Reader obtained, performing lookup...');
 
         const lookup = reader.get(ip);
-        console.log('[GeoIP] Lookup complete:', lookup ? 'found' : 'not found');
+        console.log('[GeoIP] Lookup complete:', lookup);
 
         if (!lookup) return location;
 

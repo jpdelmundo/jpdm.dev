@@ -44,7 +44,7 @@ export const createPostController = (app: AppContext) => {
                 visibility: 'public',
                 is_published: true,
                 page_num: page_num ? parseInt(String(page_num)) : 1,
-                page_size: 30,
+                page_size: 5,
                 order_by: 'created_at',
                 order_dir: 'desc'
             });
