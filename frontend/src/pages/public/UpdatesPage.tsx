@@ -9,16 +9,10 @@ import Container from '@mui/material/Container';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import type PostDTO from '@shared/models/dto/PostDTO.ts';
-import type PostImageExtended from '@shared/models/extensions/PostImageExtended';
 import type { PostImageId } from '@shared/models/generated/PostImage';
 import type { Paginated } from '@shared/types/Paginated';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, type Location } from 'react-router-dom';
-
-type ImageDialogState = {
-    imageId: PostImageId;
-    images: PostImageExtended[];
-} | null;
 
 export const UpdatesPage = () => {
     //console.log('UpdatesPage render');
@@ -27,7 +21,7 @@ export const UpdatesPage = () => {
     const [postDialogOpen, setPostDialogOpen] = useState(false);
     const [posts, setPosts] = useState<PostDTO[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [viewer, setViewer] = useState<ImageDialogState>(null);
+    const [selectedImageId, setSelectedImageId] = useState<PostImageId | null>(null);
     const origLocation = useRef<Location | null>(null);
     const location = useLocation();
     const navigate = useNavigate();
@@ -53,26 +47,20 @@ export const UpdatesPage = () => {
         setPosts(prev => prev.map(v => v.id === post.id ? post : v));
     }, []);
 
-    const handlePostImageClick = useCallback((imageId: PostImageId, images: PostImageExtended[]) => {
-        setViewer({ imageId, images });
+    const handlePostImageClick = useCallback((imageId: PostImageId) => {
+        setSelectedImageId(imageId);
         origLocation.current = location;
         window.history.pushState({}, '', `/images/${imageId}`);
     }, [location]);
 
     useEffect(() => {
-        const onPopState = () => setViewer(null);
+        const onPopState = () => setSelectedImageId(null);
         window.addEventListener('popstate', onPopState);
         return () => window.removeEventListener('popstate', onPopState);
     }, []);
 
-    // const handlePostImageClick = useCallback((imageId: PostImageId, images: PostImageExtended[]) => {
-    //     setViewer({ imageId, images });
-    //     origLocation.current = location;
-    //     window.history.pushState({}, '', `/images/${imageId}`);
-    // }, []);
-
     const closeImageDialog = useCallback(() => {
-        setViewer(null);
+        setSelectedImageId(null);
         navigate(origLocation.current ? (origLocation.current.pathname + origLocation.current.search) : '/', { replace: true });
     }, [navigate]);
 
@@ -121,10 +109,9 @@ export const UpdatesPage = () => {
                     onCreated={onPosted}
                 />
 
-                {viewer && <ImageDialog
+                {selectedImageId && <ImageDialog
                     open
-                    imageId={viewer.imageId}
-                    images={viewer.images}
+                    imageId={selectedImageId}
                     closeDialog={closeImageDialog}
                 />}
             </Box>

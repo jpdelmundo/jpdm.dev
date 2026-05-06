@@ -7,16 +7,10 @@ import { useAuthStore } from '@/store/useAuthStore';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import type PostDTO from '@shared/models/dto/PostDTO.ts';
-import type PostImageExtended from '@shared/models/extensions/PostImageExtended';
 import type { PostImageId } from '@shared/models/generated/PostImage';
 import type { ApiErrorDetail } from '@shared/types/ApiResult';
 import { useEffect, useRef, useState } from 'react';
 import { Navigate, useLocation, useNavigate, useParams, type Location } from 'react-router-dom';
-
-type ImageDialogState = {
-    imageId: PostImageId;
-    images: PostImageExtended[];
-} | null;
 
 export function PostPage() {
     const ready = useAuthStore(s => s.ready);
@@ -27,7 +21,7 @@ export function PostPage() {
     const location = useLocation();
     const navigate = useNavigate();
     const origLocation = useRef<Location | null>(null);
-    const [viewer, setViewer] = useState<ImageDialogState>(null);
+    const [selectedImageId, setSelectedImageId] = useState<PostImageId | null>(null);
 
     const getData = async () => {
         // try {
@@ -61,20 +55,20 @@ export function PostPage() {
         setPost(post);
     };
 
-    const handlePostImageClick = (imageId: PostImageId, images: PostImageExtended[]) => {
-        setViewer({ imageId, images });
+    const handlePostImageClick = (imageId: PostImageId) => {
+        setSelectedImageId(imageId);
         origLocation.current = location;
         window.history.pushState({}, '', `/images/${imageId}`);
     };
 
     useEffect(() => {
-        const onPopState = () => setViewer(null);
+        const onPopState = () => setSelectedImageId(null);
         window.addEventListener('popstate', onPopState);
         return () => window.removeEventListener('popstate', onPopState);
     }, []);
 
     const closeImageDialog = () => {
-        setViewer(null);
+        setSelectedImageId(null);
         navigate(origLocation.current ? (origLocation.current.pathname + origLocation.current.search) : '/', { replace: true });
     };
 
@@ -95,10 +89,9 @@ export function PostPage() {
                     onImageClick={handlePostImageClick}
                 />}
 
-            {viewer && <ImageDialog
+            {selectedImageId && <ImageDialog
                 open
-                imageId={viewer.imageId}
-                images={viewer.images}
+                imageId={selectedImageId}
                 closeDialog={closeImageDialog}
             />}
         </Box>

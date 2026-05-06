@@ -23,7 +23,6 @@ import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import type PostDTO from '@shared/models/dto/PostDTO.ts';
-import type PostImageExtended from '@shared/models/extensions/PostImageExtended';
 import type { PostImageId } from '@shared/models/generated/PostImage';
 import type { ImageOrientation } from '@shared/types/ImageOrientation';
 import { memo, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
@@ -38,7 +37,7 @@ type PostProps = {
     post: PostDTO;
     onDeleted?: (post: PostDTO) => void;
     onUpdated?: (post: PostDTO) => void;
-    onImageClick: (imageId: PostImageId, images: PostImageExtended[]) => void;
+    onImageClick: (imageId: PostImageId) => void;
 };
 
 export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProps) => {
@@ -149,7 +148,7 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
     }
 
     const handleOnImageClick = (image: CollageImage) => {
-        onImageClick(image.id, images);
+        onImageClick(image.id);
     }
 
     useEffect(() => {

@@ -7,12 +7,11 @@ import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
 import type PostImageExtended from '@shared/models/extensions/PostImageExtended';
 import type { PostImageId } from '@shared/models/generated/PostImage';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 type ImageDialogParams = {
     open: boolean;
     closeDialog: () => void;
-    images?: PostImageExtended[] | null;
     imageId: PostImageId | null;
 };
 
@@ -38,14 +37,13 @@ type ApiGetResult = {
     post_image_set: PostImageExtended[];
 };
 
-export function ImageDialog({ open, closeDialog, imageId, images }: ImageDialogParams) {
-    console.log('ImageDialog render', { images, imageId });
+export function ImageDialog({ open, closeDialog, imageId }: ImageDialogParams) {
     const [isLoading, setIsLoading] = useState(false);
     const [selectedImage, setSelectedImage] = useState<PostImageExtended | null>(null);
-    const [imageSet, setImageSet] = useState<PostImageExtended[] | null>(images || null);
+    const [imageSet, setImageSet] = useState<PostImageExtended[] | null>(null);
     const [controlsVisible, setControlsVisible] = useState(true);
 
-    const getData = async ({ include_set }: { include_set?: boolean } = {}) => {
+    const getData = useCallback(async ({ include_set }: { include_set?: boolean } = {}) => {
         setIsLoading(true);
         const result = await apiGet<ApiGetResult>(`/images/${imageId}`, { ...(include_set && { include_set }) });
         setIsLoading(false);
@@ -53,7 +51,7 @@ export function ImageDialog({ open, closeDialog, imageId, images }: ImageDialogP
             setSelectedImage(result.data.post_image);
             include_set && setImageSet(result.data.post_image_set);
         }
-    }
+    }, [imageId]);
 
     //e: MouseEvent<HTMLButtonElement>
     const prevOnClick = () => {
@@ -77,18 +75,12 @@ export function ImageDialog({ open, closeDialog, imageId, images }: ImageDialogP
 
     useEffect(() => {
         if (!open) return;
-        !imageSet && getData({ include_set: true });
-    }, []);
-
-    useEffect(() => {
-        setImageSet(images ?? null);
-    }, [images]);
+        getData({ include_set: true });
+    }, [open, imageId]);
 
     useEffect(() => {
         imageSet && setSelectedImage(imageSet[imageSet.findIndex(p => p.id == imageId)]);
     }, [imageId]);
-
-    console.log('ImageDialog before return jsx', { isLoading, selectedImage, imageSet, images });
 
     return (
         <>
