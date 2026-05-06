@@ -18,7 +18,7 @@ export const createPostViewService = (ctx: ServiceContext) => {
         if (!device_id || !ip) return null;
 
         const device_type = dt || 'desktop';
-        const location = ipGeoLookup(String(ip));
+        const location = await ipGeoLookup(String(ip));
 
         //create post
         const isViewHitOnCooldown = await deps.postViewRepo.onCooldown(post_id, { device_id, ip });

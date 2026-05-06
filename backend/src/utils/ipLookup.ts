@@ -26,21 +26,21 @@ const getReader = async () => {
 };
 
 export const ipGeoLookup = async (ip: string) => {
-    console.log('[GeoIP] Lookup started for:', ip);
+    //console.log('[GeoIP] Lookup started for:', ip);
     let location = {};
 
     if (!ip) {
-        console.log('[GeoIP] No IP provided, returning empty');
+        //console.log('[GeoIP] No IP provided, returning empty');
         return location;
     }
 
     try {
-        console.log('[GeoIP] Getting reader...');
+        //console.log('[GeoIP] Getting reader...');
         const reader = await getReader();
-        console.log('[GeoIP] Reader obtained, performing lookup...');
+        //console.log('[GeoIP] Reader obtained, performing lookup...');
 
         const lookup = reader.get(ip);
-        console.log('[GeoIP] Lookup complete:', lookup);
+        //console.log('[GeoIP] Lookup complete:', lookup);
 
         if (!lookup) return location;
 
@@ -48,7 +48,7 @@ export const ipGeoLookup = async (ip: string) => {
             country: lookup.country?.names.en || null,
             city: lookup.city?.names.en || null
         };
-        console.log('[GeoIP] Location data:', location);
+        //console.log('[GeoIP] Location data:', location);
     } catch (err) {
         console.error('[GeoIP] Error during lookup:', err);
         return location;
