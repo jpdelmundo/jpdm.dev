@@ -25,15 +25,34 @@ export const UpdatesPage = () => {
     const origLocation = useRef<Location | null>(null);
     const location = useLocation();
     const navigate = useNavigate();
+    const sentinelRef = useRef<HTMLDivElement>(null);
+    const [pageNum, setPageNum] = useState(1);
+    const [hasMore, setHasMore] = useState(false);
+    const [isLoadMoreLoading, setIsLoadMoreLoading] = useState(false);
 
     const getData = async () => {
         setIsLoading(true);
         const result = await apiGet<Paginated<PostDTO>>('/users/jp/posts', { page_num: 1 });
         setIsLoading(false);
         if (result.ok && result.data) {
-            setPosts(result.data.page_items);
+            const { page_num, page_items, total, page_size } = result.data;
+            setPosts(page_items);
+            setPageNum(page_num);
+            setHasMore(page_num < Math.ceil(total / page_size));
         }
     };
+
+    const loadMore = async () => {
+        setIsLoadMoreLoading(true);
+        const result = await apiGet<Paginated<PostDTO>>('/users/jp/posts', { page_num: pageNum + 1 });
+        setIsLoadMoreLoading(false);
+        if (result.ok && result.data) {
+            const { page_num, page_items, total, page_size } = result.data;
+            setPosts(prev => [...prev, ...page_items]);
+            setPageNum(page_num);
+            setHasMore(page_num < Math.ceil(total / page_size));
+        }
+    }
 
     const onPosted = () => {
         getData();
@@ -53,16 +72,30 @@ export const UpdatesPage = () => {
         window.history.pushState({}, '', `/images/${imageId}`);
     }, [location]);
 
+    const closeImageDialog = useCallback(() => {
+        setSelectedImageId(null);
+        navigate(origLocation.current ? (origLocation.current.pathname + origLocation.current.search) : '/', { replace: true });
+    }, [navigate]);
+
+    useEffect(() => {
+        console.log({ sentinelRef: sentinelRef.current });
+        if (!sentinelRef.current) return;
+        const observer = new IntersectionObserver(async entries => {
+            if (entries[0].isIntersecting) {
+                if (hasMore && !isLoadMoreLoading) {
+                    loadMore();
+                }
+            }
+        }, { rootMargin: '50px' });
+        observer.observe(sentinelRef.current);
+        return () => observer.disconnect();
+    }, [hasMore, isLoadMoreLoading]);
+
     useEffect(() => {
         const onPopState = () => setSelectedImageId(null);
         window.addEventListener('popstate', onPopState);
         return () => window.removeEventListener('popstate', onPopState);
     }, []);
-
-    const closeImageDialog = useCallback(() => {
-        setSelectedImageId(null);
-        navigate(origLocation.current ? (origLocation.current.pathname + origLocation.current.search) : '/', { replace: true });
-    }, [navigate]);
 
     useEffect(() => {
         ready && getData();
@@ -91,17 +124,21 @@ export const UpdatesPage = () => {
                         <Typography>What's on you mind?</Typography>
                     </Paper>}
 
-                {isLoading
-                    ? <PostSkeleton />
-                    : posts && posts.map(post => (
-                        <Post
-                            key={post.id}
-                            post={post}
-                            onDeleted={handlePostDeleted}
-                            onUpdated={handlePostUpdated}
-                            onImageClick={handlePostImageClick}
-                        />
-                    ))}
+                {isLoading && <PostSkeleton />}
+
+                {posts && posts.map(post => (
+                    <Post
+                        key={post.id}
+                        post={post}
+                        onDeleted={handlePostDeleted}
+                        onUpdated={handlePostUpdated}
+                        onImageClick={handlePostImageClick}
+                    />
+                ))}
+
+                {isLoadMoreLoading && <PostSkeleton />}
+
+                <div ref={sentinelRef} style={{ height: '1px' }} />
 
                 <PostDialog
                     open={postDialogOpen}
