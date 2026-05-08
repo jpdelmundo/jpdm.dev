@@ -80,6 +80,7 @@ Respond ONLY with valid JSON with properties:
 Disallow:
 - insults, anything about the face, mouth or looks
 - spam messages
+- too many unnecessary line breaks but each line is nonsense or unrelated
 
 Rules:
 - If is_allowed = true, set "reason" to an empty string.
