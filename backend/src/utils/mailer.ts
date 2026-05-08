@@ -6,7 +6,8 @@ export const mail = async ({ from, to, subject, text }: { from: string, to: stri
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
             port: Number(process.env.SMTP_PORT),
-            secure: process.env.SMTP_PORT === '465',
+            //secure: process.env.SMTP_PORT === '465',
+            secure: process.env.SMTP_SECURE === 'true', //only true only if using port 465
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS
@@ -14,7 +15,7 @@ export const mail = async ({ from, to, subject, text }: { from: string, to: stri
             tls: {
                 // key: fs.readFileSync(String(process.env.SMTP_CLIENT_KEY)),
                 // cert: fs.readFileSync(String(process.env.SMTP_CLIENT_CERT)),
-                servername: process.env.SMTP_HOST,
+                servername: process.env.SMTP_SERVER_NAME, //include server name if using ip address
                 rejectUnauthorized: process.env.NODE_ENV === 'production' //false on dev only, true makes sure the "host" param matches the host in the mail server cert
             }
         });
