@@ -55,7 +55,7 @@ const routes = [
                     }
                 ]
             },
-            { path: 'posts/:id', element: <PostPage /> },
+            { path: 'posts/:id/*', element: <PostPage /> },
             { path: 'images/:id', element: <ImagePage /> },
             { path: 'forgot-password', element: <ForgotPasswordPage /> },
             { path: 'reset-password/:token_hash', element: <ResetPasswordPage /> },

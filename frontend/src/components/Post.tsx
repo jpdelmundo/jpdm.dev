@@ -25,6 +25,7 @@ import Typography from '@mui/material/Typography';
 import type PostDTO from '@shared/models/dto/PostDTO.ts';
 import type { PostImageId } from '@shared/models/generated/PostImage';
 import type { ImageOrientation } from '@shared/types/ImageOrientation';
+import { slugFormat } from '@shared/utils/helper.ts';
 import { memo, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Avatar } from './Avatar.tsx';
@@ -102,7 +103,7 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
     }
 
     const shareButtonOnClick = async () => {
-        await copyToClipboard(`${window.location.origin}/posts/${post.id}`);
+        await copyToClipboard(`${window.location.origin}/posts/${post.id}/${slugFormat((post.title || post.content))}`);
         showMessage(<Box display={'flex'} alignItems={'center'} gap={1}><CheckCircleRounded fontSize="small" /> Copied URL to clipboard</Box>);
     }
 
@@ -180,7 +181,7 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
                 }}
             >
                 <Stack direction={'row'}>
-                    {title && <Link href={`${window.location.origin}/posts/${post.id}`} target="_blank" className="title" fontSize={'17px'} maxWidth={'93%'} {...(title.length <= 150 && { fontSize: { xs: '30px', sm: '40px' } })}>{title}</Link>}
+                    {title && <Link href={`${window.location.origin}/posts/${post.id}/${slugFormat((post.title || post.content))}`} target="_blank" className="title" fontSize={'17px'} maxWidth={'93%'} {...(title.length <= 150 && { fontSize: { xs: '30px', sm: '40px' } })}>{title}</Link>}
                     {user?.id == post.user_id && <IconButton sx={{ marginLeft: 'auto', position: 'absolute', right: '25px', top: '20px', padding: '2px' }} onClick={postOptionsOnClick}><MoreHorizRounded /></IconButton>}
                 </Stack>
                 <Stack direction={'row'} className="header">

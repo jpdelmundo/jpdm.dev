@@ -28,8 +28,8 @@ import { useForm, type SubmitHandler } from 'react-hook-form';
 // import EditRoundedIcon from '@mui/icons-material/EditRounded';
 // import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import { theme } from '@/themes/theme.ts';
-import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import { slugFormat } from '@shared/utils/helper.ts';
 
 type FilterFormInput = {
     comment: string;
@@ -188,7 +188,8 @@ export const PostComments = () => {
                         )}
                         <Stack sx={{ padding: '8px 0', alignItems: 'flex-start' }}>
                             {!post ? '[Post deleted]' : (
-                                <Box sx={{ padding: '5px', borderRadius: '10px', textDecoration: 'none', color: 'var(--mui-palette-text-disabled)' }}>
+                                <Link href={`/posts/${post.id}/${slugFormat((post.title || post.content))}`} target="_blank"
+                                    sx={{ padding: '5px', borderRadius: '10px', textDecoration: 'none', color: 'var(--mui-palette-text-disabled)', '&:hover': { textDecoration: 'underline' } }}>
                                     <Typography
                                         sx={{ fontWeight: 'bold', fontSize: '12px' }}
                                         color="textDisabled"
@@ -205,11 +206,8 @@ export const PostComments = () => {
                                         <Typography component="span" sx={{ color: '#777777', fontSize: '12px' }}>
                                             {post.content.length > 200 ? `${post.content.substring(0, 200)}...` : post.content}
                                         </Typography>
-                                        <Link href={`/posts/${post.id}`} target="_blank" className="post-url" sx={{ display: 'none', m: '0 5px' }}>
-                                            <OpenInNewRoundedIcon sx={{ fontSize: '14px', verticalAlign: 'middle' }} />
-                                        </Link>
                                     </Box>
-                                </Box>
+                                </Link>
                             )}
                             <Box sx={{ padding: '6px 12px', borderRadius: '20px', border: 'solid 1px #dddddd', backgroundColor: '#ffffff' }}>
                                 <Typography className="content">
