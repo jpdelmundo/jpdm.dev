@@ -6,7 +6,7 @@ import { createUserService } from '@/services/userService.js';
 import type { KeyValue } from '@/types/KeyValue.js';
 import { moderateComment } from '@/utils/llm.js';
 import { canModify as _canModify } from '@/utils/permissions.js';
-import type { PostCommentDTO, PostCommentDTO as PostComments } from '@shared/models/dto/PostCommentDTO.js';
+import type { PostCommentDTO } from '@shared/models/dto/PostCommentDTO.js';
 import type PostDTO from '@shared/models/dto/PostDTO.js';
 import type { Post } from '@shared/models/generated/Post.js';
 import type { PostComment, PostCommentId, PostCommentInitializer, PostCommentMutator } from '@shared/models/generated/PostComment.js';
@@ -28,7 +28,7 @@ export const createPostCommentService = (ctx: ServiceContext) => {
         return _canModify(actor, item.user_id);
     };
 
-    const create = async (params: CreateParams): Promise<PostComments> => {
+    const create = async (params: CreateParams): Promise<PostComment> => {
         const { user_id, comment, post_id } = params;
         if (!user_id) throw new ServiceError('Missing parameter: user_id');
         if (!post_id) throw new ServiceError('Missing parameter: post_id');
@@ -52,7 +52,7 @@ export const createPostCommentService = (ctx: ServiceContext) => {
             throw new ServiceError(`AI Moderation: ${moderation.reason}`);
         }
 
-        const result = (await get({ id: newComment.id })) as PostComments[];
+        const result = (await get({ id: newComment.id })) as PostComment[];
         if (!result[0]) throw new Error(`Comment created but not found: ${newComment.id}`);
 
         return result[0];
@@ -109,7 +109,7 @@ export const createPostCommentService = (ctx: ServiceContext) => {
         return result;
     };
 
-    const update = async (id: PostCommentId, params: UpdateParams): Promise<PostComment | null> => {
+    const update = async (id: PostCommentId, params: UpdateParams): Promise<PostComment> => {
         const { comment } = params;
 
         if (!id) throw new ServiceError('Missing parameter: id');
@@ -120,7 +120,7 @@ export const createPostCommentService = (ctx: ServiceContext) => {
         const moderation = await moderateComment(comment);
         if (!moderation) throw new Error('Invalid AI moderation result');
         if (!moderation.is_allowed) throw new ServiceError(`AI Moderation: ${moderation.reason}`);
-
+        console.log({ moderation });
         const commentText = String(comment).trim().replace(/\n{3,}/g, "\n\n");
 
         const updated = await deps.postCommentRepo.update(id, {

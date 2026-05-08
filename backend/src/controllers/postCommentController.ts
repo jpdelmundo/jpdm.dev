@@ -12,13 +12,15 @@ export const createPostCommentController = (app: AppContext) => {
     return {
         create: async (req: Request, res: Response): Promise<Response> => {
             const { comment, post_id } = req.body;
+            const postCommentSvc = createPostCommentService(makeCtx(req));
 
-            const result = await createPostCommentService(makeCtx(req)).create({
+            const result = await postCommentSvc.create({
                 user_id: req.user!.id,
                 post_id, comment
             });
+            const [enriched] = await postCommentSvc.enrich([result]);
 
-            return ok(res, result);
+            return ok(res, enriched);
         },
 
         get: async (req: Request, res: Response): Promise<Response> => {
@@ -30,7 +32,7 @@ export const createPostCommentController = (app: AppContext) => {
                 page_num: page_num ? parseInt(String(page_num)) : 1,
                 page_size: 10,
                 order_by: 'created_at',
-                order_dir: 'desc'
+                order_dir: 'asc'
             });
             const enriched = await commentSvc.enrich(result.page_items, { include: ['post'] });
             result.page_items = enriched;
@@ -41,10 +43,12 @@ export const createPostCommentController = (app: AppContext) => {
         update: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
             const { id } = req.params;
             const { comment } = req.body;
+            const postCommentSvc = createPostCommentService(makeCtx(req));
 
-            const result = await createPostCommentService(makeCtx(req)).update(id, { comment });
+            const result = await postCommentSvc.update(id, { comment });
+            const [enriched] = await postCommentSvc.enrich([result]);
 
-            return ok(res, result);
+            return ok(res, enriched);
         },
 
         del: async (req: Request<{ id: string }>, res: Response): Promise<Response> => {

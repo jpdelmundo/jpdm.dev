@@ -2,7 +2,7 @@ import { apiGet, apiPost } from '@/api/apiClient';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useConfirmStore } from '@/store/useConfirmStore.ts';
 import type { PostCommentsUpdatedParams } from '@/types/PostCommentsUpdatedParams';
-import { getErrorMessage, isTopInView, scrollIntoView } from '@/utils/helper';
+import { getErrorMessage } from '@/utils/helper';
 import SendRounded from '@mui/icons-material/SendRounded';
 import SmartToyOutlined from '@mui/icons-material/SmartToyOutlined';
 import WarningRounded from '@mui/icons-material/WarningRounded';
@@ -17,7 +17,7 @@ import Typography from '@mui/material/Typography';
 import type { PostCommentDTO } from '@shared/models/dto/PostCommentDTO';
 import type { PostId } from '@shared/models/generated/Post';
 import type { Paginated } from '@shared/types/Paginated';
-import { useRef, useState, type FocusEvent, type KeyboardEvent } from 'react';
+import { useState, type FocusEvent, type KeyboardEvent } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { TransitionGroup } from 'react-transition-group';
@@ -51,7 +51,6 @@ export function PostComments({ open, postId, onCommentsUpdated }: PostCommentsPr
     const [isLoadMoreLoading, setIsLoadMoreLoading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const isAuthenticated = useAuthStore(s => s.isAuthenticated);
-    const commentsRef = useRef<HTMLDivElement | null>(null);
     const navigate = useNavigate();
     const confirm = useConfirmStore(s => s.confirm);
 
@@ -63,7 +62,7 @@ export function PostComments({ open, postId, onCommentsUpdated }: PostCommentsPr
     }
 
     const getData = async ({ page_num }: GetDataParams = { page_num: 1 }) => {
-        const result = await apiGet<Paginated<PostCommentDTO>>(`/comments`, { page_num, post_id: postId });
+        const result = await apiGet<Paginated<PostCommentDTO>>('/comments', { page_num, post_id: postId });
         if (result.ok && result.data) {
             const { page_items, page_size, page_num, total } = result.data;
             setComments(page_items);
@@ -75,14 +74,12 @@ export function PostComments({ open, postId, onCommentsUpdated }: PostCommentsPr
         if (!data.comment.trim()) return;
         setErrorMessage('');
         setIsSubmitting(true);
-        const result = await apiPost<PostCommentDTO>(`/comments`, { ...data, post_id: postId });
-        if (result.ok) {
+        const result = await apiPost<PostCommentDTO>('/comments', { ...data, post_id: postId });
+        if (result.ok && result.data) {
+            const data = result.data;
             resetField('comment');
-            setPageNum(1);
             onCommentsUpdated({ type: 'comment_added' });
-            await getData();
-            const newCommentEl = commentsRef.current as Element;
-            if (!isTopInView(newCommentEl, 60)) scrollIntoView(newCommentEl, 100);
+            setComments(prev => [...prev, data]);
         } else {
             setErrorMessage(getErrorMessage(result));
         }
@@ -91,7 +88,7 @@ export function PostComments({ open, postId, onCommentsUpdated }: PostCommentsPr
 
     const loadMoreOnClick = async () => {
         setIsLoadMoreLoading(true);
-        const result = await apiGet<Paginated<PostCommentDTO>>(`/comments`, { page_num: pageNum + 1, post_id: postId });
+        const result = await apiGet<Paginated<PostCommentDTO>>('/comments', { page_num: pageNum + 1, post_id: postId });
         if (result.ok && result.data) {
             const { page_items, page_size, page_num, total } = result.data;
             setComments(prev => [...prev, ...page_items]);
@@ -151,7 +148,7 @@ export function PostComments({ open, postId, onCommentsUpdated }: PostCommentsPr
 
     return <>
         <Collapse in={open} onEntered={commentsOnEntered} onExited={commentsOnExited}>
-            <Box className="comments" ref={commentsRef}>
+            <Box className="comments">
                 <Stack className="list">
                     <Collapse in={isLoading} onExited={commentsLoadingOnCollapse}>
                         <PostCommentSkeleton />
