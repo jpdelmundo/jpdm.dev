@@ -97,7 +97,7 @@ export const UserPanel = ({ sx }: Props) => {
                 '/reset-password'
             ].every(path => !location.pathname.startsWith(path))
             && <>
-                <Stack direction={'row'}>
+                <Stack direction={'row'} justifyContent={'flex-end'}>
                     {isAuthenticated ? (
                         <IconButton onClick={avatarOnClick} sx={{ padding: 0 }}>
                             {loading
