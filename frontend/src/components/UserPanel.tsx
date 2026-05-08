@@ -6,24 +6,41 @@ import { useState, type MouseEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useAvatarProps } from '@/hooks/useAvatarProps';
-import AccountCircle from '@mui/icons-material/AccountCircle';
 import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
 import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded';
+import LoginRoundedIcon from '@mui/icons-material/LoginRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
+import PersonAddRoundedIcon from '@mui/icons-material/PersonAddRounded';
 import SpaceDashboardOutlinedIcon from '@mui/icons-material/SpaceDashboardOutlined';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
-import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import Stack from '@mui/material/Stack';
 import type { SxProps } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
+import { Link as RLink } from 'react-router-dom';
 import { Avatar } from './Avatar';
 
 type Props = {
     sx?: SxProps
 };
+
+const btnSx = {
+    fontWeight: 'normal',
+    backgroundColor: '#f8f8f8',
+    color: '#000000',
+    //boxShadow: 'var(--shadow-paper)',
+    gap: '5px',
+    adding: '3px 6px',
+    justifyContent: 'center',
+    '&:hover': {
+        backgroundColor: '#e7e7e7',
+        //boxShadow: 'var(--shadow-paper)'
+    }
+}
 
 export const UserPanel = ({ sx }: Props) => {
     const user = useAuthStore(s => s.user);
@@ -79,19 +96,28 @@ export const UserPanel = ({ sx }: Props) => {
                 '/forgot-password',
                 '/reset-password'
             ].every(path => !location.pathname.startsWith(path))
-            && <Grid container gap={1}>
-                <Grid sx={{ ml: 'auto' }}>
-                    <IconButton onClick={avatarOnClick} sx={{ padding: 0 }}>
-                        {loading
-                            ? <CircularProgress />
-                            : isAuthenticated
-                                ? <Avatar
+            && <>
+                <Stack direction={'row'}>
+                    {isAuthenticated ? (
+                        <IconButton onClick={avatarOnClick} sx={{ padding: 0 }}>
+                            {loading
+                                ? <CircularProgress />
+                                : <Avatar
                                     sx={{ height: 40, width: 40 }}
                                     {...avatarProps}
-                                />
-                                : <AccountCircle fontSize={'large'} color={isAuthenticated ? 'disabled' : 'disabled'} />}
-                    </IconButton>
-                </Grid>
+                                />}
+                        </IconButton>
+                    ) : (
+                        <Stack direction={'row'} gap={'4px'}>
+                            <Button component={RLink} to="/signin" variant="outlined" size="small" sx={btnSx}>
+                                <LoginRoundedIcon sx={{ fontSize: '14px' }} /> <Typography sx={{ fontSize: '14px', whiteSpace: 'nowrap' }}>Sign In</Typography>
+                            </Button>
+                            <Button component={RLink} to="/signup" variant="outlined" size="small" sx={btnSx}>
+                                <PersonAddRoundedIcon sx={{ fontSize: '14px' }} /> <Typography sx={{ fontSize: '14px', whiteSpace: 'nowrap' }}>Sign Up</Typography>
+                            </Button>
+                        </Stack>
+                    )}
+                </Stack>
                 {/* <Grid><Link component={RouterLink} to="/signin"></Link> {user?.username}</Grid> */}
                 {/* <Grid><Link component={RouterLink} to="/signin"></Link> {user?.username}</Grid> */}
                 {/* <Grid>{loading ? <CircularProgress /> : (isAuthenticated && <Link onClick={signOut} sx={{ cursor: 'pointer' }}>Logout</Link>)}</Grid> */}
@@ -139,7 +165,7 @@ export const UserPanel = ({ sx }: Props) => {
                         <LogoutRoundedIcon sx={{ mr: '10px' }} /> <Typography>Sign Out</Typography>
                     </MenuItem>
                 </Menu>
-            </Grid>
+            </>
         }
     </Box>);
 }

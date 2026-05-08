@@ -78,7 +78,7 @@ export const Layout = () => {
             </Drawer>
             <Container component="header" className="header-container" sx={{ height: '60px', zIndex: 1000, ...firefoxMobileSx }}>
                 <Stack direction="row" alignItems="center" maxWidth="false" sx={{ margin: '0 auto', gap: 2 }}>
-                    <Stack direction="row" gap={2} alignItems={'center'} sx={{ mr: 'auto' }}>
+                    <Stack direction="row" gap={2} alignItems={'center'} sx={{ flex: 1, mr: 'auto' }}>
                         <IconButton
                             onClick={onMenuClick}
                             sx={{ display: isSmDown ? '' : 'none' }}
@@ -107,7 +107,7 @@ export const Layout = () => {
                             </Fragment>
                         ))}
                     </Stack>
-                    <UserPanel sx={{ ml: 'auto', width: '55px' }} />
+                    <UserPanel sx={{ flex: 1, ml: 'auto' }} />
                 </Stack>
             </Container>
             <Outlet />
