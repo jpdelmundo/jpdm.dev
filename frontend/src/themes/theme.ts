@@ -352,7 +352,7 @@ export const theme = createTheme({
                             '& .content': {
                                 margin: 0,
                                 fontSize: '14px',
-                                //whiteSpace: 'pre-line',
+                                whiteSpace: 'pre-line',
                                 lineHeight: '20px',
                                 '& .double-break': {
                                     display: 'block',

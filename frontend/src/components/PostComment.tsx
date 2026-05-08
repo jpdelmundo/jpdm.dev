@@ -2,7 +2,6 @@ import { apiDelete, apiPut } from '@/api/apiClient';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useConfirmStore } from '@/store/useConfirmStore';
 import { getErrorMessage, getRelativeTime } from '@/utils/helper';
-import { formatLineBreaks } from '@/utils/tsxHelper';
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import SendRounded from '@mui/icons-material/SendRounded';
@@ -140,7 +139,7 @@ export function PostComment({ comment, index, onDeleted, onUpdated }: PostCommen
                         <Box sx={{ position: 'relative', display: 'inline-block', maxWidth: '95%' }}>
                             <Stack className="detail">
                                 <Typography className="user">{display_name}</Typography>
-                                <Typography className="content">{formatLineBreaks(post_comment)}</Typography>
+                                <Typography className="content">{post_comment}</Typography>
                             </Stack>
                             {user?.id == comment.user_id && <Box display={'flex'} alignItems={'center'} gap={'4px'} className="comment-options">
                                 <IconButton className="edit" onClick={handleEditClick} ><EditRoundedIcon sx={{ fontSize: '14px' }} /></IconButton>
