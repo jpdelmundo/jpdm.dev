@@ -15,8 +15,8 @@ import { CountdownTimer } from './CountdownTimer';
 
 type Props = {
     onEmailSubmit: (formInput: EmailFormInput) => Promise<ApiResult<{ code: ErrorCode }>>,
-    onCodeSubmit: (formInput: EmailFormInput) => Promise<ApiResult<never>>,
-    onEmailConfirmed: (result: ApiResult<never>) => void,
+    onCodeSubmit: (formInput: EmailFormInput) => Promise<ApiResult<{ email: string }>>,
+    onEmailConfirmed: (result: ApiResult<{ email: string }>) => void,
     email?: string;
 };
 

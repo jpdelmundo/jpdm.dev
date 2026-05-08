@@ -70,7 +70,9 @@ export const createUserController = (app: AppContext) => {
             const result = await userSvc.confirmEmailCode(authReq.user.id, code);
             if (!result) return fail(res, 'That code doesn\'t look right. Please check and try again.');
 
-            return ok(res);
+            const user = await userSvc.findById(authReq.user.id);
+
+            return ok(res, { email: user?.email });
         },
 
         recoverAccount: async (req: Request, res: Response): Promise<Response> => {

@@ -25,12 +25,12 @@ export const UpdateEmailAccountPage = () => {
         return res; //return to show error message on form
     }
 
-    const codeSubmit = async (formInput: EmailFormInput): Promise<ApiResult<never>> => {
-        const res = await apiPost<never>('/users/email-code-confirm', formInput);
+    const codeSubmit = async (formInput: EmailFormInput): Promise<ApiResult<{ email: string }>> => {
+        const res = await apiPost<{ email: string }>('/users/email-code-confirm', formInput);
         return res; //return to show error message on form
     }
 
-    const emailConfirmed = async (result: ApiResult<never>) => {
+    const emailConfirmed = async (result: ApiResult<{ email: string }>) => {
         if (result.ok) {
             setStep('success');
         } else {
