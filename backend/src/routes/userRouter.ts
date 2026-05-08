@@ -1,6 +1,7 @@
 import { createPostController } from '@/controllers/postController.js';
 import { createUserController } from '@/controllers/userController.js';
 import type { AppContext } from '@/infra/appContext.js';
+import { apiRateLimit } from '@/middleware/apiRateLimit.js';
 import { authRequired } from '@/utils/auth.js';
 import { Router } from 'express';
 
@@ -22,8 +23,8 @@ export const createUserRouter = (appCtx: AppContext) => {
     router.get('/me', controller.me);
     router.get('/profile', controller.profile);
 
-    router.post('/email-code', controller.emailCode);
-    router.post('/email-code-confirm', controller.emailCodeConfirm);
+    router.post('/email-code', apiRateLimit(60, 10), controller.emailCode);
+    router.post('/email-code-confirm', apiRateLimit(60, 10), controller.emailCodeConfirm);
 
     router.put('/:id', controller.update);
     router.delete('/:id', controller.del);
