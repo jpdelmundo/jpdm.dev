@@ -593,11 +593,8 @@ export const theme = createTheme({
                         display: 'flex',
                         alignItems: 'center',
                         '& .content': {
-                            margin: '8px 0',
-                            '& .double-break': {
-                                display: 'block',
-                                height: '5px'
-                            }
+                            margin: '0',
+                            whiteSpace: 'pre-line'
                         },
                         '&.MuiDataGrid-cell.MuiDataGrid-cell--editing': {
                             boxShadow: 'none',

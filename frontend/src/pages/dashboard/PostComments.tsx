@@ -3,10 +3,11 @@ import { DatePicker } from '@/components/DatePicker.tsx';
 import TextField from '@/components/TextField.tsx';
 import { useConfirmStore } from '@/store/useConfirmStore.ts';
 import { formatDateTime } from '@/utils/helper.ts';
-import { formatLineBreaks } from '@/utils/tsxHelper.tsx';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
+import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import {
@@ -26,6 +27,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 // import EditRoundedIcon from '@mui/icons-material/EditRounded';
 // import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
+import { theme } from '@/themes/theme.ts';
+import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 type FilterFormInput = {
     comment: string;
@@ -99,6 +103,8 @@ export const PostComments = () => {
     const [processing, setProcessing] = useState(new Set());
     const apiRef = useGridApiRef();
     const confirm = useConfirmStore((s) => s.confirm);
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isPortrait = useMediaQuery('(orientation: portrait)');
 
     const [paginationModel, setPaginationModel] = useState({
         page: 0,
@@ -145,44 +151,73 @@ export const PostComments = () => {
     };
 
     const columns: GridColDef<PostCommentDTO>[] = [
-        {
-            field: 'post-content',
-            headerName: 'Post',
-            flex: 1,
-            //valueGetter: (value, row) => row.post,
-            renderCell: (params) => {
-                //console.log({ row: params.row });
-                if (!params.row.post) return '';
-                const { display_name, content } = params.row.post;
-                return (
-                    <Stack sx={{ padding: '8px 0' }}>
-                        <Typography
-                            sx={{ fontWeight: 'bold' }}
-                            color="textDisabled"
-                        >
-                            {display_name}
-                        </Typography>
-                        <Typography sx={{ color: '#777777' }}>
-                            {content}
-                        </Typography>
-                    </Stack>
-                );
-            },
-        },
+        // {
+        //     field: 'post-content',
+        //     headerName: 'Post',
+        //     flex: 1,
+        //     //valueGetter: (value, row) => row.post,
+        //     renderCell: (params) => {
+        //         //console.log({ row: params.row });
+        //         if (!params.row.post) return '';
+        //         const { display_name, content } = params.row.post;
+        //         return (
+        //             <Stack sx={{ padding: '8px 0' }}>
+        //                 <Typography
+        //                     sx={{ fontWeight: 'bold' }}
+        //                     color="textDisabled"
+        //                 >
+        //                     {display_name}
+        //                 </Typography>
+        //                 <Typography sx={{ color: '#777777' }}>
+        //                     {content}
+        //                 </Typography>
+        //             </Stack>
+        //         );
+        //     },
+        // },
         {
             field: 'comment',
-            headerName: 'Your Comment',
+            headerName: 'Comment',
             flex: 1,
             renderCell: (params) => {
+                const { post } = params.row;
                 return (
                     <React.Fragment key={params.row.id}>
                         {processing.has(params.row.id) && (
                             <CircularProgress sx={{ mr: 1 }} />
                         )}
-                        <Typography className="content">
-                            {formatLineBreaks(params.value)}
-                        </Typography>
-                    </React.Fragment>
+                        <Stack sx={{ padding: '8px 0', alignItems: 'flex-start' }}>
+                            {!post ? '[Post deleted]' : (
+                                <Box sx={{ padding: '5px', borderRadius: '10px', textDecoration: 'none', color: 'var(--mui-palette-text-disabled)' }}>
+                                    <Typography
+                                        sx={{ fontWeight: 'bold', fontSize: '12px' }}
+                                        color="textDisabled"
+                                    >
+                                        {post.title}
+                                    </Typography>
+                                    <Typography
+                                        sx={{ fontWeight: 'bold', fontSize: '12px' }}
+                                        color="textDisabled"
+                                    >
+                                        {post.display_name}
+                                    </Typography>
+                                    <Box sx={{ lineHeight: '14px' }}>
+                                        <Typography component="span" sx={{ color: '#777777', fontSize: '12px' }}>
+                                            {post.content.length > 200 ? `${post.content.substring(0, 200)}...` : post.content}
+                                        </Typography>
+                                        <Link href={`/posts/${post.id}`} target="_blank" className="post-url" sx={{ display: 'none', m: '0 5px' }}>
+                                            <OpenInNewRoundedIcon sx={{ fontSize: '14px', verticalAlign: 'middle' }} />
+                                        </Link>
+                                    </Box>
+                                </Box>
+                            )}
+                            <Box sx={{ padding: '6px 12px', borderRadius: '20px', border: 'solid 1px #dddddd', backgroundColor: '#ffffff' }}>
+                                <Typography className="content">
+                                    {params.value}
+                                </Typography>
+                            </Box>
+                        </Stack>
+                    </React.Fragment >
                 );
             },
             renderEditCell: (params) => <LongTextEditCell {...params} />,
@@ -191,14 +226,20 @@ export const PostComments = () => {
         {
             field: 'created_at',
             headerName: 'Date',
-            valueFormatter: (value) =>
-                value
-                    ? formatDateTime(value, navigator.language, {
-                        short_month: true,
-                    })
-                    : '',
-            flex: 0,
-            minWidth: 200,
+            renderCell: (params) => {
+                const date = formatDateTime(params.value, navigator.language, { short_month: true, date_only: true });
+                const time = formatDateTime(params.value, navigator.language, { time_only: true });
+                const sx = {
+                    fontSize: isMobile ? '12px' : '14px'
+                };
+
+                return <Box>
+                    {isMobile || isPortrait
+                        ? <><Typography sx={sx}>{date}</Typography><Typography sx={sx}>{time}</Typography></>
+                        : <Typography sx={{ ...sx, whiteSpace: 'nowrap' }}>{date} {time}</Typography>}
+                </Box>
+            },
+            width: isMobile || isPortrait ? 100 : 200
         },
         {
             field: 'actions',
@@ -344,13 +385,15 @@ export const PostComments = () => {
                     {
                         outline: 'none',
                     },
-                    '& [data-field="created_at"]': {
-                        whiteSpace: 'nowrap !important',
+                    [`& .${gridClasses.columnHeaderTitle}`]: {
+                        color: '#aaaaaa',
+                        fontWeight: 'normal'
                     },
                     '& .MuiDataGrid-editLongTextCellTextarea': {
                         //lineHeight: 1.5,
                         fontSize: 15,
                     },
+                    '& .MuiDataGrid-row:hover': { '.post-url': { display: 'inline' } }
                 }}
             />
         </Container>
