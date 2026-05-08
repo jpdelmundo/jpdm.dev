@@ -9,6 +9,7 @@ interface SnackbarState {
     showMessage: (message: ReactNode | string) => void;
     open: boolean;
     closeMessage: () => void;
+    reset: () => void;
 }
 
 export const useSnackbarStore = create<SnackbarState>()(
@@ -17,6 +18,7 @@ export const useSnackbarStore = create<SnackbarState>()(
         severity: 'info',
         open: false,
         showMessage: (message: ReactNode | string) => set({ message, open: true }),
-        closeMessage: () => set({ open: false })
+        closeMessage: () => set({ open: false }),
+        reset: () => set({ message: '', severity: 'info', open: false }),
     })
 );

@@ -8,6 +8,7 @@ import { jwtDecode } from 'jwt-decode';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+
 interface AuthState {
     token: AccessToken;
     isAuthenticated: boolean;
@@ -72,7 +73,8 @@ export const useAuthStore = create<AuthState>()(
         signOut: async (reason?: string) => {
             reason && set({ signOutReason: reason });
             await apiPost('/auth/signout', { fp: jsonBase64Encode(getFingerprint()) });
-            get().clearToken();
+            const { resetAllStores } = await import('./resetStores');
+            resetAllStores();
         },
         signOutReason: null
     }),

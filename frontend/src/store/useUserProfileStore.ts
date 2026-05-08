@@ -6,6 +6,7 @@ import { create } from 'zustand';
 interface StoreState {
   userProfile: UserProfile | null;
   fetchProfile: (id: UserId) => void;
+  reset: () => void;
 }
 
 export const useUserProfileStore = create<StoreState>()((set) => ({
@@ -16,4 +17,5 @@ export const useUserProfileStore = create<StoreState>()((set) => ({
       set({ userProfile: result.data });
     }
   },
+  reset: () => set({ userProfile: null }),
 }));

@@ -18,14 +18,15 @@ type ConfirmState = {
     confirm: (param?: ConfirmOptions | string) => Promise<boolean>;
     onConfirm: () => void;
     onCancel: () => void;
+    reset: () => void;
 };
 
 export const useConfirmStore = create<ConfirmState>()((set, get) => ({
     open: false,
-    title: "",
+    title: '',
     message: null,
-    confirmText: "OK",
-    cancelText: "Cancel",
+    confirmText: 'OK',
+    cancelText: 'Cancel',
     resolve: null,
 
     confirm: (param) => {
@@ -53,5 +54,10 @@ export const useConfirmStore = create<ConfirmState>()((set, get) => ({
     onCancel: () => {
         get().resolve?.(false);
         set({ open: false, resolve: null });
+    },
+
+    reset: () => {
+        get().resolve?.(false);
+        set({ open: false, title: '', message: null, confirmText: 'OK', cancelText: 'Cancel', resolve: null });
     },
 }));
