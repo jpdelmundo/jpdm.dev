@@ -34,7 +34,6 @@ const btnSx = {
     color: '#000000',
     //boxShadow: 'var(--shadow-paper)',
     gap: '5px',
-    adding: '3px 6px',
     justifyContent: 'center',
     '&:hover': {
         backgroundColor: '#e7e7e7',

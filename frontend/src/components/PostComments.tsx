@@ -3,6 +3,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useConfirmStore } from '@/store/useConfirmStore.ts';
 import type { PostCommentsUpdatedParams } from '@/types/PostCommentsUpdatedParams';
 import { getErrorMessage } from '@/utils/helper';
+import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import SendRounded from '@mui/icons-material/SendRounded';
 import SmartToyOutlined from '@mui/icons-material/SmartToyOutlined';
 import WarningRounded from '@mui/icons-material/WarningRounded';
@@ -169,11 +170,14 @@ export function PostComments({ open, postId, onCommentsUpdated }: PostCommentsPr
                         <PostCommentSkeleton />
                     </Collapse>
                     <Button
-                        className="show-more"
-                        variant="contained"
+                        variant="outlined"
                         onClick={loadMoreOnClick}
-                        sx={{ display: isLoadMoreVisible ? 'block' : 'none', borderRadius: 2 }}
-                    >Show more comments</Button>
+                        sx={{
+                            display: isLoadMoreVisible ? 'flex' : 'none',
+                            borderRadius: 2,
+                            alignSelf: 'center'
+                        }}
+                    ><ExpandMoreRoundedIcon sx={{ fontSize: '12px' }} /> <Typography fontSize={'12px'}>Show more comments</Typography></Button>
                 </Stack>
                 <Box className="new-comment">
                     <form noValidate onSubmit={handleSubmit(submitHandler)}>
