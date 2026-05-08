@@ -203,7 +203,7 @@ export const createUserService = (ctx: ServiceContext) => {
         //get user
         const user = await deps.userRepo.findById(userId);
         if (!user) throw new Error(`User not found: ${userId}`);
-        if (user.email_confirmed) throw new Error(`Email already confirmed: ${user.email}`);
+        //if (user.email_confirmed) throw new Error(`Email already confirmed: ${user.email}`);
 
         //check code is valid
         if (!code || user.email_confirm_code != code) throw new ApiError('That code doesn\'t look right. Please check and try again.');
@@ -211,6 +211,8 @@ export const createUserService = (ctx: ServiceContext) => {
         //code is valid, update email confirmed
         const updatedUser = await deps.userRepo.update(user.id, { email: user.unconfirmed_email, email_confirm_code: null, unconfirmed_email: null, email_confirmed: true });
         if (!updatedUser) throw new Error(`User email update failed: ${user.id} ${user.unconfirmed_email}`);
+
+        console.log(`User email changed from ${user.email} to ${updatedUser.email}`);
 
         //send confirmation email
         mail({
