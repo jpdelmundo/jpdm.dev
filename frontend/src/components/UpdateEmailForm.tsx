@@ -101,7 +101,7 @@ export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed,
                 {step == 'code' && (
                     <>
                         <Typography fontWeight="bold" mb={1}>Code sent</Typography>
-                        <Typography>Please enter the code we sent to your email:</Typography>
+                        <Typography>Please check your inbox (or spam folder) for the code we sent to your email:</Typography>
                         <TextField inputRef={inputRef} key="code" label=""
                             {...register('code', {
                                 required: 'Please enter the code',

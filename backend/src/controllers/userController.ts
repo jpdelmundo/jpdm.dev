@@ -1,4 +1,3 @@
-import { ServiceError } from '@/errors/ServiceError.js';
 import type { AppContext } from '@/infra/appContext.js';
 import { bindContext } from '@/infra/bindContext.js';
 import { botCheck } from '@/services/captchaService.js';
@@ -81,16 +80,7 @@ export const createUserController = (app: AppContext) => {
             const { email, fp, token } = req.body;
 
             await botCheck(token);
-
-            try {
-                await createUserService(makeCtx(req)).recoverAccount(email, fp);
-            } catch (error) {
-                if (error instanceof ServiceError) {
-                    console.error(`${error.message} (${error.code})`);
-                } else {
-                    console.error((error as Error).message);
-                }
-            }
+            await createUserService(makeCtx(req)).recoverAccount(email, fp);
 
             return ok(res);
         },

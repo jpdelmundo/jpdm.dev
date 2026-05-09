@@ -60,7 +60,7 @@ export function ResetPasswordForm({ onSubmit, onResetPasswordSuccess }: {
             <Typography variant="h5" fontWeight="bold" sx={{ mb: 2 }}>Reset password</Typography>
             <form noValidate onSubmit={handleSubmit(submitHandler)}>
                 <Stack gap={2}>
-                    <PasswordField label="Password"
+                    <PasswordField label="New Password"
                         {...register('password', {
                             required: 'Password is required',
                             validate: validatePassword
@@ -68,7 +68,8 @@ export function ResetPasswordForm({ onSubmit, onResetPasswordSuccess }: {
                         placeholder=""
                         error={!!errors.password}
                         helperText={errors.password?.message}
-                        fullWidth />
+                        fullWidth
+                        autoFocus />
                     <TransitionGroup style={{ display: passwordErrors.length > 0 ? 'block' : 'none' }}>
                         {passwordErrors.map(error => (
                             <Collapse key={error} timeout={300}>

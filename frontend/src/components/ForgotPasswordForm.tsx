@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import TextField from './TextField';
 
+import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Link from '@mui/material/Link';
@@ -52,8 +53,7 @@ export function ForgotPasswordForm({ onEmailSubmit }: {
                 {step == 'email' && (
                     <>
                         <Typography variant="h5" fontWeight="bold" mb={1}>Account Recovery</Typography>
-                        <Typography>Please enter the email address associated with your account. It was requested during sign-up (or optionally in your settings).</Typography>
-                        <Typography>If no email is associated with your account, account recovery will not be possible.</Typography>
+                        <Typography>Enter the email linked to your account (used during sign-up or added in settings).</Typography>
                         <TextField inputRef={inputRef} key="email" label="Email"
                             {...register('email', {
                                 required: true,
@@ -64,6 +64,10 @@ export function ForgotPasswordForm({ onEmailSubmit }: {
                             helperText={errors.email?.message}
                             fullWidth />
                         <Typography>We'll send recovery instructions to this email if it's linked to your account.</Typography>
+                        <Stack direction={'row'} sx={{ backgroundColor: '#e6f5ff', padding: '10px', alignItems: 'center', gap: '10px', borderRadius: '10px' }}>
+                            <WarningRoundedIcon sx={{ color: '#ffbd44' }} />
+                            <Typography>If no email was linked, account recovery is unavailable.</Typography>
+                        </Stack>
                         <Button type="submit" variant="contained" disabled={isLoading}>
                             {isLoading ? <Stack direction="row" alignItems="center" gap={1}><CircularProgress /> <span>Processing...</span></Stack> : 'Submit'}
                         </Button>

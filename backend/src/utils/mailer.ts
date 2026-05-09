@@ -19,7 +19,6 @@ export const mail = async ({ from, to, subject, text }: { from: string, to: stri
         }
     }
 
-    console.log({ auth });
     try {
         console.log(process.env.SMTP_HOST, process.env.SMTP_PORT);
         const transporter = nodemailer.createTransport({

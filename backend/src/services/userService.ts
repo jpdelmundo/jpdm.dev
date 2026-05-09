@@ -277,8 +277,8 @@ export const createUserService = (ctx: ServiceContext) => {
         //check if already emailed in the last 15 minutes
         const checkAllowed = await isAllowedToSendRecoveryEmail(user.id);
         if (!checkAllowed.allowed) {
-            if (checkAllowed.reason == 'cooldown') throw new ServiceError('Still on cooldown...', ErrorCode.COOLDOWN);
-            throw new Error('isAllowedToSendRecoveryEmail not allowed for some reason');
+            if (checkAllowed.reason == 'cooldown') throw new ServiceError('Email sent just a while ago. Try again later.', ErrorCode.COOLDOWN);
+            throw new Error('Email not sent. Try again later.');
         }
 
         const token_hash = randomString(64);
