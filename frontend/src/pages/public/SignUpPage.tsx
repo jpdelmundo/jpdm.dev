@@ -6,6 +6,7 @@ import { getFingerprint } from '@/utils/device';
 import { getErrorMessage } from '@/utils/helper.ts';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Link from '@mui/material/Link';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -14,7 +15,7 @@ import type { EmailFormInput } from '@shared/types/EmailFormInput';
 import { jsonBase64Encode } from '@shared/utils/encoding';
 import { useState } from 'react';
 import { GoogleReCaptchaProvider, useGoogleReCaptcha } from 'react-google-recaptcha-v3';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link as RLink, useNavigate } from 'react-router-dom';
 
 function SignUpContent() {
     const [step, setStep] = useState<'create_user' | 'user_created' | 'add_email' | 'signed_up'>('create_user');
@@ -79,12 +80,15 @@ function SignUpContent() {
             <Typography variant="h6" fontWeight="bold" mb={1}>Secure your account by adding an email address?</Typography>
             <Stack mt={2} gap={2}>
                 <Button variant="contained" onClick={secureOnClick}>Yes, I want to secure my account.</Button>
-                <Link to="/" style={{ alignSelf: 'center' }}>I'll do this later.</Link>
+                <Link component={RLink} to="/" style={{ alignSelf: 'center' }}>I'll do this later.</Link>
             </Stack>
         </>}
 
         {step == 'add_email' && <>
-            <UpdateEmailForm onEmailSubmit={emailSubmit} onCodeSubmit={codeSubmit} onEmailConfirmed={emailConfirmed} />
+            <Stack mt={2} gap={2}>
+                <UpdateEmailForm onEmailSubmit={emailSubmit} onCodeSubmit={codeSubmit} onEmailConfirmed={emailConfirmed} />
+                <Link component={RLink} to="/" style={{ alignSelf: 'center' }}>I'll do this later.</Link>
+            </Stack>
         </>}
 
         {step == 'signed_up' && <Stack>
@@ -92,7 +96,7 @@ function SignUpContent() {
             <Typography mb={1}>Successfully added the email to your account:</Typography>
             <Typography mb={1} textAlign={'center'} fontWeight="bold">{email}</Typography>
             <Typography mb={2}>Account secured.👌</Typography>
-            <Box textAlign="center" mt={2}><Link to="/">Done. Return to Home.</Link></Box>
+            <Box textAlign="center" mt={2}><Link component={RLink} to="/">Done. Return to Home.</Link></Box>
         </Stack>}
 
         {errorMessage && <Typography color="error" textAlign="center" minHeight="21px">{errorMessage}</Typography>}

@@ -28,7 +28,8 @@ app.use(cookieParser());
 app.use(currentUser);
 app.use(passport.initialize());
 app.use('/usercontent', verifySignedUrl, express.static(USERCONTENT_DIR));
-app.use('/api', router);
+app.use('/api', (req, res, next: NextFunction) => (res.locals.apiBasePath = '/api', next()), router);
+//app.use('/api/v2', (req, res, next: NextFunction) => (res.locals.apiBasePath = '/api/v2', next()), router);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   if (err instanceof ApiError && err.code === ErrorCode.TOKEN_EXPIRED) {
