@@ -80,8 +80,9 @@ function SignUpContent() {
         {step == 'signed_up' && <Stack>
             <Typography variant="h5" fontWeight="bold" mb={1}>Email added to account</Typography>
             <Typography mb={1}>Successfully added the email to your account:</Typography>
-            <Typography mb={2} textAlign={'center'} fontWeight="bold">{email}</Typography>
-            <Box textAlign="center" mt={2}><Link to="/">Return to home.</Link></Box>
+            <Typography mb={1} textAlign={'center'} fontWeight="bold">{email}</Typography>
+            <Typography mb={2}>Account secured.👌</Typography>
+            <Box textAlign="center" mt={2}><Link to="/">Done. Return to Home.</Link></Box>
         </Stack>}
 
         {errorMessage && <Typography color="error" textAlign="center" minHeight="21px">{errorMessage}</Typography>}

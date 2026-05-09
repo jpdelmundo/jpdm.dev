@@ -61,7 +61,7 @@ export const UpdateEmailAccountPage = () => {
                         <Typography variant="h5" fontWeight="bold" mb={1}>Email added to account</Typography>
                         <Typography mb={1}>Successfully added the email to your account:</Typography>
                         <Typography mb={2} textAlign={'center'} fontWeight="bold">{email}</Typography>
-                        <Link component="button" textAlign={'center'} mt={2} onClick={accountOnClick}>Return to account page</Link>
+                        <Link component="button" textAlign={'center'} mt={2} onClick={accountOnClick}>Return to Account Page.</Link>
                     </Stack>}
                     {errorMessage && <Typography color="error" textAlign="center" minHeight="21px">{errorMessage}</Typography>}
                 </Stack>

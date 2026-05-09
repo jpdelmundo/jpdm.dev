@@ -151,30 +151,6 @@ export const PostComments = () => {
     };
 
     const columns: GridColDef<PostCommentDTO>[] = [
-        // {
-        //     field: 'post-content',
-        //     headerName: 'Post',
-        //     flex: 1,
-        //     //valueGetter: (value, row) => row.post,
-        //     renderCell: (params) => {
-        //         //console.log({ row: params.row });
-        //         if (!params.row.post) return '';
-        //         const { display_name, content } = params.row.post;
-        //         return (
-        //             <Stack sx={{ padding: '8px 0' }}>
-        //                 <Typography
-        //                     sx={{ fontWeight: 'bold' }}
-        //                     color="textDisabled"
-        //                 >
-        //                     {display_name}
-        //                 </Typography>
-        //                 <Typography sx={{ color: '#777777' }}>
-        //                     {content}
-        //                 </Typography>
-        //             </Stack>
-        //         );
-        //     },
-        // },
         {
             field: 'comment',
             headerName: 'Comment',

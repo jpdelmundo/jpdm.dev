@@ -119,6 +119,7 @@ export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed,
                                     pattern: '[0-9]*',
                                     maxLength: 4,
                                     minLength: 4,
+                                    step: 'any',
                                     sx: {
                                         textAlign: 'center',
                                         width: 120,
