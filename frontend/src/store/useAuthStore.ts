@@ -18,7 +18,7 @@ interface AuthState {
     clearToken: () => void;
     user: PayloadData | null;
     refreshToken: () => Promise<void>;
-    signOut: (reason?: string) => void;
+    signOut: (reason?: string) => Promise<void>;
     signOutReason: string | null;
 }
 const SECURE_MODE = import.meta.env.VITE_AUTH_SECURE_MODE === 'true';
@@ -38,11 +38,10 @@ export const useAuthStore = create<AuthState>()(
         isAuthenticated: false,
         isSigneOut: false,
         ready: false,
+        user: null,
+        signOutReason: null,
         setToken: (token: AccessToken) => {
-            if (!token) {
-                get().clearToken();
-                return;
-            }
+            if (!token) return get().clearToken();
 
             try {
                 const user = jwtDecode<PayloadData>(token);
@@ -55,9 +54,8 @@ export const useAuthStore = create<AuthState>()(
         },
         clearToken: () => {
             //console.log('clearToken called');
-            set({ token: null, isAuthenticated: false, user: null, isSigneOut: true });
+            set({ token: null, isAuthenticated: false, user: null, isSigneOut: true, signOutReason: null });
         },
-        user: null,
         refreshToken: async () => {
             if (!SECURE_MODE || get().isSigneOut) return;
             try {
@@ -76,28 +74,10 @@ export const useAuthStore = create<AuthState>()(
             const { resetAllStores } = await import('./resetStores');
             resetAllStores();
         },
-        signOutReason: null
     }),
         {
             name: 'auth',
             storage: createJSONStorage(() => SECURE_MODE ? memoryStorage() : localStorage),
-            partialize: (state) => ({ token: state.token }),
-            // onRehydrateStorage: (state) => {
-            //     console.log('onRehydrateStorage called', { state });
-            //     if (state?.token) {
-            //         console.log('state.token', state.token);
-            //         //jwtDecode
-            //         try {
-            //             const token = state.token;
-            //             const user = jwtDecode<TokenUserData>(token);
-            //             if (!user.id) throw new Error('Missing id in token');
-            //             useAuthStore.setState({ token, isAuthenticated: true, user });
-            //             console.log('rehydrated', state);
-            //         } catch (error) {
-            //             useAuthStore.setState({ token: null, isAuthenticated: false, user: null });
-            //             console.error('Error in parsing token', error);
-            //         }
-            //     }
-            // }
+            partialize: (state) => ({ token: state.token })
         })
 );
