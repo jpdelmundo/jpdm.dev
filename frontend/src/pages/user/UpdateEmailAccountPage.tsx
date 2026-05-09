@@ -19,6 +19,7 @@ export const UpdateEmailAccountPage = () => {
     const refreshToken = useAuthStore(s => s.refreshToken);
     const [errorMessage, setErrorMessage] = useState('');
     const [step, setStep] = useState<'form' | 'success'>('form');
+    const [email, setEmail] = useState('');
 
     const emailSubmit = async (formInput: EmailFormInput): Promise<ApiResult<never>> => {
         const res = await apiPost<never>('/users/email-code', formInput);
@@ -31,7 +32,8 @@ export const UpdateEmailAccountPage = () => {
     }
 
     const emailConfirmed = async (result: ApiResult<{ email: string }>) => {
-        if (result.ok) {
+        if (result.ok && result.data?.email) {
+            setEmail(result.data.email);
             setStep('success');
         } else {
             setErrorMessage(getErrorMessage(result));
@@ -58,7 +60,7 @@ export const UpdateEmailAccountPage = () => {
                     {step == 'success' && <Stack>
                         <Typography variant="h5" fontWeight="bold" mb={1}>Email added to account</Typography>
                         <Typography mb={1}>Successfully added the email to your account:</Typography>
-                        <Typography mb={2} textAlign={'center'} fontWeight="bold">{user?.email}</Typography>
+                        <Typography mb={2} textAlign={'center'} fontWeight="bold">{email}</Typography>
                         <Link component="button" textAlign={'center'} mt={2} onClick={accountOnClick}>Return to account page</Link>
                     </Stack>}
                     {errorMessage && <Typography color="error" textAlign="center" minHeight="21px">{errorMessage}</Typography>}
