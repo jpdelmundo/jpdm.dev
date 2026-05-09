@@ -175,27 +175,34 @@ export class PostRepository extends BaseRepository<Post> {
 
         const filters: string[] = [];
         const values: unknown[] = [];
+        const joins: string[] = [];
 
-        user_id !== undefined && (filters.push(`user_id = $${values.length + 1}`)) && values.push(user_id);
-        start_date !== undefined && (filters.push(`created_at >= $${values.length + 1}`)) && values.push(start_date);
-        end_date !== undefined && (filters.push(`created_at <= $${values.length + 1}`)) && values.push(end_date);
+        start_date !== undefined && (filters.push(`ss.created_at >= $${values.length + 1}`)) && values.push(start_date);
+        end_date !== undefined && (filters.push(`ss.created_at <= $${values.length + 1}`)) && values.push(end_date);
 
         let filter = filters.join(' and ');
         filter = filter ? `where ${filter}` : '';
 
+        user_id !== undefined && (joins.push(`p.user_id = $${values.length + 1}`)) && values.push(user_id);
+
+        let join = joins.join(' and ');
+        join = join ? `and ${join}` : '';
+
         const sql = `select
 (
-    select count(*)::int from post_views
+    select count(*)::int from post_views ss
+    join posts p on p.id = ss.post_id ${join}
     ${filter}
 ) post_views_count,
 (
-    select count(*)::int from post_likes
+    select count(*)::int from post_likes ss
+    join posts p on p.id = ss.post_id ${join}
     ${filter}
 ) post_likes_count,
 (
-    select count(*)::int from post_comments pc
-    join posts p on p.id = pc.post_id
-    ${filter.replace('user_id', 'p.user_id').replace(/created_at/gi, 'pc.created_at')}
+    select count(*)::int from post_comments ss
+    join posts p on p.id = ss.post_id ${join}
+    ${filter}
 ) post_comments_count`;
 
         const { rows } = await this.query<PostStatsDTO>(sql, values);
@@ -208,20 +215,26 @@ export class PostRepository extends BaseRepository<Post> {
 
         const filters: string[] = [];
         const values: unknown[] = [];
+        const joins: string[] = [];
 
-        user_id !== undefined && (filters.push(`user_id = $${values.length + 1}`)) && values.push(user_id);
-        start_date !== undefined && (filters.push(`created_at >= $${values.length + 1}`)) && values.push(start_date);
-        end_date !== undefined && (filters.push(`created_at <= $${values.length + 1}`)) && values.push(end_date);
+        start_date !== undefined && (filters.push(`pv.created_at >= $${values.length + 1}`)) && values.push(start_date);
+        end_date !== undefined && (filters.push(`pv.created_at <= $${values.length + 1}`)) && values.push(end_date);
 
         let filter = filters.join(' and ');
         filter = filter ? `where ${filter}` : '';
 
+        user_id !== undefined && (joins.push(`p.user_id = $${values.length + 1}`)) && values.push(user_id);
+
+        let join = joins.join(' and ');
+        join = join ? `and ${join}` : '';
+
         //TODO check if valid IANA timezone (check pg timezone table)
         const tz_clause = client_tz ? `at time zone '${String(client_tz).replace(/'/g, '')}'` : '';
         const sql = `select
-    date_trunc('day', created_at ${tz_clause})::date date,
+    date_trunc('day', pv.created_at ${tz_clause})::date date,
     count(*)::int count
-from post_views
+from post_views pv
+join posts p on p.id = pv.post_id ${join}
 ${filter}
 group by 1
 order by 1 asc;`;
