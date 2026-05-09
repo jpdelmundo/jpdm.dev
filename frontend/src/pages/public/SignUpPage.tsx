@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { getFingerprint } from '@/utils/device';
 import { getErrorMessage } from '@/utils/helper.ts';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -16,7 +17,7 @@ import { GoogleReCaptchaProvider, useGoogleReCaptcha } from 'react-google-recapt
 import { Link, useNavigate } from 'react-router-dom';
 
 function SignUpContent() {
-    const [step, setStep] = useState<'create_user' | 'update_email' | 'signed_up'>('create_user');
+    const [step, setStep] = useState<'create_user' | 'user_created' | 'add_email' | 'signed_up'>('create_user');
     const { executeRecaptcha } = useGoogleReCaptcha();
     const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState('');
@@ -42,7 +43,7 @@ function SignUpContent() {
         } else {
             //set access token and show email update form
             useAuthStore.getState().setToken(result.data.access_token);
-            setStep('update_email');
+            setStep('user_created');
         }
     };
 
@@ -66,15 +67,24 @@ function SignUpContent() {
         //redirect or add link to home?
     }
 
+    const secureOnClick = () => {
+        setStep('add_email');
+    }
+
     return <Paper sx={{ p: 6, maxWidth: 400, mx: 'auto' }}>
         {step == 'create_user' && <SignUpForm onSubmit={submit} onSignUpSuccess={signUpSuccess} />}
 
-        {step == 'update_email' && <>
+        {step == 'user_created' && <>
             <Typography variant="h5" fontWeight="bold" mb={1}>✅ Account created!</Typography>
-            <Typography variant="h6" fontWeight="bold" mb={1}>Secure your account now?</Typography>
-            <Typography mb={1}>Where can we contact you in case you forgot your password?</Typography>
+            <Typography variant="h6" fontWeight="bold" mb={1}>Secure your account by adding an email address?</Typography>
+            <Stack mt={2} gap={2}>
+                <Button variant="contained" onClick={secureOnClick}>Yes, I want to secure my account.</Button>
+                <Link to="/" style={{ alignSelf: 'center' }}>I'll do this later.</Link>
+            </Stack>
+        </>}
+
+        {step == 'add_email' && <>
             <UpdateEmailForm onEmailSubmit={emailSubmit} onCodeSubmit={codeSubmit} onEmailConfirmed={emailConfirmed} />
-            <Box textAlign="center" mt={2}><Link to="/">I'll do this later.</Link></Box>
         </>}
 
         {step == 'signed_up' && <Stack>

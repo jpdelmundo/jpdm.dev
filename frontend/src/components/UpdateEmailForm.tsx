@@ -93,7 +93,7 @@ export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed,
                             fullWidth />
                         <Typography>We'll send a code to this email after you click the button below.</Typography>
                         <Button type="submit" variant="contained" disabled={isLoading}>
-                            {isLoading ? <Stack direction="row" alignItems="center" gap={1}><CircularProgress /> <span>Processing...</span></Stack> : 'Send code to my email'}
+                            {isLoading ? <Stack direction="row" alignItems="center" gap={1}><CircularProgress sx={{ color: '#ffffff' }} /> <span>Processing...</span></Stack> : 'Send code to my email'}
                         </Button>
                     </>
                 )}
@@ -131,10 +131,17 @@ export function UpdateEmailForm({ onEmailSubmit, onCodeSubmit, onEmailConfirmed,
                                 }
                             }}
                             sx={{
-                                alignSelf: 'center'
+                                alignSelf: 'center',
+                                '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button': {
+                                    WebkitAppearance: 'none',
+                                    margin: 0,
+                                },
+                                '& input[type=number]': {
+                                    MozAppearance: 'textfield',
+                                },
                             }} />
                         <Button type="submit" variant="contained" disabled={isLoading}>
-                            {isLoading ? <Stack direction="row" alignItems="center" gap={1}><CircularProgress /> <span>Processing...</span></Stack> : 'Submit code'}
+                            {isLoading ? <Stack direction="row" alignItems="center" gap={1}><CircularProgress sx={{ color: '#ffffff' }} /> <span>Processing...</span></Stack> : 'Submit code'}
                         </Button>
                     </>
                 )}

@@ -1,7 +1,4 @@
-import { apiPost } from '@/api/apiClient';
 import { useAuthStore } from '@/store/useAuthStore';
-import { getFingerprint } from '@/utils/device';
-import { jsonBase64Encode } from '@shared/utils/encoding';
 import { useState, type MouseEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -46,18 +43,17 @@ export const UserPanel = ({ sx }: Props) => {
     const avatarProps = useAvatarProps();
     const navigate = useNavigate();
     const location = useLocation();
-    const clearToken = useAuthStore(s => s.clearToken);
+    const signOut = useAuthStore(s => s.signOut);
     const isAuthenticated = useAuthStore(s => s.isAuthenticated)
     const [loading, setLoading] = useState(false);
     const [userMenuAnchor, setUserMenuAnchor] = useState<HTMLElement | null>(null);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
 
-    const signOut = async () => {
+    const signOutClick = async () => {
         userMenuOnClose();
         setLoading(true);
-        await apiPost('/auth/signout', { fp: jsonBase64Encode(getFingerprint()) });
+        await signOut();
         setLoading(false);
-        clearToken();
         navigate('/');
     }
 
@@ -160,7 +156,7 @@ export const UserPanel = ({ sx }: Props) => {
                     <MenuItem onClick={dashboardClick}>
                         <SpaceDashboardOutlinedIcon sx={{ mr: '10px' }} /> <Typography>Dashboard</Typography>
                     </MenuItem>
-                    <MenuItem onClick={signOut}>
+                    <MenuItem onClick={signOutClick}>
                         <LogoutRoundedIcon sx={{ mr: '10px' }} /> <Typography>Sign Out</Typography>
                     </MenuItem>
                 </Menu>

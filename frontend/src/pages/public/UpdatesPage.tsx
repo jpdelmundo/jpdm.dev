@@ -78,7 +78,6 @@ export const UpdatesPage = () => {
     }, [navigate]);
 
     useEffect(() => {
-        console.log({ sentinelRef: sentinelRef.current });
         if (!sentinelRef.current) return;
         const observer = new IntersectionObserver(async entries => {
             if (entries[0].isIntersecting) {

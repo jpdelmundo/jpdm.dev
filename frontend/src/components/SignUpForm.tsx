@@ -111,7 +111,7 @@ export function SignUpForm({ onSubmit, onSignUpSuccess }: {
                         helperText={errors.confirm_password?.message}
                         fullWidth />
                     <Button type="submit" variant="contained" disabled={isSubmitting}>
-                        {isSubmitting ? <Stack direction="row" alignItems="center" gap={1}><CircularProgress /> <span>Processing...</span></Stack> : 'Submit'}
+                        {isSubmitting ? <Stack direction="row" alignItems="center" gap={1}><CircularProgress sx={{ color: '#ffffff' }} /> <span>Processing...</span></Stack> : 'Submit'}
                     </Button>
                     {errorMessage && <Typography color="error" textAlign="center">{errorMessage}</Typography>}
                     <Link component={RouterLink} to="/signin" textAlign={'center'} mt={1}>I want to sign in. I already have an account</Link>

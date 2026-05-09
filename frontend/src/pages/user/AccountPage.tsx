@@ -127,9 +127,9 @@ export const AccountPage = () => {
             <Stack direction={'row'} alignContent={'center'} gap={'5px'}><MailOutlineRounded sx={{ color: '#adb0b4' }} /><Typography>Email</Typography></Stack>
             <Box {...boxProps}>
                 {
-                    user?.email
+                    data.email
                         ? <Stack gap={1}>
-                            <Stack direction={'row'} gap={1}><Typography fontWeight={'bold'}>{user?.email}</Typography></Stack>
+                            <Stack direction={'row'} gap={1}><Typography fontWeight={'bold'}>{data.email}</Typography></Stack>
                             <Box><Button variant="outlined" size="small" sx={{ width: '150px' }} onClick={updateEmailOnClick}>Change email</Button></Box>
                         </Stack>
                         : <Button variant="outlined" size="small" sx={{ width: '150px' }} onClick={updateEmailOnClick}>Add email</Button>
