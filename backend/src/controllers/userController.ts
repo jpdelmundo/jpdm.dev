@@ -48,7 +48,7 @@ export const createUserController = (app: AppContext) => {
             const access_token = generateJwt(payload);
             const refreshToken = await userSvc.createRefreshToken({ ...jsonBase64Decode(fp), user_id: payload.id, request_ip: req.ip });
 
-            createRefreshTokenCookie(refreshToken, false, req, res);
+            createRefreshTokenCookie(refreshToken, true, req, res);
 
             return ok(res, { access_token, user_id: newUser.id });
         },
@@ -71,6 +71,8 @@ export const createUserController = (app: AppContext) => {
             if (!result) return fail(res, 'That code doesn\'t look right. Please check and try again.');
 
             const user = await userSvc.findById(authReq.user.id);
+
+            //TODO renew token
 
             return ok(res, { email: user?.email });
         },
