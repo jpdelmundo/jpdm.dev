@@ -28,6 +28,8 @@ import { useForm, type SubmitHandler } from 'react-hook-form';
 // import EditRoundedIcon from '@mui/icons-material/EditRounded';
 // import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import { theme } from '@/themes/theme.ts';
+import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { slugFormat } from '@shared/utils/helper.ts';
 
@@ -221,11 +223,13 @@ export const PostComments = () => {
             renderCell: (params) => (
                 <GridActionsCell {...params}>
                     <GridActionsCellItem
+                        icon={<EditRoundedIcon />}
                         label="Edit"
                         onClick={() => handleEdit(params.row)}
                         showInMenu
                     />
                     <GridActionsCellItem
+                        icon={<DeleteForeverRoundedIcon />}
                         label="Delete"
                         onClick={() => handleDelete(params.row)}
                         showInMenu
@@ -305,7 +309,7 @@ export const PostComments = () => {
                     <TextField
                         label="Search"
                         {...register('comment')}
-                        placeholder="Search comments..."
+                        placeholder="Search my comments..."
                     />
                     <DatePicker
                         label="From"
@@ -351,22 +355,10 @@ export const PostComments = () => {
                 onPaginationModelChange={setPaginationModel}
                 processRowUpdate={processRowUpdate}
                 sx={{
-                    [`& .${gridClasses.cell}:focus, & .${gridClasses.cell}:focus-within`]:
-                    {
-                        outline: 'none',
-                    },
-                    [`& .${gridClasses.columnHeader}:focus, & .${gridClasses.columnHeader}:focus-within`]:
-                    {
-                        outline: 'none',
-                    },
-                    [`& .${gridClasses.columnHeaderTitle}`]: {
-                        color: '#aaaaaa',
-                        fontWeight: 'normal'
-                    },
-                    '& .MuiDataGrid-editLongTextCellTextarea': {
-                        //lineHeight: 1.5,
-                        fontSize: 15,
-                    },
+                    border: 'var(--border)',
+                    [`& .${gridClasses.cell}:focus-within, & .${gridClasses.columnHeader}:focus-within`]: { outline: 'none' },
+                    [`& .${gridClasses.columnHeaderTitle}`]: { fontWeight: 'normal' },
+                    '& .MuiDataGrid-editLongTextCellTextarea': { fontSize: 15, },
                     '& .MuiDataGrid-row:hover': { '.post-url': { display: 'inline' } }
                 }}
             />
