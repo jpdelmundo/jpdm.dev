@@ -24,24 +24,12 @@ export function PostPage() {
     const [selectedImageId, setSelectedImageId] = useState<PostImageId | null>(null);
 
     const getData = async () => {
-        // try {
-        //     setIsLoading(true);
-        //     const result = await apiGet<PostDTO>(`/posts/${id}`);
-        //     if (result.ok && result.data) {
-        //         setPost(result.data);
-        //     }
-        // } catch (error) {
-        //     console.log('error caught');
-        //     return <Error error={error} />
-        // } finally {
-        //     setIsLoading(false);
-        // }
-
         setIsLoading(true);
-        const result = await apiGet<PostDTO>(`/posts/${id}`);
+        const result = await apiGet<PostDTO[]>(`/posts/${id}`);
         setIsLoading(false);
         if (result.ok && result.data) {
-            setPost(result.data);
+            const [data] = result.data;
+            setPost(data);
         } else {
             if (result.error) setError(result.error);
         }

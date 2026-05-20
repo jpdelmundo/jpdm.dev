@@ -7,3 +7,6 @@ export type DateComparison =
     | { between: [Date, Date] }
     | { isNull: true }
     | { isNotNull: true };
+
+//used in validation
+export const DateComparison = Symbol('DateComparison');

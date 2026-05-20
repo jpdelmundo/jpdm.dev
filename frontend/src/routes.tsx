@@ -3,6 +3,7 @@ import { RequireAuth } from './components/RequireAuth';
 import { DashboardHome } from './pages/dashboard/DashboardHome.tsx';
 import { DashboardLayout } from './pages/dashboard/DashboardLayout.tsx';
 import { PostComments } from './pages/dashboard/PostComments.tsx';
+import { Posts } from './pages/dashboard/Posts.tsx';
 import { Users } from './pages/dashboard/Users';
 import { AboutPage } from './pages/public/AboutPage.tsx';
 import { AuthCallbackPage } from './pages/public/AuthCallback';
@@ -70,6 +71,7 @@ const routes = [
                 element: <DashboardLayout />,
                 children: [
                     { index: true, element: <DashboardHome /> },
+                    { path: 'posts', element: <Posts /> },
                     { path: 'comments', element: <PostComments /> },
                     { path: 'users', element: <Users /> },
                 ]

@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 /** Identifier type for posts */
 export type PostId = string & { __flavor?: 'PostId' };
 
@@ -76,6 +78,47 @@ export interface PostMutator {
 
   views?: number;
 }
+
+export const PostIdSchema = z.uuid();
+
+export const PostSchema = z.object({
+  id: PostIdSchema,
+  title: z.string().nullable(),
+  content: z.string(),
+  created_at: z.date(),
+  updated_at: z.date().nullable(),
+  user_id: z.uuid(),
+  visibility: z.string(),
+  is_published: z.boolean(),
+  likes: z.number(),
+  views: z.number(),
+});
+
+export const PostInitializerSchema = z.object({
+  id: PostIdSchema.optional(),
+  title: z.string().optional().nullable(),
+  content: z.string(),
+  created_at: z.date().optional(),
+  updated_at: z.date().optional().nullable(),
+  user_id: z.uuid(),
+  visibility: z.string().optional(),
+  is_published: z.boolean().optional(),
+  likes: z.number().optional(),
+  views: z.number().optional(),
+});
+
+export const PostMutatorSchema = z.object({
+  id: PostIdSchema.optional(),
+  title: z.string().optional().nullable(),
+  content: z.string().optional(),
+  created_at: z.date().optional(),
+  updated_at: z.date().optional().nullable(),
+  user_id: z.uuid().optional(),
+  visibility: z.string().optional(),
+  is_published: z.boolean().optional(),
+  likes: z.number().optional(),
+  views: z.number().optional(),
+});
 
 export const PostColumns = [
   "id",

@@ -13,7 +13,7 @@ type Props<T extends FieldValues> = Omit<SelectProps, 'name'> & {
 
 export const Select = <T extends FieldValues>(props: Props<T>) => {
     const { label, children, name, control, labelInputGap, ...selectProps } = props;
-    return <FormControl fullWidth>
+    return <FormControl>
         <Stack gap={labelInputGap ?? '0'}>
             {label && <Typography fontWeight="500">{label}</Typography>}
             <Controller

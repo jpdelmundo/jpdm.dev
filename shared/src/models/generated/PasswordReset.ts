@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 /** Identifier type for password_reset */
 export type PasswordResetId = string & { __flavor?: 'PasswordResetId' };
 
@@ -48,6 +50,35 @@ export interface PasswordResetMutator {
 
   created_at?: Date;
 }
+
+export const PasswordResetIdSchema = z.uuid();
+
+export const PasswordResetSchema = z.object({
+  id: PasswordResetIdSchema,
+  user_id: z.uuid(),
+  token_hash: z.string(),
+  used_at: z.date().nullable(),
+  expires_at: z.date(),
+  created_at: z.date(),
+});
+
+export const PasswordResetInitializerSchema = z.object({
+  id: PasswordResetIdSchema.optional(),
+  user_id: z.uuid(),
+  token_hash: z.string(),
+  used_at: z.date().optional().nullable(),
+  expires_at: z.date().optional(),
+  created_at: z.date().optional(),
+});
+
+export const PasswordResetMutatorSchema = z.object({
+  id: PasswordResetIdSchema.optional(),
+  user_id: z.uuid().optional(),
+  token_hash: z.string().optional(),
+  used_at: z.date().optional().nullable(),
+  expires_at: z.date().optional(),
+  created_at: z.date().optional(),
+});
 
 export const PasswordResetColumns = [
   "id",

@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 /** Identifier type for post_likes */
 export type PostLikeId = string & { __flavor?: 'PostLikeId' };
 
@@ -41,6 +43,32 @@ export interface PostLikeMutator {
 
   updated_at?: Date | null;
 }
+
+export const PostLikeIdSchema = z.uuid();
+
+export const PostLikeSchema = z.object({
+  id: PostLikeIdSchema,
+  user_id: z.uuid(),
+  post_id: z.uuid(),
+  created_at: z.date().nullable(),
+  updated_at: z.date().nullable(),
+});
+
+export const PostLikeInitializerSchema = z.object({
+  id: PostLikeIdSchema.optional(),
+  user_id: z.uuid(),
+  post_id: z.uuid(),
+  created_at: z.date().optional().nullable(),
+  updated_at: z.date().optional().nullable(),
+});
+
+export const PostLikeMutatorSchema = z.object({
+  id: PostLikeIdSchema.optional(),
+  user_id: z.uuid().optional(),
+  post_id: z.uuid().optional(),
+  created_at: z.date().optional().nullable(),
+  updated_at: z.date().optional().nullable(),
+});
 
 export const PostLikeColumns = [
   "id",

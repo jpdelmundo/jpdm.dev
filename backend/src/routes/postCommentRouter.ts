@@ -16,7 +16,7 @@ export const createPostCommentRouter = (appCtx: AppContext) => {
     router.use(authRequired);
     router.post('/', apiRateLimit(60, 10, (req) => req.body.post_id), controller.create);
     router.put('/:id', apiRateLimit(60, 20, (req) => req.body.post_id), controller.update);
-    router.delete('/:id', apiRateLimit(60, 20), controller.del);
+    router.delete('/:id', apiRateLimit(60, 20), controller.delete);
     // router.post('/email-code', controller.emailCode);
     // router.post('/email-code-confirm', controller.emailCodeConfirm);
 

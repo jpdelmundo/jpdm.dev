@@ -9,23 +9,27 @@ import { canModify as _canModify, isOwner } from '@/utils/permissions.js';
 import type PostDTO from '@shared/models/dto/PostDTO.js';
 import type PostImageExtended from '@shared/models/extensions/PostImageExtended.js';
 import { type File, type FileInitializer } from '@shared/models/generated/File.js';
-import type { Post, PostId, PostInitializer, PostMutator } from '@shared/models/generated/Post.js';
+import { PostSchema, type Post, type PostId, type PostInitializer, type PostMutator } from '@shared/models/generated/Post.js';
 import type { PostImage, PostImageId } from '@shared/models/generated/PostImage.js';
 import type { UserId } from '@shared/models/generated/User.js';
+import { DateComparisonSchema } from '@shared/types/DateComparisonSchema.js';
 import type { EnrichOptions } from '@shared/types/EnrichOptions.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
+import { OrderDirection } from '@shared/types/OrderDirection.js';
+import { Visibility } from '@shared/types/Visibility.js';
+import { coercedBoolean } from '@shared/utils/helper.js';
 import { createHash } from 'crypto';
 import { fileTypeFromFile } from 'file-type';
 import fs from 'fs';
 import { imageSizeFromFile } from 'image-size/fromFile';
 import path from 'path';
 import { validate } from 'uuid';
+import z from 'zod';
 import { createFileService } from './fileService.js';
 import { createPostImageService } from './postImageService.js';
 import { createPostLikeService } from './postLikeService.js';
 import { createUserProfileService } from './userProfileService.js';
 import { createUserService } from './userService.js';
-
 
 type CreateInput = PostInitializer & { files?: { file_id: string; sort: number }[]; }
 type UpdateInput = PostMutator & { files?: { id: string; file_id: string; sort: number }[]; };
@@ -34,6 +38,20 @@ export const createPostService = (ctx: ServiceContext) => {
     const { deps, actor } = ctx;
 
     const get = async <P extends KeyValue>(params: P) => {
+        const schema = PostSchema.extend({
+            post: z.string(),
+            date_from: DateComparisonSchema,
+            date_to: DateComparisonSchema,
+            order_dir: z.enum(OrderDirection),
+            page_size: z.number(),
+            page_num: z.number(),
+            visibility: z.enum(Visibility),
+            is_published: coercedBoolean()
+        }).partial();
+
+        const parsed = schema.safeParse(params);
+        if (!parsed.success) throw new ServiceError('One or more parameters are invalid.', ErrorCode.INVALID_PARAMETER, parsed.error.issues);
+
         return deps.postRepo.find(params);
     };
 

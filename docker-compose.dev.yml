@@ -1,0 +1,34 @@
+services:
+  # frontend:
+  #   profiles: ["prod"]
+
+  backend:
+    profiles: ["prod"]
+
+  db:
+    ports:
+      - "${POSTGRES_PORT}:5432"
+
+  litellm:
+    ports:
+      - "4000:4000"
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_CONFIG_MAX_LOGIN_ATTEMPTS: ${PGADMIN_CONFIG_MAX_LOGIN_ATTEMPTS}
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - db
+    networks:
+      - app-net
+    restart: unless-stopped
+
+volumes:
+  pgadmin_data:

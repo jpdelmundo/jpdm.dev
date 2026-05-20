@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 /** Identifier type for post_images */
 export type PostImageId = string & { __flavor?: 'PostImageId' };
 
@@ -48,6 +50,35 @@ export interface PostImageMutator {
 
   updated_at?: Date | null;
 }
+
+export const PostImageIdSchema = z.uuid();
+
+export const PostImageSchema = z.object({
+  id: PostImageIdSchema,
+  post_id: z.uuid(),
+  file_id: z.uuid(),
+  sort: z.number(),
+  created_at: z.date(),
+  updated_at: z.date().nullable(),
+});
+
+export const PostImageInitializerSchema = z.object({
+  id: PostImageIdSchema.optional(),
+  post_id: z.uuid(),
+  file_id: z.uuid(),
+  sort: z.number().optional(),
+  created_at: z.date().optional(),
+  updated_at: z.date().optional().nullable(),
+});
+
+export const PostImageMutatorSchema = z.object({
+  id: PostImageIdSchema.optional(),
+  post_id: z.uuid().optional(),
+  file_id: z.uuid().optional(),
+  sort: z.number().optional(),
+  created_at: z.date().optional(),
+  updated_at: z.date().optional().nullable(),
+});
 
 export const PostImageColumns = [
   "id",

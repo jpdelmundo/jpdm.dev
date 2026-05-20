@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 /** Identifier type for users */
 export type UserId = string & { __flavor?: 'UserId' };
 
@@ -124,6 +126,71 @@ export interface UserMutator {
 
   deleted_at?: Date | null;
 }
+
+export const UserIdSchema = z.uuid();
+
+export const UserSchema = z.object({
+  id: UserIdSchema,
+  username: z.string(),
+  created_at: z.date(),
+  updated_at: z.date().nullable(),
+  password: z.string().nullable(),
+  email: z.string().nullable(),
+  email_confirm_code: z.string().nullable(),
+  email_confirmed: z.boolean().nullable(),
+  unconfirmed_email: z.string().nullable(),
+  email_confirm_code_first_sent_at: z.date().nullable(),
+  email_confirm_code_last_sent_at: z.date().nullable(),
+  email_confirm_code_num_sent: z.number(),
+  vanity_id: z.string().nullable(),
+  google_id: z.string().nullable(),
+  facebook_id: z.string().nullable(),
+  password_updated_at: z.date().nullable(),
+  deleted: z.boolean().nullable(),
+  deleted_at: z.date().nullable(),
+});
+
+export const UserInitializerSchema = z.object({
+  id: UserIdSchema.optional(),
+  username: z.string(),
+  created_at: z.date().optional(),
+  updated_at: z.date().optional().nullable(),
+  password: z.string().optional().nullable(),
+  email: z.string().optional().nullable(),
+  email_confirm_code: z.string().optional().nullable(),
+  email_confirmed: z.boolean().optional().nullable(),
+  unconfirmed_email: z.string().optional().nullable(),
+  email_confirm_code_first_sent_at: z.date().optional().nullable(),
+  email_confirm_code_last_sent_at: z.date().optional().nullable(),
+  email_confirm_code_num_sent: z.number().optional(),
+  vanity_id: z.string().optional().nullable(),
+  google_id: z.string().optional().nullable(),
+  facebook_id: z.string().optional().nullable(),
+  password_updated_at: z.date().optional().nullable(),
+  deleted: z.boolean().optional().nullable(),
+  deleted_at: z.date().optional().nullable(),
+});
+
+export const UserMutatorSchema = z.object({
+  id: UserIdSchema.optional(),
+  username: z.string().optional(),
+  created_at: z.date().optional(),
+  updated_at: z.date().optional().nullable(),
+  password: z.string().optional().nullable(),
+  email: z.string().optional().nullable(),
+  email_confirm_code: z.string().optional().nullable(),
+  email_confirmed: z.boolean().optional().nullable(),
+  unconfirmed_email: z.string().optional().nullable(),
+  email_confirm_code_first_sent_at: z.date().optional().nullable(),
+  email_confirm_code_last_sent_at: z.date().optional().nullable(),
+  email_confirm_code_num_sent: z.number().optional(),
+  vanity_id: z.string().optional().nullable(),
+  google_id: z.string().optional().nullable(),
+  facebook_id: z.string().optional().nullable(),
+  password_updated_at: z.date().optional().nullable(),
+  deleted: z.boolean().optional().nullable(),
+  deleted_at: z.date().optional().nullable(),
+});
 
 export const UserColumns = [
   "id",

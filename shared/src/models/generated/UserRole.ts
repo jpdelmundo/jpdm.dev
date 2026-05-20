@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 /** Identifier type for user_roles */
 export type UserRoleId = string & { __flavor?: 'UserRoleId' };
 
@@ -29,6 +31,26 @@ export interface UserRoleMutator {
 
   role?: string;
 }
+
+export const UserRoleIdSchema = z.uuid();
+
+export const UserRoleSchema = z.object({
+  id: UserRoleIdSchema,
+  user_id: z.uuid(),
+  role: z.string(),
+});
+
+export const UserRoleInitializerSchema = z.object({
+  id: UserRoleIdSchema.optional(),
+  user_id: z.uuid(),
+  role: z.string().optional(),
+});
+
+export const UserRoleMutatorSchema = z.object({
+  id: UserRoleIdSchema.optional(),
+  user_id: z.uuid().optional(),
+  role: z.string().optional(),
+});
 
 export const UserRoleColumns = [
   "id",

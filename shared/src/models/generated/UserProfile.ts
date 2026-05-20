@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 /** Identifier type for user_profiles */
 export type UserProfileId = string & { __flavor?: 'UserProfileId' };
 
@@ -86,6 +88,53 @@ export interface UserProfileMutator {
 
   avatar_file_id?: string | null;
 }
+
+export const UserProfileIdSchema = z.uuid();
+
+export const UserProfileSchema = z.object({
+  id: UserProfileIdSchema,
+  user_id: z.uuid(),
+  avatar_url: z.string().nullable(),
+  date_of_birth: z.date().nullable(),
+  bio: z.string().nullable(),
+  phone_number: z.string().nullable(),
+  created_at: z.date(),
+  updated_at: z.date().nullable(),
+  first_name: z.string().nullable(),
+  last_name: z.string().nullable(),
+  gender: z.string().nullable(),
+  avatar_file_id: z.uuid().nullable(),
+});
+
+export const UserProfileInitializerSchema = z.object({
+  id: UserProfileIdSchema.optional(),
+  user_id: z.uuid(),
+  avatar_url: z.string().optional().nullable(),
+  date_of_birth: z.date().optional().nullable(),
+  bio: z.string().optional().nullable(),
+  phone_number: z.string().optional().nullable(),
+  created_at: z.date().optional(),
+  updated_at: z.date().optional().nullable(),
+  first_name: z.string().optional().nullable(),
+  last_name: z.string().optional().nullable(),
+  gender: z.string().optional().nullable(),
+  avatar_file_id: z.uuid().optional().nullable(),
+});
+
+export const UserProfileMutatorSchema = z.object({
+  id: UserProfileIdSchema.optional(),
+  user_id: z.uuid().optional(),
+  avatar_url: z.string().optional().nullable(),
+  date_of_birth: z.date().optional().nullable(),
+  bio: z.string().optional().nullable(),
+  phone_number: z.string().optional().nullable(),
+  created_at: z.date().optional(),
+  updated_at: z.date().optional().nullable(),
+  first_name: z.string().optional().nullable(),
+  last_name: z.string().optional().nullable(),
+  gender: z.string().optional().nullable(),
+  avatar_file_id: z.uuid().optional().nullable(),
+});
 
 export const UserProfileColumns = [
   "id",

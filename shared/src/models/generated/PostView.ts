@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 /** Identifier type for post_views */
 export type PostViewId = string & { __flavor?: 'PostViewId' };
 
@@ -113,6 +115,68 @@ export interface PostViewMutator {
 
   device?: string | null;
 }
+
+export const PostViewIdSchema = z.uuid();
+
+export const PostViewSchema = z.object({
+  id: PostViewIdSchema,
+  post_id: z.uuid(),
+  user_id: z.uuid().nullable(),
+  device_id: z.uuid().nullable(),
+  tz: z.string().nullable(),
+  screen_height: z.number().nullable(),
+  screen_width: z.number().nullable(),
+  cpu_count: z.number().nullable(),
+  referrer: z.string().nullable(),
+  client: z.string().nullable(),
+  ip: z.string().nullable(),
+  os: z.string().nullable(),
+  device_type: z.string().nullable(),
+  created_at: z.date(),
+  country: z.string().nullable(),
+  city: z.string().nullable(),
+  device: z.string().nullable(),
+});
+
+export const PostViewInitializerSchema = z.object({
+  id: PostViewIdSchema.optional(),
+  post_id: z.uuid(),
+  user_id: z.uuid().optional().nullable(),
+  device_id: z.uuid().optional().nullable(),
+  tz: z.string().optional().nullable(),
+  screen_height: z.number().optional().nullable(),
+  screen_width: z.number().optional().nullable(),
+  cpu_count: z.number().optional().nullable(),
+  referrer: z.string().optional().nullable(),
+  client: z.string().optional().nullable(),
+  ip: z.string().optional().nullable(),
+  os: z.string().optional().nullable(),
+  device_type: z.string().optional().nullable(),
+  created_at: z.date().optional(),
+  country: z.string().optional().nullable(),
+  city: z.string().optional().nullable(),
+  device: z.string().optional().nullable(),
+});
+
+export const PostViewMutatorSchema = z.object({
+  id: PostViewIdSchema.optional(),
+  post_id: z.uuid().optional(),
+  user_id: z.uuid().optional().nullable(),
+  device_id: z.uuid().optional().nullable(),
+  tz: z.string().optional().nullable(),
+  screen_height: z.number().optional().nullable(),
+  screen_width: z.number().optional().nullable(),
+  cpu_count: z.number().optional().nullable(),
+  referrer: z.string().optional().nullable(),
+  client: z.string().optional().nullable(),
+  ip: z.string().optional().nullable(),
+  os: z.string().optional().nullable(),
+  device_type: z.string().optional().nullable(),
+  created_at: z.date().optional(),
+  country: z.string().optional().nullable(),
+  city: z.string().optional().nullable(),
+  device: z.string().optional().nullable(),
+});
 
 export const PostViewColumns = [
   "id",

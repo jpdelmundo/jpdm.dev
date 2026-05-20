@@ -3,7 +3,7 @@ import { getFullQuery } from '@/infra/pgHelper.js';
 import type { Db } from '@/types/Db.js';
 import type { InferFindResultType } from '@/types/InferFindResultType.js';
 import type { KeyValue, KeyValueWithPagination } from '@/types/KeyValue.js';
-import { OrderDirections, type OrderDirection } from '@shared/types/OrderDirection.js';
+import { OrderDirection } from '@shared/types/OrderDirection.js';
 import { isNumber } from '@shared/utils/validation.js';
 import { type QueryResultRow } from 'pg';
 
@@ -11,7 +11,8 @@ export interface GetOrderByParams {
     allowedOrderColumns: string[];
     order_by: string;
     order_dir: OrderDirection | undefined;
-    prioritize_user_id?: number
+    prioritize_user_id?: number,
+    customOrderBy?: KeyValue
 }
 
 export abstract class BaseRepository<T extends QueryResultRow> {
@@ -75,16 +76,19 @@ export abstract class BaseRepository<T extends QueryResultRow> {
     }
 
     protected getOrderBy(params: GetOrderByParams, values: unknown[]) {
-        const { allowedOrderColumns, order_by, order_dir, prioritize_user_id } = params;
+        const { allowedOrderColumns, order_by, order_dir, prioritize_user_id, customOrderBy } = params;
         let order = '';
-        if (allowedOrderColumns.includes(order_by)) {
-            const dir = order_dir && OrderDirections.includes(order_dir) ? order_dir : 'asc';
+        const orderByExpr = customOrderBy?.[order_by];
+        const effectiveOrderBy = orderByExpr ?? order_by;
+
+        if (orderByExpr || allowedOrderColumns.includes(order_by)) {
+            const dir = order_dir && Object.values(OrderDirection).includes(order_dir) ? order_dir : 'asc';
             let priority = '';
             if (values && prioritize_user_id) {
                 priority = `case when user_id = $${values.length + 1} then 0 else 1 end,`;
                 values.push(prioritize_user_id);
             }
-            order = priority ? `order by ${priority} ${order_by} ${dir}` : `order by ${order_by} ${dir}`;
+            order = priority ? `order by ${priority} ${effectiveOrderBy} ${dir}` : `order by ${effectiveOrderBy} ${dir}`;
         }
         return order;
     }

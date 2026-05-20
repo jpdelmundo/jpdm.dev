@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 /** Identifier type for refresh_tokens */
 export type RefreshTokenId = string & { __flavor?: 'RefreshTokenId' };
 
@@ -100,6 +102,65 @@ export interface RefreshTokenMutator {
 
   remember?: boolean;
 }
+
+export const RefreshTokenIdSchema = z.uuid();
+
+export const RefreshTokenSchema = z.object({
+  id: RefreshTokenIdSchema,
+  device_id: z.uuid(),
+  client_tz: z.string(),
+  used_at: z.date().nullable(),
+  revoked_at: z.date().nullable(),
+  is_used: z.boolean(),
+  is_revoked: z.boolean(),
+  created_at: z.date(),
+  updated_at: z.date().nullable(),
+  user_id: z.uuid(),
+  screen_height: z.number().nullable(),
+  screen_width: z.number().nullable(),
+  cpu_count: z.number(),
+  previous_refresh_token_id: z.uuid().nullable(),
+  request_ip: z.string().nullable(),
+  remember: z.boolean(),
+});
+
+export const RefreshTokenInitializerSchema = z.object({
+  id: RefreshTokenIdSchema.optional(),
+  device_id: z.uuid(),
+  client_tz: z.string(),
+  used_at: z.date().optional().nullable(),
+  revoked_at: z.date().optional().nullable(),
+  is_used: z.boolean(),
+  is_revoked: z.boolean(),
+  created_at: z.date().optional(),
+  updated_at: z.date().optional().nullable(),
+  user_id: z.uuid(),
+  screen_height: z.number().optional().nullable(),
+  screen_width: z.number().optional().nullable(),
+  cpu_count: z.number(),
+  previous_refresh_token_id: z.uuid().optional().nullable(),
+  request_ip: z.string().optional().nullable(),
+  remember: z.boolean().optional(),
+});
+
+export const RefreshTokenMutatorSchema = z.object({
+  id: RefreshTokenIdSchema.optional(),
+  device_id: z.uuid().optional(),
+  client_tz: z.string().optional(),
+  used_at: z.date().optional().nullable(),
+  revoked_at: z.date().optional().nullable(),
+  is_used: z.boolean().optional(),
+  is_revoked: z.boolean().optional(),
+  created_at: z.date().optional(),
+  updated_at: z.date().optional().nullable(),
+  user_id: z.uuid().optional(),
+  screen_height: z.number().optional().nullable(),
+  screen_width: z.number().optional().nullable(),
+  cpu_count: z.number().optional(),
+  previous_refresh_token_id: z.uuid().optional().nullable(),
+  request_ip: z.string().optional().nullable(),
+  remember: z.boolean().optional(),
+});
 
 export const RefreshTokenColumns = [
   "id",

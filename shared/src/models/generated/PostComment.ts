@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 /** Identifier type for post_comments */
 export type PostCommentId = string & { __flavor?: 'PostCommentId' };
 
@@ -60,6 +62,41 @@ export interface PostCommentMutator {
 
   moderation_notes?: string | null;
 }
+
+export const PostCommentIdSchema = z.uuid();
+
+export const PostCommentSchema = z.object({
+  id: PostCommentIdSchema,
+  post_id: z.uuid(),
+  user_id: z.uuid(),
+  comment: z.string(),
+  created_at: z.date(),
+  updated_at: z.date().nullable(),
+  status: z.string(),
+  moderation_notes: z.string().nullable(),
+});
+
+export const PostCommentInitializerSchema = z.object({
+  id: PostCommentIdSchema.optional(),
+  post_id: z.uuid(),
+  user_id: z.uuid(),
+  comment: z.string(),
+  created_at: z.date().optional(),
+  updated_at: z.date().optional().nullable(),
+  status: z.string().optional(),
+  moderation_notes: z.string().optional().nullable(),
+});
+
+export const PostCommentMutatorSchema = z.object({
+  id: PostCommentIdSchema.optional(),
+  post_id: z.uuid().optional(),
+  user_id: z.uuid().optional(),
+  comment: z.string().optional(),
+  created_at: z.date().optional(),
+  updated_at: z.date().optional().nullable(),
+  status: z.string().optional(),
+  moderation_notes: z.string().optional().nullable(),
+});
 
 export const PostCommentColumns = [
   "id",

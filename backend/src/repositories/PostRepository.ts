@@ -1,7 +1,9 @@
+import { getDateParamCondition } from '@/infra/pgHelper.js';
 import type { KeyValue } from '@/types/KeyValue.js';
 import type { PostStatsDTO } from '@shared/models/dto/PostStatsDTO.js';
 import type { PostViewsDTO } from '@shared/models/dto/PostViewsDTO.js';
-import type { Post, PostId, PostInitializer, PostMutator } from '@shared/models/generated/Post.js';
+import { PostColumns, type Post, type PostId, type PostInitializer, type PostMutator } from '@shared/models/generated/Post.js';
+import type { DateComparison } from '@shared/types/DateComparison.js';
 import { type OrderDirection } from '@shared/types/OrderDirection.js';
 import type { Visibility } from '@shared/types/Visibility.js';
 import { BaseRepository } from './BaseRepository.js';
@@ -10,9 +12,11 @@ type FindParams = {
     id?: PostId;
     ids?: PostId[];
     user_id?: string;
+    post?: string;
+    date_from?: DateComparison;
+    date_to?: DateComparison;
     visibility?: Visibility;
     is_published?: boolean;
-    is_admin?: boolean;
     page_num?: number;
     page_size?: number;
     order_by?: string;
@@ -21,16 +25,19 @@ type FindParams = {
 
 export class PostRepository extends BaseRepository<Post> {
     async find<P extends KeyValue>(params: P) {
-        const { id, ids, user_id, visibility, is_published, is_admin, order_by, order_dir } = params as FindParams;
+        const { id, ids, user_id, visibility, is_published, order_by, order_dir, post, date_from, date_to } = params as FindParams;
         const filters: string[] = [];
         const values: unknown[] = [];
 
         //where
-        id && filters.push(`id = $${filters.length + 1}`) && values.push(id);
-        ids && filters.push(`id = any($${filters.length + 1})`) && values.push(ids);
-        user_id && filters.push(`user_id = $${filters.length + 1}`) && values.push(user_id);
-        visibility && filters.push(`visibility = $${filters.length + 1}`) && values.push(visibility);
-        is_published && filters.push(`is_published = $${filters.length + 1}`) && values.push(is_published);
+        id && filters.push(`id = $${values.length + 1}`) && values.push(id);
+        ids && filters.push(`id = any($${values.length + 1})`) && values.push(ids);
+        user_id && filters.push(`user_id = $${values.length + 1}`) && values.push(user_id);
+        visibility && filters.push(`visibility = $${values.length + 1}`) && values.push(visibility);
+        is_published !== undefined && filters.push(`is_published = $${values.length + 1}`) && values.push(is_published);
+        post && filters.push(`(title ilike $${values.length + 1} or content ilike $${values.length + 1})`) && values.push(`%${post}%`);
+        date_from && filters.push(getDateParamCondition('created_at', date_from, values));
+        date_to && filters.push(getDateParamCondition('created_at', date_to, values));
 
         if (filters.length == 0) {
             throw new Error('At least one filter must be provided');
@@ -40,7 +47,15 @@ export class PostRepository extends BaseRepository<Post> {
         filter = filter ? `where ${filter}` : '';
 
         //order by params
-        const orderByParams = order_by ? { allowedOrderColumns: ['created_at'], order_by, order_dir } : null;
+        type Column = (typeof PostColumns[number]);
+        const orderByParams = order_by ? {
+            allowedOrderColumns: ['created_at', 'visibility', 'is_published'] as Column[],
+            order_by,
+            order_dir,
+            customOrderBy: {
+                post: "lower(coalesce(nullif(title, ''), content))"
+            }
+        } : null;
 
         //get and return result
         return this.getFindResult('posts', filter, orderByParams, values, params);

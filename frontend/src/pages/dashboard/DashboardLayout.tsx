@@ -1,4 +1,5 @@
 import { UserPanel } from '@/components/UserPanel';
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 import ForumRoundedIcon from '@mui/icons-material/ForumRounded';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import SpaceDashboardOutlinedIcon from '@mui/icons-material/SpaceDashboardOutlined';
@@ -43,6 +44,7 @@ export const DashboardLayout = () => {
 
     const menuItems = [
         { text: 'Home', path: '/dashboard', icon: SpaceDashboardOutlinedIcon },
+        { text: 'Posts', path: '/dashboard/posts', icon: ArticleOutlinedIcon },
         { text: 'Comments', path: '/dashboard/comments', icon: ForumRoundedIcon },
     ];
 
@@ -62,7 +64,7 @@ export const DashboardLayout = () => {
     return (
         <>
             <Stack>
-                <Container component="header" className="header-container" sx={{ height: '60px', zIndex: 2000, borderBottom: 'solid 1px #eeeeee', backgroundColor: '#ffffff !important' }}>
+                <Container component="header" className="header-container" sx={{ height: '60px', zIndex: 1, borderBottom: 'solid 1px #eeeeee', backgroundColor: '#ffffff !important' }}>
                     <Stack direction="row" alignItems="center" sx={{ margin: '0 auto' }}>
                         <Stack direction="row" gap={2}>
                             <IconButton

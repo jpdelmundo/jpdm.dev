@@ -24,39 +24,45 @@ export const createPostCommentController = (app: AppContext) => {
         },
 
         get: async (req: Request, res: Response): Promise<Response> => {
-            const { page_num, post_id } = req.query;
-            const commentSvc = createPostCommentService(makeCtx(req));
-            const result = await commentSvc.get({
-                post_id,
+            const { page_num, page_size, comment, date_from, date_to } = req.query;
+            const postCommentSvc = createPostCommentService(makeCtx(req));
+
+            const result = await postCommentSvc.get({
+                user_id: req.user!.id,
                 status: [CommentStatus.AI_APPROVED, CommentStatus.USER_APPROVED],
                 page_num: page_num ? parseInt(String(page_num)) : 1,
-                page_size: 10,
+                page_size: page_size ? parseInt(String(page_size)) : 30,
                 order_by: 'created_at',
-                order_dir: 'asc'
+                order_dir: 'desc',
+                ...(comment && { comment: String(comment) }),
+                ...(date_from && { date_from: { gte: new Date(String(date_from)) } }),
+                ...(date_to && { date_to: { lte: new Date(String(date_to)) } }),
             });
-            const enriched = await commentSvc.enrich(result.page_items, { include: ['post'] });
+
+            const enriched = await postCommentSvc.enrich(result.page_items, { include: ['post'], });
             result.page_items = enriched;
 
             return ok(res, result);
         },
 
-        update: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
+        update: async (req: Request<RouteParams>, res: Response,): Promise<Response> => {
             const { id } = req.params;
             const { comment } = req.body;
+            const { return_include } = req.query;
             const postCommentSvc = createPostCommentService(makeCtx(req));
 
             const result = await postCommentSvc.update(id, { comment });
-            const [enriched] = await postCommentSvc.enrich([result]);
+            const [enriched] = await postCommentSvc.enrich([result], { ...(return_include && { include: String(return_include).split(',') }) });
 
             return ok(res, enriched);
         },
 
-        del: async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
+        delete: async (req: Request<RouteParams>, res: Response,): Promise<Response> => {
             const { id } = req.params;
+            const commentSvc = createPostCommentService(makeCtx(req));
+            const deleted = await commentSvc.delete(id);
 
-            const result = await createPostCommentService(makeCtx(req)).delete(id);
-
-            return ok(res, result);
-        }
+            return ok(res, deleted);
+        },
     }
 }

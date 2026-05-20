@@ -11,7 +11,7 @@ import { fail, ok } from '@/utils/apiHelper.js';
 import { getCurrentUser } from '@/utils/auth.js';
 import { escapeHtml } from '@/utils/helper.js';
 import type PostImageExtended from '@shared/models/extensions/PostImageExtended.js';
-import type { PostId } from '@shared/models/generated/Post.js';
+import type { Post, PostId } from '@shared/models/generated/Post.js';
 import type { PostViewInitializer } from '@shared/models/generated/PostView.js';
 import type { DeviceFingerprint } from '@shared/types/DeviceFingerprint.js';
 import { jsonBase64Decode } from '@shared/utils/encoding.js';
@@ -69,11 +69,29 @@ export const createPostController = (app: AppContext) => {
 
         get: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
             const { id } = req.params;
-            const postSvc = createPostService(makeCtx(req));
-            const post = await postSvc.getById(id!);
-            const [enriched] = await postSvc.enrich([post]);
+            const { page_num, page_size, order_by, order_dir, post, date_from, date_to, visibility, is_published } = req.query;
 
-            return ok(res, enriched);
+            const postSvc = createPostService(makeCtx(req));
+            let result = await postSvc.get({
+                user_id: req.user?.id,
+                ...(page_num && { page_num: parseInt(String(page_num)) }),
+                ...(page_size && { page_size: parseInt(String(page_size)) }),
+                ...(id && { id }),
+                ...(post && { post }),
+                ...(date_from && { date_from: { gte: new Date(String(date_from)) } }),
+                ...(date_to && { date_to: { lte: new Date(String(date_to)) } }),
+                ...(visibility && { visibility }),
+                ...(is_published && { is_published }),
+                ...(order_by && { order_by }),
+                ...(order_dir && { order_dir })
+            });
+
+            if ('page_items' in result)
+                result.page_items = await postSvc.enrich(result.page_items as Post[]);
+            else
+                result = await postSvc.enrich(result);
+
+            return ok(res, result);
         },
 
         createComment: async (req: Request<RouteParams>, res: Response): Promise<Response> => {

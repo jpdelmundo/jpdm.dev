@@ -35,4 +35,3 @@ usercontent/
 *.tsbuildinfo
 *.cpuprofile
 backend/db
-docker-compose.dev.yml

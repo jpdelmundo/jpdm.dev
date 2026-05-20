@@ -1,3 +1,7 @@
+import { ServiceError } from '@/errors/ServiceError.js';
+import type { KeyValue } from '@/types/KeyValue.js';
+import { ErrorCode } from '@shared/types/ErrorCode.js';
+import { isValid, type ValidType } from '@shared/utils/validation.js';
 import fs from 'fs';
 import crypto, { randomBytes } from 'node:crypto';
 import { Readable } from 'node:stream';
@@ -78,4 +82,16 @@ export const downloadImage = async (url: string, destDir: string, timeoutMs: num
 
 export const getUserAvatarDir = (user_id: string) => {
     return path.posix.join('avatars', crypto.createHash('sha256').update(user_id).digest('hex').slice(0, 16));
+}
+
+export const throwIfInvalid = (input: KeyValue, validType: ValidType, code: ErrorCode = ErrorCode.INVALID_PARAMETER) => {
+    const entry = Object.entries(input)[0];
+    if (!entry) return;
+    const [key, value] = entry;
+    if (!isValid(value, validType)) {
+        const sanitize = (val: unknown) => String(val).replace(/[<>"'\n\r\t]/g, '');
+        const _key = sanitize(key);
+        const _value = sanitize(value);
+        throw new ServiceError(`Invalid parameter ${_key}: ${_value}`, code);
+    }
 }

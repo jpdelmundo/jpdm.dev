@@ -146,6 +146,7 @@ export const theme = createTheme({
                 containedPrimary: {
                     backgroundColor: '#0c66e4',
                     border: 'solid 1px #0a56c0',
+                    padding: '3px 9px',
                     '&:hover': {
                         backgroundColor: '#0a56c0'
                     }
