@@ -8,7 +8,6 @@ export class UserRoleRepository extends BaseRepository<UserRole> {
 
         id && filters.push(`id = $${filters.length + 1}`) && values.push(id);
         userId && filters.push(`user_id = $${filters.length + 1}`) && values.push(userId);
-        // email && filters.push(`email = $${filters.length + 1}`) && values.push(email);
 
         if (filters.length == 0) {
             throw new Error('At least one filter must be provided');
@@ -25,15 +24,15 @@ export class UserRoleRepository extends BaseRepository<UserRole> {
         return result[0] || null;
     }
 
-    create(item: UserRole): Promise<UserRole> {
-        throw new Error("Method not implemented.")
+    async create(_item: Partial<UserRole>): Promise<UserRole> {
+        throw new Error('Method not implemented.');
     }
 
-    update(id: string, item: Partial<UserRole>): Promise<UserRole> {
-        throw new Error("Method not implemented.")
+    async update(_id: UserRoleId | UserRoleId[], _data: Partial<UserRole>, _options?: Record<string, unknown>): Promise<UserRole[]> {
+        throw new Error('Method not implemented.');
     }
 
-    delete(id: UserRoleId): Promise<UserRole> {
-        throw new Error("Method not implemented.")
+    async delete(_id: string, _options?: Record<string, unknown>): Promise<UserRole> {
+        throw new Error('Method not implemented.');
     }
 }

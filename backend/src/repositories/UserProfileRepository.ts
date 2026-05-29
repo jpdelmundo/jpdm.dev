@@ -73,7 +73,7 @@ export class UserProfileRepository extends BaseRepository<UserProfile> {
         return result.rows[0];
     }
 
-    async update(id: string, data: UserProfileMutator): Promise<UserProfile> {
+    async update(id: UserProfileId | UserProfileId[], data: UserProfileMutator): Promise<UserProfile[]> {
         const validColumns = new Set(UserProfileColumns as readonly string[]);
         const entries = Object.entries(data).filter(([key, value]) => validColumns.has(key) && value !== undefined && key != 'id');
         const set: string[] = [];
@@ -90,25 +90,24 @@ export class UserProfileRepository extends BaseRepository<UserProfile> {
         set.push(`updated_at = now()`);
 
         const filters: string[] = [];
-        id.trim() && filters.push(`id = $${values.length + 1}`) && values.push(id.trim());
+        !Array.isArray(id) && id.trim() && filters.push(`id = $${values.length + 1}`) && values.push(id.trim());
+        Array.isArray(id) && filters.push(`id = any($${values.length + 1})`) && values.push(id.map(i => i.trim()));
         //user_id?.trim() && filters.push(`user_id = $${values.length + 1}`) && values.push(user_id.trim());
 
         if (filters.length == 0) {
             throw new Error('Update condition missing');
         }
 
-        let where = filters.join(' and ');
-        where = where ? `where ${where}` : '';
+        const where = filters.join(' and ');
 
         const sql = `update user_profiles
                      set ${set.join(', ')}
-                     ${where}
+                     where ${where}
                      returning *`;
 
         const result = await this.query(sql, values);
-        if (!result.rows[0]) throw new Error(`Update failed`);
 
-        return result.rows[0];
+        return result.rows;
     }
 
     async delete(id: UserProfileId): Promise<UserProfile> {

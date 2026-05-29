@@ -71,7 +71,7 @@ export class PasswordResetRepository extends BaseRepository<PasswordReset> {
         return result.rows[0];
     }
 
-    async update(id: PasswordResetId, data: PasswordResetMutator): Promise<PasswordReset> {
+    async update(id: PasswordResetId | PasswordResetId[], data: PasswordResetMutator): Promise<PasswordReset[]> {
         const { user_id } = data;
         const entries = Object.entries(data).filter(([key, value]) => value !== undefined && key != 'id' && key != 'user_id');
         const set: string[] = [];
@@ -87,26 +87,23 @@ export class PasswordResetRepository extends BaseRepository<PasswordReset> {
         }
         //set.push(`updated_at = now()`);
 
-        const filters: string[] = [];
-        id.trim() && filters.push(`id = $${values.length + 1}`) && values.push(id.trim());
-        user_id?.trim() && filters.push(`user_id = $${values.length + 1}`) && values.push(user_id.trim());
+        const where: string[] = [];
+        !Array.isArray(id) && id.trim() && where.push(`id = $${values.length + 1}`) && values.push(id.trim());
+        Array.isArray(id) && where.push(`id = any($${values.length + 1})`) && values.push(id.map(i => i.trim()));
+        user_id?.trim() && where.push(`user_id = $${values.length + 1}`) && values.push(user_id.trim());
 
-        if (filters.length == 0) {
+        if (where.length == 0) {
             throw new Error('Update condition missing');
         }
 
-        let where = filters.join(' and ');
-        where = where ? `where ${where}` : '';
-
         const sql = `update password_reset
                      set ${set.join(', ')}
-                     ${where}
+                     where ${where.join(' and ')}
                      returning *`;
 
         const result = await this.query(sql, values);
-        if (!result.rows[0]) throw new Error(`Update failed`);
 
-        return result.rows[0];
+        return result.rows;
     }
 
     async delete(id: PasswordResetId): Promise<PasswordReset> {

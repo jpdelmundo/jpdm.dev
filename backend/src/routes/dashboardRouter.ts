@@ -1,4 +1,4 @@
-import { createDashboardController } from '@/controllers/dashboard/dashboardController.js';
+import { createDashboardController } from '@/controllers/dashboardController.js';
 import { createPostCommentController } from '@/controllers/postCommentController.js';
 import { createPostController } from '@/controllers/postController.js';
 import type { AppContext } from '@/infra/appContext.js';

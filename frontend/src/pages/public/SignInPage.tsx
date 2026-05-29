@@ -5,7 +5,7 @@ import { getFingerprint } from '@/utils/device';
 import type { AccessToken } from '@shared/types/AccessToken';
 import type { ApiResult } from '@shared/types/ApiResult';
 import { jsonBase64Encode } from '@shared/utils/encoding';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { theme } from '@/themes/theme';
 import Alert from '@mui/material/Alert';
@@ -21,7 +21,7 @@ export const SignInPage = () => {
     // const isAuthenticated = useAuthStore(s => s.isAuthenticated);
     const location = useLocation();
     const navigate = useNavigate();
-
+    const [searchParams] = useSearchParams();
 
     //const from = location.state?.from?.pathname || '/';
     // if (isAuthenticated) {
@@ -35,13 +35,22 @@ export const SignInPage = () => {
 
     const signInSuccess = (result: ApiResult<AccessToken>) => {
         if (!result.data) throw new Error('Something went wrong. Sign-in was successful but returned an empty token.');
-        const from = location.state?.from?.pathname || '/';
-
+        const from = searchParams.get('from') || location.state?.from?.pathname || '/';
         setToken(result.data);
-        navigate(from, { replace: true });
+
+        if (useAuthStore.getState().mustChangePassword) {
+            navigate('/user/change-password', { replace: true });
+        } else {
+            navigate(from, { replace: true });
+        }
     };
-    //console.log({ signOutReason });
-    const message = signOutReason == 'password_changed' ? 'Successfully changed password. You have been signed-out on all your devices. Sign in with your new password.' : '';
+
+    const reason = searchParams.get('reason');
+    const message = reason === 'invalid_token'
+        ? 'Your session has been invalidated. Please sign in again.'
+        : signOutReason == 'password_changed'
+            ? 'Successfully changed password. You have been signed-out on all your devices. Sign in with your new password.'
+            : '';
 
     useEffect(() => {
         useAuthStore.setState({ signOutReason: null });

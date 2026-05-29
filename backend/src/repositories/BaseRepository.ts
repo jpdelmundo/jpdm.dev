@@ -96,6 +96,6 @@ export abstract class BaseRepository<T extends QueryResultRow> {
     abstract find<P extends KeyValue>(params: P): Promise<InferFindResultType<P, T> | T[]>;
     abstract findById(id: string): Promise<T | null>;
     abstract create(data: T): Promise<T>;
-    abstract update(id: string, data: Partial<T>, options?: Record<string, unknown>): Promise<T>;
+    abstract update(id: string | string[], data: Partial<T>, options?: Record<string, unknown>): Promise<T[]>;
     abstract delete(id: string, options?: Record<string, unknown>): Promise<T>;
 }

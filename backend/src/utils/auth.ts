@@ -1,4 +1,5 @@
 import { HttpError } from '@/errors/HttpError.js';
+import { ServiceError } from '@/errors/ServiceError.js';
 import { pool } from '@/infra/db.js';
 import { makeDeps } from '@/infra/makeDeps.js';
 import type { ServiceContext } from '@/infra/serviceContext.js';
@@ -65,9 +66,18 @@ export const authRequired = async (req: Request, res: Response, next: NextFuncti
     const user = await createUserService(systemContext).findById(authUser.id);
     if (!user) throw new Error('Cannot find user using payload data');
 
-    //check if password changed, consider jwt invalid (use redis if it becomes a performance issue)
-    if (user.password_updated_at && (payload.iat * 1000) < user.password_updated_at.getTime()) throw new ApiError('Invalid token. User has change password.', 401, ErrorCode.TOKEN_INVALID);
+    //reject if user must change password (only if req path not actually update-password)
+    if (user.must_change_password && !req.path.includes('/update-password')) throw new ApiError('User must change password.', 403, ErrorCode.MUST_CHANGE_PASSWORD);
 
+    //check if password changed, consider jwt invalid (use redis if it becomes a performance issue)
+    if (user.password_updated_at && (payload.iat * 1000) < user.password_updated_at.getTime()) throw new ApiError('Invalid token. User has changed password.', 401, ErrorCode.TOKEN_INVALID);
+
+    next();
+}
+
+export const adminRequired = async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+    if (!user || !user.roles || !user.roles.includes('admin')) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
     next();
 }
 

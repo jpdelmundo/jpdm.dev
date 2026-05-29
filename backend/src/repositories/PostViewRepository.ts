@@ -73,7 +73,7 @@ export class PostViewRepository extends BaseRepository<PostView> {
         return result.rows[0];
     }
 
-    async update(id: string, data: PostViewMutator): Promise<PostView> {
+    async update(id: PostViewId | PostViewId[], data: PostViewMutator, options?: Record<string, unknown>): Promise<PostView[]> {
         throw new Error('Method not implemented');
     }
 

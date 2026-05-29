@@ -10,13 +10,14 @@ import { moderateImage, moderateName } from "@/utils/llm.js";
 import { canModify as _canModify } from '@/utils/permissions.js';
 import type { FileInitializer } from "@shared/models/generated/File.js";
 import type { UserId } from "@shared/models/generated/User.js";
-import type { UserProfile, UserProfileId, UserProfileInitializer, UserProfileMutator } from "@shared/models/generated/UserProfile.js";
+import { UserProfileSchema, type UserProfile, type UserProfileId, type UserProfileInitializer, type UserProfileMutator } from "@shared/models/generated/UserProfile.js";
 import { ErrorCode } from "@shared/types/ErrorCode.js";
 import { randomBytes } from "crypto";
 import { fileTypeFromFile } from "file-type";
 import fs from 'fs';
 import { imageSizeFromFile } from "image-size/fromFile";
 import path from 'path';
+import z from 'zod';
 
 export const createUserProfileService = (ctx: ServiceContext) => {
     const { deps, actor } = ctx;
@@ -69,6 +70,11 @@ export const createUserProfileService = (ctx: ServiceContext) => {
 
     const update = async (id: UserProfileId, params: UserProfileMutator) => {
         if (!id) throw new ServiceError('Missing parameter: id');
+        const parsed = UserProfileSchema.extend({
+            date_of_birth: z.coerce.date()
+        }).partial().safeParse(params);
+        if (!parsed.success) throw new ServiceError('One or more parameters are invalid.', ErrorCode.INVALID_PARAMETER, parsed.error.issues);
+
         if (!await canModify(id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
         const updated = await deps.userProfileRepo.update(id, params);
@@ -76,9 +82,13 @@ export const createUserProfileService = (ctx: ServiceContext) => {
         return updated;
     };
 
-    const updateByUserId = async (user_id: UserId, param: UserProfileMutator) => {
-        const { avatar_url, bio, date_of_birth, first_name, last_name, gender, phone_number, avatar_file_id } = param;
+    const updateByUserId = async (user_id: UserId, params: UserProfileMutator) => {
+        const { avatar_url, bio, date_of_birth, first_name, last_name, gender, phone_number, avatar_file_id } = params;
         if (!user_id) throw new ServiceError('Missing parameter: user_id');
+        const parsed = UserProfileSchema.extend({
+            date_of_birth: z.coerce.date()
+        }).partial().safeParse(params);
+        if (!parsed.success) throw new ServiceError('One or more parameters are invalid.', ErrorCode.INVALID_PARAMETER, parsed.error.issues);
         if (!_canModify(actor, user_id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
         if (first_name || last_name) {
@@ -89,14 +99,14 @@ export const createUserProfileService = (ctx: ServiceContext) => {
             if (!moderation.is_allowed) throw new ServiceError(`AI Moderation: ${moderation.reason}`);
         }
 
-        const params = {
+        const updateParams = {
             ...(avatar_url !== undefined && { avatar_url }),
             ...(avatar_file_id !== undefined && { avatar_file_id }),
             ...(bio !== undefined && { bio }),
-            ...(date_of_birth !== undefined && { date_of_birth: date_of_birth || null }),
+            ...(date_of_birth !== undefined && { date_of_birth }),
             ...(first_name !== undefined && { first_name }),
             ...(last_name !== undefined && { last_name }),
-            ...(gender !== undefined && { gender: gender || null }),
+            ...(gender !== undefined && { gender }),
             ...(phone_number !== undefined && { phone_number }),
         };
 
@@ -104,18 +114,19 @@ export const createUserProfileService = (ctx: ServiceContext) => {
         if (!userProfile) {
             userProfile = await create({
                 user_id,
-                ...params
+                ...updateParams
             });
         } else {
             //if avatar_url is being updated and user has existing avatar, delete avatar file
             if ((avatar_url || avatar_url === null) && userProfile.avatar_file_id) {
                 await createFileService(ctx).delete(userProfile.avatar_file_id);
-                avatar_url === null && (params.avatar_file_id = null);
+                avatar_url === null && (updateParams.avatar_file_id = null);
             }
 
-            avatar_file_id && (params.avatar_url = null);
+            avatar_file_id && (updateParams.avatar_url = null);
 
-            userProfile = await update(userProfile.id, params);
+            const updated = await update(userProfile.id, updateParams);
+            userProfile = updated[0];
         }
 
         if (!userProfile) throw new Error('Failed updating user profile by user_id');

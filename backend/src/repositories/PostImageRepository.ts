@@ -63,7 +63,7 @@ export class PostImageRepository extends BaseRepository<PostImage> {
         return result.rows[0];
     }
 
-    async update(id: string, item: PostImageMutator): Promise<PostImage> {
+    async update(id: PostImageId | PostImageId[], item: PostImageMutator): Promise<PostImage[]> {
         const entries = Object.entries(item).filter(([key, value]) => value !== undefined && key != 'id');
         const set: string[] = [];
         const values: unknown[] = [];
@@ -79,7 +79,8 @@ export class PostImageRepository extends BaseRepository<PostImage> {
         set.push(`updated_at = now()`);
 
         const where: string[] = [];
-        id.trim() && where.push(`id = $${values.length + 1}`) && values.push(id.trim());
+        !Array.isArray(id) && id.trim() && where.push(`id = $${values.length + 1}`) && values.push(id.trim());
+        Array.isArray(id) && where.push(`id = any($${values.length + 1})`) && values.push(id.map(i => i.trim()));
 
         if (where.length == 0) {
             throw new Error('Update condition missing');
@@ -91,9 +92,8 @@ export class PostImageRepository extends BaseRepository<PostImage> {
                      returning *`;
 
         const result = await this.query<PostImage>(sql, values);
-        if (!result.rows[0]) throw new Error('Update failed');
 
-        return result.rows[0];
+        return result.rows;
     }
 
     async delete(id: PostImageId): Promise<PostImage> {

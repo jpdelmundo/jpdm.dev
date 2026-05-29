@@ -52,13 +52,13 @@ export class RefreshTokenRepository extends BaseRepository<RefreshToken> {
         return result.rows[0];
     }
 
-    async update(id: RefreshTokenId, item: RefreshTokenMutator): Promise<RefreshToken> {
+    async update(id: RefreshTokenId | RefreshTokenId[], item: RefreshTokenMutator): Promise<RefreshToken[]> {
         const validColumns = new Set(RefreshTokenColumns as readonly string[]);
         const entries = Object.entries(item).filter(([key, value]) => validColumns.has(key) && value !== undefined && key != 'id');
         const set: string[] = [];
         const values: unknown[] = [];
 
-        entries.forEach(([key, value], index) => {
+        entries.forEach(([key, value]) => {
             set.push(`${key} = $${values.length + 1}`);
             values.push(value);
         });
@@ -69,7 +69,8 @@ export class RefreshTokenRepository extends BaseRepository<RefreshToken> {
         set.push(`updated_at = now()`);
 
         const where: string[] = [];
-        id.trim() && where.push(`id = $${values.length + 1}`) && values.push(id.trim());
+        !Array.isArray(id) && id.trim() && where.push(`id = $${values.length + 1}`) && values.push(id.trim());
+        Array.isArray(id) && where.push(`id = any($${values.length + 1})`) && values.push(id.map(i => i.trim()));
 
         if (where.length == 0) {
             throw new Error('Update condition missing');
@@ -81,9 +82,8 @@ export class RefreshTokenRepository extends BaseRepository<RefreshToken> {
                      returning *`;
 
         const result = await this.query<RefreshToken>(sql, values);
-        if (!result.rows[0]) throw new Error('Update failed');
 
-        return result.rows[0];
+        return result.rows;
     }
 
     async delete(id: RefreshTokenId): Promise<RefreshToken> {

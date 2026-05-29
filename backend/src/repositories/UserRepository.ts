@@ -1,5 +1,6 @@
 import type { KeyValue } from '@/types/KeyValue.js';
 import { UserColumns, type User, type UserId, type UserInitializer, type UserMutator } from '@shared/models/generated/User.js';
+import type { OrderDirection } from '@shared/types/OrderDirection.js';
 import { BaseRepository } from './BaseRepository.js';
 
 type FindParams = {
@@ -7,14 +8,20 @@ type FindParams = {
     ids?: UserId[];
     username?: string;
     email?: string;
+    name?: string;
     vanity_id?: string;
     email_confirmed?: boolean;
     facebook_id?: string;
+    is_admin?: boolean;
+    page_num?: number;
+    page_size?: number;
+    order_by?: string;
+    order_dir?: OrderDirection;
 }
 
 export class UserRepository extends BaseRepository<User> {
-    async find<P extends KeyValue>(params: P): Promise<User[]> {
-        const { id, ids, username, email, vanity_id, email_confirmed, facebook_id } = params as FindParams;
+    async find<P extends KeyValue>(params: P) {
+        const { id, ids, username, email, vanity_id, email_confirmed, facebook_id, name, order_by, order_dir, is_admin } = params as FindParams;
         const filters: string[] = [];
         const values: unknown[] = [];
 
@@ -26,18 +33,36 @@ export class UserRepository extends BaseRepository<User> {
         vanity_id && filters.push(`vanity_id = $${filters.length + 1}`) && values.push(vanity_id);
         email_confirmed && filters.push(`email_confirmed = $${filters.length + 1}`) && values.push(email_confirmed);
         facebook_id && filters.push(`facebook_id = $${filters.length + 1}`) && values.push(facebook_id);
+        name && filters.push(`username ilike $${values.length + 1}
+                              or exists (
+                                select 1 from user_profiles up
+                                where up.user_id = users.id
+                                and (
+                                    up.first_name ilike $${values.length + 1}
+                                    or up.last_name ilike $${values.length + 1}
+                                    or concat_ws(' ', up.first_name, up.last_name) ilike $${values.length + 1}
+                                )
+                              )`) && values.push(`%${name}%`);
 
-        if (filters.length == 0) {
+        if (!is_admin && filters.length == 0) {
             throw new Error('At least one filter must be provided');
         }
 
         let filter = filters.join(' and ');
         filter = filter ? `where ${filter}` : '';
 
-        const result = await this.query<User>(`select *
-                                               from users
-                                               ${filter}`, values);
-        return result.rows;
+        type Column = (typeof UserColumns[number]);
+        const orderByParams = order_by ? {
+            allowedOrderColumns: ['created_at', 'email', 'username'] as Column[],
+            order_by,
+            order_dir,
+            customOrderBy: {
+                first_name: "(select lower(up.first_name) from user_profiles up where up.user_id = users.id)",
+                last_name: "(select lower(up.last_name) from user_profiles up where up.user_id = users.id)",
+            }
+        } : null;
+
+        return this.getFindResult('users', filter, orderByParams, values, params);
     }
 
     async findById(id: string): Promise<User | null> {
@@ -64,7 +89,7 @@ export class UserRepository extends BaseRepository<User> {
         return result.rows[0];
     }
 
-    async update(id: UserId, item: UserMutator): Promise<User> {
+    async update(id: UserId | UserId[], item: UserMutator): Promise<User[]> {
         const validColumns = new Set(UserColumns as readonly string[]);
         const entries = Object.entries(item).filter(([key, value]) => validColumns.has(key) && value !== undefined && key != 'id');
         const set: string[] = [];
@@ -80,7 +105,8 @@ export class UserRepository extends BaseRepository<User> {
         set.push(`updated_at = now()`);
 
         const where: string[] = [];
-        id.trim() && where.push(`id = $${values.length + 1}`) && values.push(id.trim());
+        !Array.isArray(id) && id.trim() && where.push(`id = $${values.length + 1}`) && values.push(id.trim());
+        Array.isArray(id) && where.push(`id = any($${values.length + 1})`) && values.push(id.map(i => i.trim()));
 
         if (where.length == 0) throw new Error('Update condition missing');
 
@@ -90,9 +116,8 @@ export class UserRepository extends BaseRepository<User> {
                      returning *`;
 
         const result = await this.query(sql, values);
-        if (!result.rows[0]) throw new Error('Update failed');
 
-        return result.rows[0];
+        return result.rows;
     }
 
     async delete(id: UserId, options: Record<string, unknown> = {}): Promise<User> {

@@ -1,4 +1,5 @@
 import z from 'zod';
+import { type UserProfile } from '../models/generated/UserProfile.js';
 
 export function alphanumericOnly(input: string): string {
     if (!input) return '';
@@ -24,4 +25,17 @@ export function parseBoolean(input: unknown): boolean | undefined {
 
 export function coercedBoolean() {
     return z.union([z.boolean(), z.string().transform(v => v === 'true')]);
+}
+
+export function getAvatarProps({ username, profile }: { username: string, profile: Pick<UserProfile, 'avatar_url' | 'first_name' | 'last_name'> | null }) {
+    const name = profile ? `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() : '';
+    return {
+        display_name: name || username || '',
+        avatar_url: profile?.avatar_url || '',
+    };
+}
+
+export const randomString = (length: number) => {
+    const bytes = crypto.getRandomValues(new Uint8Array(Math.ceil(length / 2)));
+    return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, length);
 }

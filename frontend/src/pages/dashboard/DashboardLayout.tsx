@@ -1,8 +1,12 @@
 import { UserPanel } from '@/components/UserPanel';
+import { useAuthStore } from '@/store/useAuthStore.ts';
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
+import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
 import ForumRoundedIcon from '@mui/icons-material/ForumRounded';
+import GroupRoundedIcon from '@mui/icons-material/GroupRounded';
+import InsertChartOutlinedRoundedIcon from '@mui/icons-material/InsertChartOutlinedRounded';
+import KeyRoundedIcon from '@mui/icons-material/KeyRounded';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
-import SpaceDashboardOutlinedIcon from '@mui/icons-material/SpaceDashboardOutlined';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Drawer from '@mui/material/Drawer';
@@ -17,7 +21,7 @@ import Stack from '@mui/material/Stack';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useState } from 'react';
-import { Outlet, Link as RLink, useNavigate } from "react-router-dom";
+import { Outlet, Link as RLink, useNavigate } from 'react-router-dom';
 
 export const DashboardLayout = () => {
     const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -25,6 +29,7 @@ export const DashboardLayout = () => {
     const theme = useTheme();
     const isSmUp = useMediaQuery(theme.breakpoints.up('sm'));
     const [drawerOpen, setDrawerOpen] = useState(false);
+    const user = useAuthStore(s => s.user);
 
     const menuItemClick = (index: number) => {
         if (menuItems[index]) {
@@ -43,9 +48,14 @@ export const DashboardLayout = () => {
     }
 
     const menuItems = [
-        { text: 'Home', path: '/dashboard', icon: SpaceDashboardOutlinedIcon },
+        { text: 'Stats', path: '/dashboard', icon: InsertChartOutlinedRoundedIcon },
         { text: 'Posts', path: '/dashboard/posts', icon: ArticleOutlinedIcon },
         { text: 'Comments', path: '/dashboard/comments', icon: ForumRoundedIcon },
+        { admin: true, text: 'Posts', path: '/dashboard/admin/posts', icon: ArticleOutlinedIcon },
+        { admin: true, text: 'Comments', path: '/dashboard/admin/comments', icon: ForumRoundedIcon },
+        { admin: true, text: 'Users', path: '/dashboard/admin/users', icon: GroupRoundedIcon },
+        { admin: true, text: 'Tokens', path: '/dashboard/admin/tokens', icon: KeyRoundedIcon },
+        { admin: true, text: 'Logs', path: '/dashboard/admin/logs', icon: DescriptionRoundedIcon }
     ];
 
     // useEffect(() => {
@@ -100,7 +110,9 @@ export const DashboardLayout = () => {
                         }}
                     >
                         <List>
+                            <ListItem sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Dashboard</ListItem>
                             {menuItems.map((item, index) => {
+                                if (item.admin) return;
                                 const Icon = item.icon;
                                 const { text } = item;
                                 return (
@@ -116,6 +128,27 @@ export const DashboardLayout = () => {
                                     </ListItem>
                                 )
                             })}
+                            {user?.roles.includes('admin') && <>
+                                <ListItem sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Admin</ListItem>
+                                {menuItems.map((item, index) => {
+                                    if (!item.admin) return;
+                                    const Icon = item.icon;
+                                    const { text } = item;
+                                    return (
+                                        <ListItem key={`admin-${text}`} disablePadding>
+                                            <ListItemButton
+                                                sx={{ gap: '15px' }}
+                                                onClick={() => menuItemClick(index)}
+                                                selected={selectedIndex === index}
+                                            >
+                                                <ListItemIcon sx={{ minWidth: 0 }}><Icon /></ListItemIcon>
+                                                <ListItemText primary={text} />
+                                            </ListItemButton>
+                                        </ListItem>
+                                    )
+                                })}
+
+                            </>}
                         </List>
                     </Drawer>
                     <Stack

@@ -1,10 +1,10 @@
 import { useRoutes } from 'react-router-dom';
 import { RequireAuth } from './components/RequireAuth';
-import { DashboardHome } from './pages/dashboard/DashboardHome.tsx';
+import { UserManagement } from './pages/admin/UserManagement.tsx';
 import { DashboardLayout } from './pages/dashboard/DashboardLayout.tsx';
 import { PostComments } from './pages/dashboard/PostComments.tsx';
 import { Posts } from './pages/dashboard/Posts.tsx';
-import { Users } from './pages/dashboard/Users';
+import { Stats } from './pages/dashboard/Stats.tsx';
 import { AboutPage } from './pages/public/AboutPage.tsx';
 import { AuthCallbackPage } from './pages/public/AuthCallback';
 import { ForgotPasswordPage } from './pages/public/ForgotPasswordPage';
@@ -70,14 +70,27 @@ const routes = [
             {
                 element: <DashboardLayout />,
                 children: [
-                    { index: true, element: <DashboardHome /> },
+                    { index: true, element: <Stats /> },
                     { path: 'posts', element: <Posts /> },
                     { path: 'comments', element: <PostComments /> },
-                    { path: 'users', element: <Users /> },
                 ]
             }
         ]
-    }
+    },
+    {
+        path: 'dashboard/admin',
+        element: <RequireAuth />,
+        children: [
+            {
+                element: <DashboardLayout />,
+                children: [
+                    // { path: 'posts', element: <Posts /> },
+                    // { path: 'comments', element: <PostComments /> },
+                    { path: 'users', element: <UserManagement /> },
+                ]
+            }
+        ]
+    },
 ];
 
 export const AppRoutes = () => {

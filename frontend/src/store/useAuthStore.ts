@@ -20,6 +20,7 @@ interface AuthState {
     refreshToken: () => Promise<void>;
     signOut: (reason?: string) => Promise<void>;
     signOutReason: string | null;
+    mustChangePassword: boolean;
 }
 const SECURE_MODE = import.meta.env.VITE_AUTH_SECURE_MODE === 'true';
 
@@ -40,13 +41,14 @@ export const useAuthStore = create<AuthState>()(
         ready: false,
         user: null,
         signOutReason: null,
+        mustChangePassword: false,
         setToken: (token: AccessToken) => {
             if (!token) return get().clearToken();
 
             try {
                 const user = jwtDecode<PayloadData>(token);
                 if (!user.id) throw new Error('Missing id in token');
-                set({ token, isAuthenticated: true, user, isSigneOut: false });
+                set({ token, isAuthenticated: true, user, isSigneOut: false, mustChangePassword: !!user.must_change_password });
             } catch (error) {
                 get().clearToken();
                 console.error('Error in parsing token', error);
@@ -54,7 +56,7 @@ export const useAuthStore = create<AuthState>()(
         },
         clearToken: () => {
             //console.log('clearToken called');
-            set({ token: null, isAuthenticated: false, user: null, isSigneOut: true, signOutReason: null });
+            set({ token: null, isAuthenticated: false, user: null, isSigneOut: true, signOutReason: null, mustChangePassword: false });
         },
         refreshToken: async () => {
             if (!SECURE_MODE || get().isSigneOut) return;

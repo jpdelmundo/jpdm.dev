@@ -19,7 +19,7 @@ export class ClientApiError extends Error {
 }
 
 type ClientApiResult<T> = ApiResult<T> & { status: number };
-type JsonPrimitive = string | number | boolean | null;
+type JsonPrimitive = string | number | boolean | null | undefined;
 type JsonArray = JsonValue[];
 interface JsonObject { [key: string]: JsonValue; }
 type JsonValue = JsonPrimitive | JsonObject | JsonArray;
@@ -27,6 +27,21 @@ type ApiRequestBody = JsonObject | FormData;
 type ApiGetParams = Record<string, string | number | boolean> | URLSearchParams;
 
 const basePath = import.meta.env.VITE_API_BASE_PATH;
+
+const handleTokenInvalid = () => {
+    useAuthStore.getState().clearToken();
+    const location = window.location;
+    const from = encodeURIComponent(`${location.pathname}${location.search}${location.hash}`);
+    window.location.href = `/signin?reason=invalid_token${location.pathname.includes('/change-password') ? '' : `&from=${from}`}`;
+};
+
+const handleMustChangePassword = () => {
+    const location = window.location;
+    const from = encodeURIComponent(`${location.pathname}${location.search}${location.hash}`);
+    if (!location.pathname.includes('change-password')) {
+        window.location.href = `/user/change-password?from=${from}`;
+    }
+}
 
 export async function apiRequest<T>(input: RequestInfo | URL, init?: RequestInit, isRetry = false) {
     await waitForRefreshIfNeeded();
@@ -66,6 +81,8 @@ export async function apiRequest<T>(input: RequestInfo | URL, init?: RequestInit
                 //changed from throwing an error to returning as a an api "fail" result (with possible return data. ex. email update code request cooldown)
                 //throwing error is reserved for real errors
                 error.code == ErrorCode.BOT_DETECTED && (error.message = 'Unusual activity detected. Please try again.');
+                error.code == ErrorCode.TOKEN_INVALID && handleTokenInvalid();
+                error.code == ErrorCode.MUST_CHANGE_PASSWORD && handleMustChangePassword();
                 return { error, ok: res.ok, status: res.status } as ClientApiResult<T>;
             }
         }
@@ -157,6 +174,8 @@ export async function apiPost<T>(url: string, body?: ApiRequestBody, onProgress?
                         //reject(new ClientApiError({ status: xhr.status } as Response, error));
                         //changed from throwing an error to returning as a an api "fail" result (with possible return data. ex. email update code request cooldown)
                         //throwing error is reserved for real errors
+                        error.code == ErrorCode.TOKEN_INVALID && handleTokenInvalid();
+                        error.code == ErrorCode.MUST_CHANGE_PASSWORD && handleMustChangePassword();
                         resolve({ error, ok: false, status: xhr.status } as ClientApiResult<T>);
                     }
                 } catch (error) {

@@ -66,7 +66,7 @@ export class PostLikeRepository extends BaseRepository<PostLike> {
         return result.rows[0];
     }
 
-    async update(id: string, data: PostLikeMutator): Promise<PostLike> {
+    async update(id: PostLikeId | PostLikeId[], data: PostLikeMutator, options?: Record<string, unknown>): Promise<PostLike[]> {
         throw new Error('Method not implemented');
     }
 

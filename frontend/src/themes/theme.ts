@@ -76,6 +76,10 @@ export const theme = createTheme({
         MuiOutlinedInput: {
             styleOverrides: {
                 root: () => ({
+                    '& .MuiOutlinedInput-notchedOutline, &.Mui-disabled .MuiOutlinedInput-notchedOutline': {
+                        //boxShadow: '0 1px 2px 0px rgba(0,0,0,.1)',
+                        borderColor: '#e5e5e5'
+                    },
                     '& .MuiOutlinedInput-notchedOutline': {
                         //boxShadow: '0 1px 2px 0px rgba(0,0,0,.1)',
                         borderColor: '#e5e5e5'
@@ -101,6 +105,7 @@ export const theme = createTheme({
                         borderWidth: '1px',
                         borderColor: theme.palette.error.main
                     },
+
                 }),
                 input: {
                     boxSizing: 'border-box',
@@ -605,7 +610,11 @@ export const theme = createTheme({
                             //     outlineOffset: '0'
                             // }
                         }
-                    }
+                    },
+                    '& .MuiDataGrid-columnSeparator': {
+                        color: '#dddddd',
+                        opacity: 1,
+                    },
                 },
             }
         }

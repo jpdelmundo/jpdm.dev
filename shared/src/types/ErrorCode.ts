@@ -18,7 +18,8 @@ export const ErrorCode = {
     NOT_AVAILABLE: 'NOT_AVAILABLE',
     NOT_ALLOWED: 'NOT_ALLOWED',
     INVALID_ID: 'INVALID_ID',
-    FORBIDDEN: 'FORBIDDEN'
+    FORBIDDEN: 'FORBIDDEN',
+    MUST_CHANGE_PASSWORD: 'MUST_CHANGE_PASSWORD'
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

@@ -19,18 +19,19 @@ export const Select = <T extends FieldValues>(props: Props<T>) => {
             <Controller
                 name={name}
                 control={control}
-                render={({ field,
+                render={({ field: { value, ...field },
                     // fieldState: { error }
-                }) => (
-                    <>
+                }) => {
+                    return <>
                         <MuiSelect
+                            value={value ?? ''}
                             {...field}
                             {...selectProps}
                         >
                             {children}
                         </MuiSelect>
                     </>
-                )}
+                }}
             >
             </Controller>
         </Stack>

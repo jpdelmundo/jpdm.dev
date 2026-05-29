@@ -83,7 +83,7 @@ export class PostRepository extends BaseRepository<Post> {
         return result.rows[0];
     }
 
-    async update(id: string, item: PostMutator): Promise<Post> {
+    async update(id: PostId | PostId[], item: PostMutator): Promise<Post[]> {
         const entries = Object.entries(item).filter(([key, value]) => value !== undefined && key != 'id');
         const set: string[] = [];
         const values: unknown[] = [];
@@ -98,25 +98,22 @@ export class PostRepository extends BaseRepository<Post> {
         }
         set.push(`updated_at = now()`);
 
-        const filters: string[] = [];
-        id.trim() && filters.push(`id = $${values.length + 1}`) && values.push(id.trim());
+        const where: string[] = [];
+        !Array.isArray(id) && id.trim() && where.push(`id = $${values.length + 1}`) && values.push(id.trim());
+        Array.isArray(id) && where.push(`id = any($${values.length + 1})`) && values.push(id.map(i => i.trim()));
 
-        if (filters.length == 0) {
+        if (where.length == 0) {
             throw new Error('Update condition missing');
         }
 
-        let filter = filters.join(' and ');
-        filter = filter ? `where ${filter}` : '';
-
         const sql = `update posts
                      set ${set.join(', ')}
-                     ${filter}
+                     where ${where.join(' and ')}
                      returning *`;
 
         const result = await this.query<Post>(sql, values);
-        if (!result.rows[0]) throw new Error('Update failed');
 
-        return result.rows[0];
+        return result.rows;
     }
 
     async delete(id: PostId): Promise<Post> {

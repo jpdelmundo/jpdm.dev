@@ -25,7 +25,7 @@ const statSx = {
     border: 'solid 1px #dddddd',
 };
 
-export const DashboardHome = () => {
+export const Stats = () => {
     const [loading, setLoading] = useState(false);
     const [stats, setStats] = useState<PostStatsDTO | null>(null);
     const [postViews, setPostViews] = useState<PostViewsDTO[]>([]);
@@ -64,7 +64,7 @@ export const DashboardHome = () => {
     return (
         <Container sx={{ mt: 2 }}>
             <Typography variant="h5" fontWeight={'bold'}>
-                Dashboard
+                Stats
             </Typography>
             <DateRangePicker dateRangeItem={dateRangeItem} onChange={dateRangePickerOnChange} />
             <Stack direction={'row'} gap={'10px'} my={2} flexWrap={'wrap'}>

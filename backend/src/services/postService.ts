@@ -260,7 +260,7 @@ export const createPostService = (ctx: ServiceContext) => {
 
             const updated = await txDeps.postRepo.update(id, { title: title ?? null, content });
 
-            return { post: updated, deletedFiles };
+            return { post: updated[0], deletedFiles };
         });
 
         for (const file of updated.deletedFiles) {

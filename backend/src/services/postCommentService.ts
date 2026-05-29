@@ -120,14 +120,15 @@ export const createPostCommentService = (ctx: ServiceContext) => {
         const moderation = await moderateComment(comment);
         if (!moderation) throw new Error('Invalid AI moderation result');
         if (!moderation.is_allowed) throw new ServiceError(`AI Moderation: ${moderation.reason}`);
-        console.log({ moderation });
+
         const commentText = String(comment).trim().replace(/\n{3,}/g, "\n\n");
 
-        const updated = await deps.postCommentRepo.update(id, {
+        const [updated] = await deps.postCommentRepo.update(id, {
             comment: commentText,
             status: CommentStatus.AI_APPROVED,
             moderation_notes: null
         });
+        if (!updated) throw new Error(`Update returned no result: ${id}`);
 
         return updated;
     };

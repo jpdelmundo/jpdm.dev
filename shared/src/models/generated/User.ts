@@ -40,6 +40,8 @@ export interface User {
   deleted: boolean | null;
 
   deleted_at: Date | null;
+
+  must_change_password: boolean | null;
 }
 
 /** Represents the table public.users */
@@ -86,6 +88,8 @@ export interface UserInitializer {
   deleted?: boolean | null;
 
   deleted_at?: Date | null;
+
+  must_change_password?: boolean | null;
 }
 
 /** Represents the table public.users */
@@ -125,6 +129,8 @@ export interface UserMutator {
   deleted?: boolean | null;
 
   deleted_at?: Date | null;
+
+  must_change_password?: boolean | null;
 }
 
 export const UserIdSchema = z.uuid();
@@ -148,6 +154,7 @@ export const UserSchema = z.object({
   password_updated_at: z.date().nullable(),
   deleted: z.boolean().nullable(),
   deleted_at: z.date().nullable(),
+  must_change_password: z.boolean().nullable(),
 });
 
 export const UserInitializerSchema = z.object({
@@ -169,6 +176,7 @@ export const UserInitializerSchema = z.object({
   password_updated_at: z.date().optional().nullable(),
   deleted: z.boolean().optional().nullable(),
   deleted_at: z.date().optional().nullable(),
+  must_change_password: z.boolean().optional().nullable(),
 });
 
 export const UserMutatorSchema = z.object({
@@ -190,6 +198,7 @@ export const UserMutatorSchema = z.object({
   password_updated_at: z.date().optional().nullable(),
   deleted: z.boolean().optional().nullable(),
   deleted_at: z.date().optional().nullable(),
+  must_change_password: z.boolean().optional().nullable(),
 });
 
 export const UserColumns = [
@@ -211,4 +220,5 @@ export const UserColumns = [
   "password_updated_at",
   "deleted",
   "deleted_at",
+  "must_change_password",
 ] as const;

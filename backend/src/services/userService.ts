@@ -1,28 +1,34 @@
 import { ServiceError } from '@/errors/ServiceError.js';
 import type { ServiceContext } from '@/infra/serviceContext.js';
 import type { KeyValue } from '@/types/KeyValue.js';
-import { randomString } from '@/utils/helper.js';
 import { moderateName } from '@/utils/llm.js';
 import { canModify as _canModify } from '@/utils/permissions.js';
 import type { MeDTO } from '@shared/models/dto/MeDTO.js';
+import type { UserDTO } from '@shared/models/dto/UserDTO.js';
 import type UserWithRoles from '@shared/models/extensions/UserWithRoles.js';
 import type { RefreshToken, RefreshTokenInitializer } from '@shared/models/generated/RefreshToken.js';
-import type { User, UserId, UserInitializer, UserMutator } from '@shared/models/generated/User.js';
+import { UserSchema, type User, type UserId, type UserInitializer, type UserMutator } from '@shared/models/generated/User.js';
 import type { UserProfile } from '@shared/models/generated/UserProfile.js';
 import type { UserRole as UserRoleModel } from '@shared/models/generated/UserRole.js';
+import { DateComparisonSchema } from '@shared/types/DateComparisonSchema.js';
+import type { EnrichOptions } from '@shared/types/EnrichOptions.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
 import type { Jwt, PayloadData } from '@shared/types/Jwt.js';
+import { OrderDirection } from '@shared/types/OrderDirection.js';
 import type { UserRole } from '@shared/types/UserRole.js';
 import { jsonBase64Decode } from '@shared/utils/encoding.js';
+import { randomString } from '@shared/utils/helper.js';
 import { generateRandomUsername, getEmailUsername } from '@shared/utils/username.js';
-import { isValidEmail, validatePassword, validateUsername } from '@shared/utils/validation.js';
+import { isValidEmail, passwordSchema, validatePassword, validateUsername } from '@shared/utils/validation.js';
 import * as bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import type { Profile as FacebookProfile } from 'passport-facebook';
 import type { Profile as GoogleProfile } from 'passport-google-oauth20';
 import { validate } from 'uuid';
+import z from 'zod';
 import { ApiError } from '../utils/apiHelper.js';
 import { mail } from '../utils/mailer.js';
+import { createUserProfileService } from './userProfileService.js';
 
 type UpdateParams = UserMutator & {
     old_password?: string;
@@ -38,6 +44,21 @@ export const createUserService = (ctx: ServiceContext) => {
     const { deps, actor } = ctx;
 
     const get = async <P extends KeyValue>(params: P) => {
+        const schema = UserSchema.extend({
+            name: z.string(),
+            email: z.string(),
+            date_from: DateComparisonSchema,
+            date_to: DateComparisonSchema,
+            page_size: z.number(),
+            page_nume: z.number(),
+            order_by: z.string(),
+            order_dir: z.enum(OrderDirection),
+            is_admin: z.boolean()
+        }).partial();
+
+        const parsed = schema.safeParse(params);
+        if (!parsed.success) throw new ServiceError('One or more parameters are invalid.', ErrorCode.INVALID_PARAMETER, parsed.error.issues);
+
         return deps.userRepo.find(params);
     };
 
@@ -177,7 +198,7 @@ export const createUserService = (ctx: ServiceContext) => {
         //generate
         const code = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
         const updatedUser = await deps.userRepo.update(userId, { unconfirmed_email: email, email_confirm_code: code });
-        if (updatedUser.email_confirm_code != code) return false;
+        if (updatedUser[0]?.email_confirm_code != code) return false;
 
         const mailResult = await mail({
             from: 'jpdm.dev <noreply@jpdm.dev>',
@@ -191,9 +212,9 @@ export const createUserService = (ctx: ServiceContext) => {
 
         //update first/last sent date (for rate limiting)
         await deps.userRepo.update(userId, {
-            ...(!updatedUser.email_confirm_code_first_sent_at && { email_confirm_code_first_sent_at: new Date() }),
+            ...(!updatedUser[0].email_confirm_code_first_sent_at && { email_confirm_code_first_sent_at: new Date() }),
             email_confirm_code_last_sent_at: new Date(),
-            email_confirm_code_num_sent: updatedUser.email_confirm_code_num_sent + 1
+            email_confirm_code_num_sent: updatedUser[0].email_confirm_code_num_sent + 1
         });
 
         return mailResult;
@@ -210,14 +231,14 @@ export const createUserService = (ctx: ServiceContext) => {
 
         //code is valid, update email confirmed
         const updatedUser = await deps.userRepo.update(user.id, { email: user.unconfirmed_email, email_confirm_code: null, unconfirmed_email: null, email_confirmed: true });
-        if (!updatedUser) throw new Error(`User email update failed: ${user.id} ${user.unconfirmed_email}`);
+        if (!updatedUser[0]) throw new Error(`User email update failed: ${user.id} ${user.unconfirmed_email}`);
 
-        console.log(`User email changed from ${user.email} to ${updatedUser.email}`);
+        console.log(`User email changed from ${user.email} to ${updatedUser[0].email}`);
 
         //send confirmation email
         mail({
             from: 'jpdm.dev <noreply@jpdm.dev>',
-            to: updatedUser.email!,
+            to: updatedUser[0].email!,
             subject: 'Email Confirmation',
             text: 'Your email address is now confirmed'
         });
@@ -262,7 +283,8 @@ export const createUserService = (ctx: ServiceContext) => {
         }
 
         const userWithRoles = await getUserWithRoles(user.id);
-        return { id: userWithRoles.id, username: userWithRoles.username, email: userWithRoles.email, roles: userWithRoles.roles };
+        const { id, username: _username, email: _email, roles, must_change_password } = userWithRoles;
+        return { id, username: _username, email: _email, roles, must_change_password };
     };
 
     const recoverAccount = async (email: string, fingerprint: string) => {
@@ -332,13 +354,13 @@ Please disregard if you did not make this request.`
 
         //update password
         const user = await deps.userRepo.update(passwordReset.user_id, { password: await bcrypt.hash(password, 12) });
-        if (!user) throw new Error(`Cannot reset password. user_id: ${passwordReset.user_id}`);
+        if (!user[0]) throw new Error(`Cannot reset password. user_id: ${passwordReset.user_id}`);
 
         await deps.passwordResetRepo.update(passwordReset.id, { used_at: new Date() });
 
         const mailResult = await mail({
             from: 'jpdm.dev <noreply@jpdm.dev>',
-            to: user.email!,
+            to: user[0].email!,
             subject: 'Password reset successful',
             text: `Hi,
 
@@ -352,7 +374,7 @@ Stay safe,
 The Support Team`
         });
 
-        if (!mailResult || mailResult.rejected.length > 0 || !mailResult.response) throw new Error(`Problem generating/sending email confirm code for user : ${user.id}`);
+        if (!mailResult || mailResult.rejected.length > 0 || !mailResult.response) throw new Error(`Problem generating/sending email confirm code for user : ${user[0].id}`);
 
         return mailResult;
     };
@@ -418,8 +440,10 @@ The Support Team`
         return newUser;
     };
 
-    const update = async (id: UserId, params: UpdateParams) => {
-        const { old_password, new_password, deleted, deleted_at } = params;
+    const updatePassword = async (id: UserId, params: UpdateParams) => {
+        const { old_password, new_password } = params;
+        const parsed = passwordSchema.safeParse(new_password);
+        if (!parsed.success) throw new ServiceError('One or more parameters are invalid.', ErrorCode.INVALID_PARAMETER, parsed.error.issues);
         if (!id) throw new ServiceError('Missing parameter: id');
         if (!await canModify(id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
@@ -431,12 +455,14 @@ The Support Team`
         }
 
         const updated = await deps.userRepo.update(id, {
-            ...(new_password && { password: await bcrypt.hash(new_password, 12), password_updated_at: new Date() }),
-            ...('deleted' in params && { deleted }),
-            ...(deleted_at && { deleted_at })
+            ...(new_password && {
+                password: await bcrypt.hash(new_password, 12),
+                password_updated_at: new Date(),
+                must_change_password: false
+            })
         });
 
-        const result = (await get({ id: updated?.id }))[0];
+        const [result] = updated;
         if (!result?.id) throw new ServiceError('User not found.');
 
         if (new_password) {
@@ -446,25 +472,70 @@ The Support Team`
         return result;
     };
 
-    const del = async (id: UserId, params: DeleteParams) => {
-        const { password, token } = params;
-        if (!password && !token) throw new ServiceError('Missing or empty required parameter: password or token');
-        if (!await canModify(id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
+    const update = async (id: UserId | UserId[], params: UpdateParams) => {
+        const { username, email, deleted, deleted_at } = params;
+        const ids = Array.isArray(id) ? id : [id];
 
-        const user = await findById(id);
-        if (password && !await bcrypt.compare(password, user?.password || '')) throw new ServiceError('Incorrect password', ErrorCode.INVALID_CREDENTIALS);
-        if (token) {
-            const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as Jwt;
-            if (!decoded.id || decoded.scope != 'delete_account') throw new ServiceError('Invalid delete token');
-            if (decoded.id != id) throw new ServiceError('Unauthorized request', ErrorCode.NOT_ALLOWED);
+        const parsed = UserSchema.partial().safeParse(params);
+        if (!parsed.success) throw new ServiceError('One or more parameters are invalid.', ErrorCode.INVALID_PARAMETER, parsed.error.issues);
+
+        for (const id of ids) {
+            if (username) {
+                const checkUsername = await findByUsername(username);
+                if (checkUsername?.id !== id) throw new ServiceError('The username chosen is already in use by another account', ErrorCode.ALREADY_USED, { param: 'username' });
+            }
+
+            if (email) {
+                const checkEmail = await findByEmail(email);
+                if (checkEmail?.id !== id && checkEmail?.email_confirmed) throw new ServiceError('The email is already in use by another account', ErrorCode.ALREADY_USED, { param: 'email' });
+            }
+
+            if (!id) throw new ServiceError('Missing parameter: id');
+            if (!await canModify(id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
         }
 
-        const deleted = await deps.userRepo.delete(id);
-        if (!deleted?.id) throw new Error(`Failed deleting user: ${id}`);
+        const result = await deps.userRepo.update(ids, {
+            ...(email && { email }),
+            ...(deleted !== undefined && { deleted }),
+            ...(deleted_at !== undefined && { deleted_at })
+        });
 
-        deps.refreshTokenRepo.markUserRefreshTokensAsRevoked(id);
+        return result;
+    };
 
-        return deleted;
+    const _delete = async (id: UserId | UserId[], params: DeleteParams) => {
+        const { password, token } = params;
+        const ids = Array.isArray(id) ? id : [id];
+
+        if (Array.isArray(id) && actor.type === 'user' && !actor.roles.includes('admin')) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
+
+        for (const userId of ids) {
+            if (actor.type === 'user') {
+                if (!actor.roles.includes('admin') || userId === actor.id) {
+                    if (!password && !token) throw new ServiceError('Missing or empty required parameter: password or token');
+                    if (!await canModify(userId)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
+
+                    const user = await findById(userId);
+                    if (password && !await bcrypt.compare(password, user?.password || '')) throw new ServiceError('Incorrect password', ErrorCode.INVALID_CREDENTIALS);
+                    if (token) {
+                        const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as Jwt;
+                        if (!decoded.id || decoded.scope != 'delete_account') throw new ServiceError('Invalid delete token');
+                        if (decoded.id != userId) throw new ServiceError('Unauthorized request', ErrorCode.NOT_ALLOWED);
+                    }
+                }
+            }
+        }
+
+        const result: User[] = [];
+        for (const userId of ids) {
+            const deleted = await deps.userRepo.delete(userId);
+            if (!deleted?.id) throw new Error(`Failed deleting user: ${userId}`);
+
+            deps.refreshTokenRepo.markUserRefreshTokensAsRevoked(userId);
+            result.push(deleted);
+        }
+
+        return result;
     };
 
     const toMe = (user: User | null): MeDTO => {
@@ -489,6 +560,44 @@ The Support Team`
         if (!user) return false;
 
         return _canModify(actor, user.id);
+    };
+
+    const enrich = async (items: User[], options: EnrichOptions = { include: [] }) => {
+        const { include } = options;
+        const ids = [...new Set(items.map(i => i.id))];
+        const userProfileSvc = createUserProfileService(ctx);
+        const userProfiles = await userProfileSvc.get({ user_ids: ids });
+        const userProfilesEnrinched = await userProfileSvc.enrich(userProfiles);
+
+        const userProfileMap = new Map(userProfilesEnrinched.map(i => [i.user_id, i]));
+
+        const result: UserDTO[] = [];
+        for (const { id, username, email, deleted, deleted_at, created_at, email_confirmed, facebook_id, google_id } of items) {
+            result.push({
+                id, username, email, deleted, deleted_at, created_at, email_confirmed,
+                profile: userProfileMap.get(id) || null,
+                social_login: facebook_id ? 'facebook' : google_id ? 'google' : null
+            });
+        }
+
+        return result;
+    };
+
+    const setTempPassword = async (id: UserId) => {
+        if (!id) throw new ServiceError('Missing parameter: id');
+        if (!_canModify(actor, id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
+
+        const password = randomString(8);
+
+        const result = await deps.userRepo.update(id, {
+            must_change_password: true,
+            password: await bcrypt.hash(password, 12),
+            password_updated_at: new Date()
+        });
+
+        await deps.refreshTokenRepo.markUserRefreshTokensAsUsed(id);
+
+        return result ? password : null;
     };
 
     return {
@@ -519,8 +628,11 @@ The Support Team`
         createUserFromSocialLogin,
         createUserFromFacebookLogin,
         update,
-        delete: del,
+        updatePassword,
+        delete: _delete,
         toMe,
-        canModify
+        canModify,
+        enrich,
+        setTempPassword
     };
 };

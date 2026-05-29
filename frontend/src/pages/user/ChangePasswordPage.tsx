@@ -17,7 +17,7 @@ export const ChangePasswordPage = () => {
     const signOut = useAuthStore(s => s.signOut);
 
     const onSubmit = async (formInput: ChangePasswordFormInput) => {
-        const res = await apiPut<never>(`/users/${user?.id}`, formInput);
+        const res = await apiPut<never>(`/users/${user?.id}/update-password`, formInput);
         return res; //return to show error message on form
     };
 
