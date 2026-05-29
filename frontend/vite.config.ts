@@ -40,10 +40,6 @@ export default defineConfig(({ command }) => {
               return 'vendor-rhf';
             }
 
-            if (id.includes('@mui/x-data-grid')) {
-              return 'vendor-mui-datagrid';
-            }
-
             if (id.includes('@mui/') || id.includes('@emotion/')) {
               return 'vendor-mui';
             }
