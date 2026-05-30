@@ -26,7 +26,6 @@ export const createUserRouter = (appCtx: AppContext) => {
 
     router.post('/email-code', apiRateLimit(60, 10), controller.emailCode);
     router.post('/email-code-confirm', apiRateLimit(60, 10), controller.emailCodeConfirm);
-    router.post('/:id/set-temp-password', adminRequired, controller.setTempPassword);
 
     router.put('/:id/update-password', controller.updatePassword);
     router.put('/:id', controller.update);

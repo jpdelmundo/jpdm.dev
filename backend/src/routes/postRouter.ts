@@ -1,3 +1,4 @@
+import { createPostCommentController } from '@/controllers/postCommentController.js';
 import { createPostController } from '@/controllers/postController.js';
 import type { AppContext } from '@/infra/appContext.js';
 import { authRequired } from '@/utils/auth.js';
@@ -5,23 +6,30 @@ import { Router } from 'express';
 
 export const createPostRouter = (appCtx: AppContext) => {
     const router = Router();
-    const controller = createPostController(appCtx);
+    const postController = createPostController(appCtx);
+    const postCommentController = createPostCommentController(appCtx);
 
-    router.get('/og/image/:id', controller.getOGImage);
-    router.get('/og/:id{/:slug}', controller.getOG);
-    router.get('/:id{/:slug}', controller.get);
-    router.post('/:id/log-view', controller.logView);
-    //router.get('/:id/comments', controller.getComments);
+    //post comments
+    router.post('/:id/comments', authRequired, postCommentController.create);
+    router.get('/:id/comments', postCommentController.getPostComments);
+
+    //opengraph handler
+    router.get('/og/image/:id', postController.getOGImage);
+    router.get('/og/:id{/:slug}', postController.getOG);
+
+    //misc
+    router.get('/:id{/:slug}', postController.getPost);
+    router.post('/:id/log-view', postController.logView);
 
     //private
     router.use(authRequired);
-    router.post('/', controller.create);
-    router.post('/:id/like', controller.like);
-    router.post('/:id/unlike', controller.unlike);
-    router.post('/:id/image', controller.uploadImage);
-    router.delete('/:id', controller.del);
-    router.put('/:id', controller.update);
-    //router.post('/:id/comments', controller.createComment);
+    router.post('/', postController.create);
+    router.post('/:id/like', postController.like);
+    router.post('/:id/unlike', postController.unlike);
+    router.post('/:id/image', postController.uploadImage);
+    router.delete('/:id', postController.delete);
+    router.put('/:id', postController.update);
+
     // router.post('/email-code', controller.emailCode);
     // router.post('/email-code-confirm', controller.emailCodeConfirm);
 

@@ -4,7 +4,7 @@ import { createPostService } from '@/services/postService.js';
 import { ok } from '@/utils/apiHelper.js';
 import type { Request, Response } from 'express';
 
-export const createDashboardController = (app: AppContext) => {
+export const createMeController = (app: AppContext) => {
     const makeCtx = bindContext(app);
 
     return {

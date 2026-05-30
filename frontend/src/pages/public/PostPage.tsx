@@ -25,11 +25,10 @@ export function PostPage() {
 
     const getData = async () => {
         setIsLoading(true);
-        const result = await apiGet<PostDTO[]>(`/posts/${id}`);
+        const result = await apiGet<PostDTO>(`/posts/${id}`);
         setIsLoading(false);
         if (result.ok && result.data) {
-            const [data] = result.data;
-            setPost(data);
+            setPost(result.data);
         } else {
             if (result.error) setError(result.error);
         }

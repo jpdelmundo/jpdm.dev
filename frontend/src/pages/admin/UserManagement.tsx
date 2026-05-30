@@ -71,7 +71,7 @@ const CustomToolbar = () => {
         const confirmed = await confirm({ title: 'Delete', message: `Are you sure you want to delete ${selectedCount == 1 ? 'this user?' : `${selectedCount} selected users?`}`, confirmText: 'Delete' });
         if (confirmed) {
             setLoading(true);
-            await apiDelete('/users', { ids: [...selectionModel.ids] });
+            await apiDelete('/admin/users', { ids: [...selectionModel.ids] });
             setLoading(false);
             getData();
         }
@@ -82,7 +82,7 @@ const CustomToolbar = () => {
         const confirmed = await confirm({ title: 'Restore', message: `Are you sure you want to restore ${selectedCount == 1 ? 'this user?' : `${selectedCount} selected users?`}`, confirmText: 'Restore' });
         if (confirmed) {
             setLoading(true);
-            await apiPut('/users', { ids: [...selectionModel.ids], deleted: false });
+            await apiPut('/admin/users', { ids: [...selectionModel.ids], deleted: false });
             setLoading(false);
             getData();
         }
@@ -151,7 +151,7 @@ export function UserManagement() {
     const getData = useCallback(async () => {
         setLoading(true);
         const activeSort = sortModel[0];
-        const result = await apiGet<Paginated<UserDTO>>('/users', {
+        const result = await apiGet<Paginated<UserDTO>>('/admin/users', {
             page_num: paginationModel.page + 1,
             page_size: paginationModel.pageSize,
             ...(activeSort.field && { order_by: activeSort.field }),
@@ -169,7 +169,7 @@ export function UserManagement() {
         const confirmed = await confirm({ message: 'Are you sure you want to delete this user?', confirmText: 'Delete' });
 
         if (confirmed) {
-            await apiDelete(`/users/${user.id}`);
+            await apiDelete(`/admin/users/${user.id}`);
             getData();
         }
     }, [confirm, getData]);

@@ -10,13 +10,15 @@ export const createPostCommentController = (app: AppContext) => {
     const makeCtx = bindContext(app);
 
     return {
-        create: async (req: Request, res: Response): Promise<Response> => {
-            const { comment, post_id } = req.body;
+        create: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
+            const { id } = req.params;
+            const { comment } = req.body;
             const postCommentSvc = createPostCommentService(makeCtx(req));
 
             const result = await postCommentSvc.create({
+                post_id: id,
                 user_id: req.user!.id,
-                post_id, comment
+                comment
             });
             const [enriched] = await postCommentSvc.enrich([result]);
 
@@ -24,6 +26,47 @@ export const createPostCommentController = (app: AppContext) => {
         },
 
         get: async (req: Request, res: Response): Promise<Response> => {
+            const { page_num, page_size, comment, date_from, date_to } = req.query;
+            const postCommentSvc = createPostCommentService(makeCtx(req));
+
+            const result = await postCommentSvc.get({
+                user_id: req.user!.id,
+                status: [CommentStatus.AI_APPROVED, CommentStatus.USER_APPROVED],
+                page_num: page_num ? parseInt(String(page_num)) : 1,
+                page_size: page_size ? parseInt(String(page_size)) : 30,
+                order_by: 'created_at',
+                order_dir: 'desc',
+                ...(comment && { comment: String(comment) }),
+                ...(date_from && { date_from: { gte: new Date(String(date_from)) } }),
+                ...(date_to && { date_to: { lte: new Date(String(date_to)) } }),
+            });
+
+            const enriched = await postCommentSvc.enrich(result.page_items, { include: ['post'], });
+            result.page_items = enriched;
+
+            return ok(res, result);
+        },
+
+        getPostComments: async (req: Request, res: Response): Promise<Response> => {
+            const { page_num } = req.query;
+            const { id } = req.params;
+            const postCommentSvc = createPostCommentService(makeCtx(req));
+
+            const result = await postCommentSvc.get({
+                post_id: id,
+                page_num: page_num ? parseInt(String(page_num)) : 1,
+                page_size: 10,
+                order_by: 'created_at',
+                order_dir: 'asc'
+            });
+
+            const enriched = await postCommentSvc.enrich(result.page_items);
+            result.page_items = enriched;
+
+            return ok(res, result);
+        },
+
+        getMyComments: async (req: Request, res: Response): Promise<Response> => {
             const { page_num, page_size, comment, date_from, date_to } = req.query;
             const postCommentSvc = createPostCommentService(makeCtx(req));
 

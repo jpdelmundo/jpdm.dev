@@ -1,4 +1,4 @@
-import { apiPost, apiPut } from '@/api/apiClient.ts';
+import { apiPut } from '@/api/apiClient.ts';
 import { useConfirmStore } from '@/store/useConfirmStore.ts';
 import { useSnackbarStore } from '@/store/useSnackbarStore.ts';
 import { copyToClipboard } from '@/utils/helper.ts';
@@ -57,8 +57,7 @@ export const UserFormDialog = ({ data, onClose, onUpdated }: Props) => {
         const { email, profile } = formData;
         const { first_name, last_name, date_of_birth, bio, phone_number, gender } = profile || {};
         setIsSubmitting(true);
-        const result = await apiPut<UserDTO>('/users', {
-            ids: [formData.id],
+        const result = await apiPut<UserDTO>(`/admin/users/${formData.id}`, {
             email,
             profile: {
                 id: profileId,
@@ -85,7 +84,7 @@ export const UserFormDialog = ({ data, onClose, onUpdated }: Props) => {
         if (confirmed) {
             setResetPasswordOpen(true);
             setResetPasswordLoading(true);
-            const result = await apiPost<{ password: string }>(`/users/${data.id}/set-temp-password`);
+            const result = await apiPut<{ password: string }>(`/admin/users/${data.id}/set-temp-password`);
             if (result.ok) {
                 setTempPassword(result.data?.password || '');
             }

@@ -63,7 +63,7 @@ export function PostComments({ open, postId, onCommentsUpdated }: PostCommentsPr
     }
 
     const getData = async ({ page_num }: GetDataParams = { page_num: 1 }) => {
-        const result = await apiGet<Paginated<PostCommentDTO>>('/comments', { page_num, post_id: postId });
+        const result = await apiGet<Paginated<PostCommentDTO>>(`/posts/${postId}/comments`, { page_num });
         if (result.ok && result.data) {
             const { page_items, page_size, page_num, total } = result.data;
             setComments(page_items);
@@ -75,7 +75,7 @@ export function PostComments({ open, postId, onCommentsUpdated }: PostCommentsPr
         if (!data.comment.trim()) return;
         setErrorMessage('');
         setIsSubmitting(true);
-        const result = await apiPost<PostCommentDTO>('/comments', { ...data, post_id: postId });
+        const result = await apiPost<PostCommentDTO>(`/posts/${postId}/comments`, { ...data });
         if (result.ok && result.data) {
             const data = result.data;
             resetField('comment');
@@ -89,7 +89,7 @@ export function PostComments({ open, postId, onCommentsUpdated }: PostCommentsPr
 
     const loadMoreOnClick = async () => {
         setIsLoadMoreLoading(true);
-        const result = await apiGet<Paginated<PostCommentDTO>>('/comments', { page_num: pageNum + 1, post_id: postId });
+        const result = await apiGet<Paginated<PostCommentDTO>>(`/posts/${postId}/comments`, { page_num: pageNum + 1 });
         if (result.ok && result.data) {
             const { page_items, page_size, page_num, total } = result.data;
             setComments(prev => [...prev, ...page_items]);

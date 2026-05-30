@@ -10,15 +10,16 @@ type UpdateParams = PostViewMutator & { current_user_id?: UserId };
 type DeleteParams = { is_admin?: boolean; current_user_id?: UserId };
 
 export const createPostViewService = (ctx: ServiceContext) => {
-    const { deps } = ctx;
+    const { deps, actor } = ctx;
 
     const create = async (params: CreateParams): Promise<PostView | null> => {
-        const { user_id, post_id, device_id, tz, screen_height, screen_width, cpu_count, referrer, client, ip, os, device, device_type: dt } = params;
+        const { post_id, device_id, tz, screen_height, screen_width, cpu_count, referrer, client, ip, os, device, device_type: dt } = params;
         if (!post_id) throw new ServiceError('Missing parameter: post_id');
         if (!device_id || !ip) return null;
 
         const device_type = dt || 'desktop';
         const location = await ipGeoLookup(String(ip));
+        const user_id = actor.type === 'user' ? actor.id : null;
 
         //create post
         const isViewHitOnCooldown = await deps.postViewRepo.onCooldown(post_id, { device_id, ip });

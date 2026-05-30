@@ -9,10 +9,11 @@ import { canModify as _canModify } from '@/utils/permissions.js';
 import type { PostCommentDTO } from '@shared/models/dto/PostCommentDTO.js';
 import type PostDTO from '@shared/models/dto/PostDTO.js';
 import type { Post } from '@shared/models/generated/Post.js';
-import type { PostComment, PostCommentId, PostCommentInitializer, PostCommentMutator } from '@shared/models/generated/PostComment.js';
+import { PostCommentSchema, type PostComment, type PostCommentId, type PostCommentInitializer, type PostCommentMutator } from '@shared/models/generated/PostComment.js';
 import type { UserId } from '@shared/models/generated/User.js';
 import { CommentStatus } from '@shared/types/CommentStatus.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
+import z from 'zod';
 
 type CreateParams = PostCommentInitializer;
 type UpdateParams = PostCommentMutator;
@@ -59,11 +60,11 @@ export const createPostCommentService = (ctx: ServiceContext) => {
     };
 
     const get = async <P extends KeyValue>(params: P) => {
-        const findParams = {
-            ...params,
-            ...(actor?.type == 'user' && { prioritize_user_id: actor.id }),
-        } as P;
-        return deps.postCommentRepo.find(findParams);
+        const parsed = PostCommentSchema.extend({
+            status: z.array(z.enum(Object.values(CommentStatus) as [CommentStatus, ...CommentStatus[]]))
+        }).partial().safeParse(params);
+        if (!parsed.success) throw new ServiceError('One or more parameters are invalid.', ErrorCode.INVALID_PARAMETER, parsed.error.issues);
+        return deps.postCommentRepo.find(params);
     };
 
     const enrich = async (items: PostComment[], options: { include?: string[] } = {}): Promise<PostCommentDTO[]> => {

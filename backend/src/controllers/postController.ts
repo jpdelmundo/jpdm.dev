@@ -8,7 +8,6 @@ import { createPostViewService } from '@/services/postViewService.js';
 import { createUserService } from '@/services/userService.js';
 import type { RouteParams } from '@/types/RouteParams.js';
 import { fail, ok } from '@/utils/apiHelper.js';
-import { getCurrentUser } from '@/utils/auth.js';
 import { escapeHtml } from '@/utils/helper.js';
 import type PostImageExtended from '@shared/models/extensions/PostImageExtended.js';
 import type { Post, PostId } from '@shared/models/generated/Post.js';
@@ -94,42 +93,74 @@ export const createPostController = (app: AppContext) => {
             return ok(res, result);
         },
 
-        createComment: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
+        getPost: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
             const { id } = req.params;
-            const { comment } = req.body;
 
-            const result = await createPostCommentService(makeCtx(req)).create({
-                post_id: id!,
-                user_id: req.user!.id,
-                comment
+            const postSvc = createPostService(makeCtx(req));
+            const result = await postSvc.get({
+                id,
+                visibility: 'public',
+                is_published: true
             });
-            if (!result.id) return fail(res);
+
+            const [post] = await postSvc.enrich(result);
+
+            return ok(res, post);
+        },
+
+        getMyPosts: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
+            const { id } = req.params;
+            const { page_num, page_size, order_by, order_dir, post, date_from, date_to, visibility, is_published } = req.query;
+
+            const postSvc = createPostService(makeCtx(req));
+            let result = await postSvc.get({
+                user_id: req.user?.id,
+                ...(page_num && { page_num: parseInt(String(page_num)) }),
+                ...(page_size && { page_size: parseInt(String(page_size)) }),
+                ...(id && { id }),
+                ...(post && { post }),
+                ...(date_from && { date_from: { gte: new Date(String(date_from)) } }),
+                ...(date_to && { date_to: { lte: new Date(String(date_to)) } }),
+                ...(visibility && { visibility }),
+                ...(is_published && { is_published }),
+                ...(order_by && { order_by }),
+                ...(order_dir && { order_dir })
+            });
+
+            if ('page_items' in result)
+                result.page_items = await postSvc.enrich(result.page_items as Post[]);
+            else
+                result = await postSvc.enrich(result);
 
             return ok(res, result);
         },
 
-        getComments: async (req: Request, res: Response): Promise<Response> => {
-            const { page_num } = req.query;
-            const { id } = req.params;
+        updateComment: async (req: Request, res: Response,): Promise<Response> => {
+            const { post_id, comment_id } = req.params;
+            const { comment } = req.body;
+            const { return_include } = req.query;
+            const postCommentSvc = createPostCommentService(makeCtx(req));
 
-            const result = await createPostCommentService(makeCtx(req)).get({
-                post_id: id!,
-                page_num: page_num ? parseInt(String(page_num)) : 1,
-                page_size: 10,
-                order_by: 'created_at',
-                order_dir: 'desc'
-            });
-            return ok(res, result);
+            const result = await postCommentSvc.update(String(comment_id), { comment });
+            const [enriched] = await postCommentSvc.enrich([result], { ...(return_include && { include: String(return_include).split(',') }) });
+
+            return ok(res, enriched);
+        },
+
+        deleteComment: async (req: Request, res: Response,): Promise<Response> => {
+            const { comment_id } = req.params;
+            const commentSvc = createPostCommentService(makeCtx(req));
+            const deleted = await commentSvc.delete(String(comment_id));
+
+            return ok(res, deleted);
         },
 
         logView: async (req: Request, res: Response): Promise<Response> => {
-            const { id: post_id } = req.params;
+            const { id } = req.params;
             const { fp, referrer } = req.body;
             const { device_id, client_tz, screen_width, screen_height, cpu_count, client, os, device_type, device } = jsonBase64Decode(fp) as DeviceFingerprint;
-            const current_user_id = getCurrentUser(req)?.id;
             const postView: PostViewInitializer = {
-                ...(current_user_id && { user_id: current_user_id }),
-                post_id: post_id!,
+                post_id: id,
                 ...(device_id && { device_id }),
                 ...(client_tz && { tz: client_tz }),
                 ...(screen_height && { screen_height }),
@@ -160,7 +191,7 @@ export const createPostController = (app: AppContext) => {
             return ok(res);
         },
 
-        del: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
+        delete: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
             const { id } = req.params;
             const deleted = await createPostService(makeCtx(req)).delete(id);
             return ok(res, deleted);
@@ -214,9 +245,9 @@ export const createPostController = (app: AppContext) => {
         //             return res.status(200).send(html.replace('<!-- OG_META -->', ogMeta));
         //         },
         getOG: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
-            const { id } = req.params;
+            const { post_id } = req.params;
             const postSvc = await createPostService(makeCtx(req));
-            const post = await postSvc.getById(id!);
+            const post = await postSvc.getById(post_id!);
             const [enriched] = await postSvc.enrich([post]);
             const file = fileURLToPath(new URL('../../../frontend/dist/index.html', import.meta.url));
             const html = readFileSync(file, { encoding: 'utf-8' });
@@ -238,9 +269,9 @@ export const createPostController = (app: AppContext) => {
         },
 
         getOGImage: async (req: Request<RouteParams>, res: Response): Promise<void> => {
-            const { id } = req.params;
+            const { post_id } = req.params;
             const imageSvc = await createPostImageService(makeCtx(req));
-            const [image] = await imageSvc.get({ post_id: id });
+            const [image] = await imageSvc.get({ post_id });
             const [enriched] = (image ? await imageSvc.enrich([image]) : []) as PostImageExtended[];
             const proto = req.headers['x-forwarded-proto'] ?? 'https';
             const host = req.headers['host'];
