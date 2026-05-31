@@ -1,4 +1,5 @@
 import { apiDelete, apiGet, apiPut } from '@/api/apiClient.ts';
+import TextField from '@/components/TextField.tsx';
 import { Tooltip } from '@/components/Tooltip.tsx';
 import { UserFormDialog } from '@/components/UserFormDialog.tsx';
 import { useAuthStore } from '@/store/useAuthStore.ts';
@@ -10,6 +11,7 @@ import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import RestoreFromTrashRoundedIcon from '@mui/icons-material/RestoreFromTrashRounded';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import Container from '@mui/material/Container';
 import Pagination from '@mui/material/Pagination';
@@ -22,6 +24,7 @@ import { OrderDirection } from '@shared/types/OrderDirection.ts';
 import { type Paginated } from '@shared/types/Paginated.ts';
 import { getAvatarProps } from '@shared/utils/helper.ts';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
+import { useForm, type SubmitHandler } from 'react-hook-form';
 import { Avatar } from '../../components/Avatar.tsx';
 
 type SelectionContext = {
@@ -131,7 +134,24 @@ const CustomFooter = () => {
 
 }
 
+type FilterFormInput = {
+    username: string | null;
+    lastName: string | null;
+    firstName: string | null;
+    email: string | null;
+    deleted: boolean | null;
+}
+
+const filterDefault = {
+    username: '',
+    lastName: '',
+    firstName: '',
+    email: '',
+    deleted: null
+};
+
 export function UserManagement() {
+    const { handleSubmit, register, reset } = useForm<FilterFormInput>({ defaultValues: filterDefault });
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isPortrait = useMediaQuery('(orientation: portrait)');
     const user = useAuthStore(s => s.user);
@@ -147,6 +167,7 @@ export function UserManagement() {
     const [sortModel, setSortModel] = useState<GridSortModel>([
         { field: 'created_at', sort: 'desc' }
     ]);
+    const [filters, setFilters] = useState<FilterFormInput>();
 
     const getData = useCallback(async () => {
         setLoading(true);
@@ -154,6 +175,10 @@ export function UserManagement() {
         const result = await apiGet<Paginated<UserDTO>>('/admin/users', {
             page_num: paginationModel.page + 1,
             page_size: paginationModel.pageSize,
+            ...(filters?.username && { username: filters.username }),
+            ...(filters?.firstName && { first_name: filters.firstName }),
+            ...(filters?.lastName && { last_name: filters.lastName }),
+            ...(filters?.email && { email: filters.email }),
             ...(activeSort.field && { order_by: activeSort.field }),
             ...(activeSort.sort && { order_dir: activeSort.sort }),
         });
@@ -163,7 +188,7 @@ export function UserManagement() {
             setRows(page_items);
             setRowCount(total);
         }
-    }, [paginationModel, sortModel]);
+    }, [paginationModel, sortModel, filters]);
 
     const handleRowDelete = useCallback(async (user: UserDTO) => {
         const confirmed = await confirm({ message: 'Are you sure you want to delete this user?', confirmText: 'Delete' });
@@ -263,6 +288,17 @@ export function UserManagement() {
         toolbar: CustomToolbar
     }), []);
 
+    const submitHandler: SubmitHandler<FilterFormInput> = (data) => {
+        setFilters(data);
+        setPaginationModel(prev => ({ ...prev, page: 0 }));
+    }
+
+    const onResetClick = () => {
+        reset();
+        setFilters(filterDefault);
+        setPaginationModel(prev => ({ ...prev, page: 0 }));
+    }
+
     useEffect(() => {
         getData();
     }, [getData]);
@@ -271,6 +307,51 @@ export function UserManagement() {
         <Typography variant="h5" fontWeight={'bold'}>
             Manage Users
         </Typography>
+
+        <form onSubmit={handleSubmit(submitHandler)} noValidate>
+            <Stack
+                direction={{ sm: 'column', md: 'row' }}
+                sx={{ my: 2, gap: 1 }}
+                alignItems={{ md: 'flex-end' }}
+            >
+                <TextField
+                    label="Username"
+                    {...register('username')}
+                    placeholder="Search username"
+                />
+                <TextField
+                    label="First Name"
+                    {...register('firstName')}
+                    placeholder="Search first name"
+                />
+                <TextField
+                    label="Last Name"
+                    {...register('lastName')}
+                    placeholder="Search last name"
+                />
+                <TextField
+                    label="Email"
+                    {...register('email')}
+                    placeholder="Search email"
+                />
+                <Button
+                    type="submit"
+                    variant="contained"
+                    size="small"
+                    sx={{ marginLeft: { md: 'auto' } }}
+                >
+                    Search
+                </Button>
+                <Button
+                    type="button"
+                    variant="outlined"
+                    size="small"
+                    onClick={onResetClick}
+                >
+                    Reset
+                </Button>
+            </Stack>
+        </form>
 
         <SelectionProvider {...{ setLoading, getData }}>
             <PaginationContext value={{

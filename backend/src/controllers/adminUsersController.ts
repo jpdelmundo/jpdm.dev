@@ -11,13 +11,14 @@ export const createAdminUsersController = (app: AppContext) => {
     const makeCtx = bindContext(app);
 
     return {
-        get: async (req: Request, res: Response) => {
-            const { name, email, date_from, date_to, page_num, page_size, order_by, order_dir } = req.query;
+        search: async (req: Request, res: Response) => {
+            const { username, first_name, last_name, email, date_from, date_to, page_num, page_size, order_by, order_dir } = req.query;
             const userSvc = createUserService(makeCtx(req));
-            const result = await userSvc.get({
-                is_admin: true,
+            const result = await userSvc.search({
+                ...(username && { username }),
+                ...(first_name && { first_name }),
+                ...(last_name && { last_name }),
                 ...(email && { email }),
-                ...(name && { name }),
                 ...(page_num && { page_num: parseInt(String(page_num)) }),
                 ...(page_size && { page_size: parseInt(String(page_size)) }),
                 ...(date_from && { date_from: { gte: new Date(String(date_from)) } }),
@@ -41,7 +42,7 @@ export const createAdminUsersController = (app: AppContext) => {
             const { ids, deleted, username, email } = req.body;
             const { profile } = req.body;
             const { first_name, last_name, date_of_birth, bio, phone_number, gender } = profile || {};
-            const targetIds = ids || id;
+            const targetIds = ids || [id];
             const ctx = makeCtx(req);
             const userSvc = createUserService(ctx);
             const updated = new Set<UserId>();

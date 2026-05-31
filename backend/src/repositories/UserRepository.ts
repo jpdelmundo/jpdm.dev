@@ -12,7 +12,18 @@ type FindParams = {
     vanity_id?: string;
     email_confirmed?: boolean;
     facebook_id?: string;
-    is_admin?: boolean;
+    page_num?: number;
+    page_size?: number;
+    order_by?: string;
+    order_dir?: OrderDirection;
+}
+
+type SearchParams = {
+    username?: string;
+    email?: string;
+    last_name?: string;
+    first_name?: string;
+    name?: string;
     page_num?: number;
     page_size?: number;
     order_by?: string;
@@ -21,7 +32,7 @@ type FindParams = {
 
 export class UserRepository extends BaseRepository<User> {
     async find<P extends KeyValue>(params: P) {
-        const { id, ids, username, email, vanity_id, email_confirmed, facebook_id, name, order_by, order_dir, is_admin } = params as FindParams;
+        const { id, ids, username, email, vanity_id, email_confirmed, facebook_id, order_by, order_dir } = params as FindParams;
         const filters: string[] = [];
         const values: unknown[] = [];
 
@@ -33,18 +44,8 @@ export class UserRepository extends BaseRepository<User> {
         vanity_id && filters.push(`vanity_id = $${filters.length + 1}`) && values.push(vanity_id);
         email_confirmed && filters.push(`email_confirmed = $${filters.length + 1}`) && values.push(email_confirmed);
         facebook_id && filters.push(`facebook_id = $${filters.length + 1}`) && values.push(facebook_id);
-        name && filters.push(`username ilike $${values.length + 1}
-                              or exists (
-                                select 1 from user_profiles up
-                                where up.user_id = users.id
-                                and (
-                                    up.first_name ilike $${values.length + 1}
-                                    or up.last_name ilike $${values.length + 1}
-                                    or concat_ws(' ', up.first_name, up.last_name) ilike $${values.length + 1}
-                                )
-                              )`) && values.push(`%${name}%`);
 
-        if (!is_admin && filters.length == 0) {
+        if (filters.length == 0) {
             throw new Error('At least one filter must be provided');
         }
 
@@ -56,10 +57,6 @@ export class UserRepository extends BaseRepository<User> {
             allowedOrderColumns: ['created_at', 'email', 'username'] as Column[],
             order_by,
             order_dir,
-            customOrderBy: {
-                first_name: "(select lower(up.first_name) from user_profiles up where up.user_id = users.id)",
-                last_name: "(select lower(up.last_name) from user_profiles up where up.user_id = users.id)",
-            }
         } : null;
 
         return this.getFindResult('users', filter, orderByParams, values, params);
@@ -133,5 +130,51 @@ export class UserRepository extends BaseRepository<User> {
         if (!result.rows[0]) throw new Error(`Delete failed. id: ${id}`);
 
         return result.rows[0];
+    }
+
+    async search<P extends KeyValue>(params: P) {
+        const { username, email, first_name, last_name, name, order_by, order_dir } = params as SearchParams;
+        const filters: string[] = [];
+        const values: unknown[] = [];
+
+        //where
+        username && filters.push(`username ilike $${filters.length + 1}`) && values.push(`%${username}%`);
+        email && filters.push(`email ilike $${filters.length + 1}`) && values.push(`%${email}%`);
+        first_name && filters.push(`exists (
+                                    select 1 from user_profiles up
+                                    where up.user_id = users.id
+                                    and up.first_name ilike $${values.length + 1}
+                                )`) && values.push(`%${first_name}%`);
+        last_name && filters.push(`exists (
+                                    select 1 from user_profiles up
+                                    where up.user_id = users.id
+                                    and up.last_name ilike $${values.length + 1}
+                                )`) && values.push(`%${last_name}%`);
+        name && filters.push(`username ilike $${values.length + 1}
+                              or exists (
+                                select 1 from user_profiles up
+                                where up.user_id = users.id
+                                and (
+                                    up.first_name ilike $${values.length + 1}
+                                    or up.last_name ilike $${values.length + 1}
+                                    or concat_ws(' ', up.first_name, up.last_name) ilike $${values.length + 1}
+                                )
+                              )`) && values.push(`%${name}%`);
+
+        let filter = filters.join(' and ');
+        filter = filter ? `where ${filter}` : '';
+
+        type Column = (typeof UserColumns[number]);
+        const orderByParams = order_by ? {
+            allowedOrderColumns: ['created_at', 'email', 'username', 'last_name', 'first_name'] as Column[],
+            order_by,
+            order_dir,
+            customOrderBy: {
+                first_name: "(select lower(up.first_name) from user_profiles up where up.user_id = users.id)",
+                last_name: "(select lower(up.last_name) from user_profiles up where up.user_id = users.id)",
+            }
+        } : null;
+
+        return this.getFindResult('users', filter, orderByParams, values, params);
     }
 }

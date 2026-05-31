@@ -20,7 +20,6 @@ export const createUserRouter = (appCtx: AppContext) => {
 
     //private
     router.use(authRequired);
-    router.get('/', adminRequired, controller.get);
     router.get('/me', controller.me);
     router.get('/profile', controller.profile);
 

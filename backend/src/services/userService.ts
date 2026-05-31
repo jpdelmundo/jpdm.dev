@@ -45,21 +45,41 @@ export const createUserService = (ctx: ServiceContext) => {
 
     const get = async <P extends KeyValue>(params: P) => {
         const schema = UserSchema.extend({
+            ids: z.array(z.uuid()),
             name: z.string(),
             email: z.string(),
             date_from: DateComparisonSchema,
             date_to: DateComparisonSchema,
             page_size: z.number(),
-            page_nume: z.number(),
+            page_num: z.number(),
             order_by: z.string(),
-            order_dir: z.enum(OrderDirection),
-            is_admin: z.boolean()
+            order_dir: z.enum(OrderDirection)
         }).partial();
 
         const parsed = schema.safeParse(params);
         if (!parsed.success) throw new ServiceError('One or more parameters are invalid.', ErrorCode.INVALID_PARAMETER, parsed.error.issues);
 
         return deps.userRepo.find(params);
+    };
+
+    const search = async <P extends KeyValue>(params: P) => {
+        const schema = UserSchema.extend({
+            username: z.string(),
+            first_name: z.string(),
+            last_name: z.string(),
+            email: z.string(),
+            date_from: DateComparisonSchema,
+            date_to: DateComparisonSchema,
+            page_size: z.number(),
+            page_nume: z.number(),
+            order_by: z.string(),
+            order_dir: z.enum(OrderDirection)
+        }).partial();
+
+        const parsed = schema.safeParse(params);
+        if (!parsed.success) throw new ServiceError('One or more parameters are invalid.', ErrorCode.INVALID_PARAMETER, parsed.error.issues);
+
+        return deps.userRepo.search(params);
     };
 
     const findById = async (id: string): Promise<User | null> => {
@@ -633,6 +653,7 @@ The Support Team`
         toMe,
         canModify,
         enrich,
-        setTempPassword
+        setTempPassword,
+        search
     };
 };

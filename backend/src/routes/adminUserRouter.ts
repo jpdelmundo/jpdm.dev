@@ -8,7 +8,7 @@ export const createAdminUsersRouter = (appCtx: AppContext) => {
     const controller = createAdminUsersController(appCtx);
 
     router.use(authRequired, adminRequired);
-    router.get('/', controller.get);
+    router.get('/', controller.search);
     router.delete('/:id', controller.delete);
     router.delete('/', controller.delete);
     router.put('/:id', controller.update);
