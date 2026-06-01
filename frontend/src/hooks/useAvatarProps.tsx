@@ -1,5 +1,5 @@
-import { useAuthStore } from "@/store/useAuthStore";
-import { useUserProfileStore } from "@/store/useUserProfileStore";
+import { useAuthStore } from '@/store/useAuthStore';
+import { useUserProfileStore } from '@/store/useUserProfileStore';
 
 export type AvatarProps = {
     display_name: string;

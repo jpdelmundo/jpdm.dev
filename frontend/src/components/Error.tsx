@@ -1,8 +1,8 @@
 import server from '@/assets/images/server2.jpg';
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import type { ApiErrorDetail } from '@shared/types/ApiResult';
-import { ErrorCode } from "@shared/types/ErrorCode";
+import { ErrorCode } from '@shared/types/ErrorCode';
 
 type ErrorProps = {
     error: ApiErrorDetail;

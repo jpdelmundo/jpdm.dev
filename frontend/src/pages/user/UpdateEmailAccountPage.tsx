@@ -1,17 +1,17 @@
-import { apiPost } from "@/api/apiClient";
-import { UpdateEmailForm } from "@/components/UpdateEmailForm";
-import { useAuthStore } from "@/store/useAuthStore";
-import { getErrorMessage } from "@/utils/helper";
-import Box from "@mui/material/Box";
+import { apiPost } from '@/api/apiClient';
+import { UpdateEmailForm } from '@/components/UpdateEmailForm';
+import { useAuthStore } from '@/store/useAuthStore';
+import { getErrorMessage } from '@/utils/helper';
+import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
-import Link from "@mui/material/Link";
-import Paper from "@mui/material/Paper";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import type { ApiResult } from "@shared/types/ApiResult";
-import type { EmailFormInput } from "@shared/types/EmailFormInput";
-import { useState } from "react";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import Link from '@mui/material/Link';
+import Paper from '@mui/material/Paper';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import type { ApiResult } from '@shared/types/ApiResult';
+import type { EmailFormInput } from '@shared/types/EmailFormInput';
+import { useState } from 'react';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
 export const UpdateEmailAccountPage = () => {
     const navigate = useNavigate();

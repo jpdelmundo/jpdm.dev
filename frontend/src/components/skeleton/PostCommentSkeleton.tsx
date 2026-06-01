@@ -1,6 +1,6 @@
-import Box, { type BoxProps } from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
-import { WaveSkeleton } from "./WaveSkeleton";
+import Box, { type BoxProps } from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import { WaveSkeleton } from './WaveSkeleton';
 
 export function PostCommentSkeleton(props: BoxProps) {
     return <Box className="comment" {...props}>

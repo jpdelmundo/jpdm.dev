@@ -1,7 +1,7 @@
-import { scrollbarWidthAware } from "@/utils/helper";
-import type { DialogProps } from "@mui/material/Dialog";
-import MuiDialog from "@mui/material/Dialog";
-import { useEffect } from "react";
+import { scrollbarWidthAware } from '@/utils/helper';
+import type { DialogProps } from '@mui/material/Dialog';
+import MuiDialog from '@mui/material/Dialog';
+import { useEffect } from 'react';
 
 export const Dialog = (props: DialogProps) => {
     const { children, open, onClose, ...otherProps } = props;

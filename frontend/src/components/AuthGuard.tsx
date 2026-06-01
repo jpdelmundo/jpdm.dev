@@ -1,6 +1,6 @@
-import { useAuthStore } from "@/store/useAuthStore";
-import type { ReactNode } from "react";
-import { PageLoading } from "./skeleton/PageLoading";
+import { useAuthStore } from '@/store/useAuthStore';
+import type { ReactNode } from 'react';
+import { PageLoading } from './skeleton/PageLoading';
 
 type Props = {
     children: ReactNode;

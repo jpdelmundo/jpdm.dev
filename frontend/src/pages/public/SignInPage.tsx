@@ -1,5 +1,5 @@
 import { apiPost } from '@/api/apiClient';
-import { SignInForm, type FormInput } from "@/components/SignInForm";
+import { SignInForm, type FormInput } from '@/components/SignInForm';
 import { useAuthStore } from '@/store/useAuthStore';
 import { getFingerprint } from '@/utils/device';
 import type { AccessToken } from '@shared/types/AccessToken';

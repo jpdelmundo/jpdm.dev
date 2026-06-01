@@ -1,21 +1,21 @@
-import { getImageFileDetail } from "@/utils/helper";
-import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
-import { arrayMove, rectSortingStrategy, SortableContext, sortableKeyboardCoordinates, useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import { getImageFileDetail } from '@/utils/helper';
+import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, rectSortingStrategy, SortableContext, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import AddPhotoAlternate from '@mui/icons-material/AddPhotoAlternate';
 import Cancel from '@mui/icons-material/Cancel';
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import IconButton from "@mui/material/IconButton";
-import Stack from "@mui/material/Stack";
-import type PostImageExtended from "@shared/models/extensions/PostImageExtended";
-import type { PostImageDraft } from "@shared/types/PostImageDraft";
-import { useEffect, useRef, useState, type ChangeEvent, type MouseEvent } from "react";
-import { CoverImage } from "./CoverImage";
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import IconButton from '@mui/material/IconButton';
+import Stack from '@mui/material/Stack';
+import type PostImageExtended from '@shared/models/extensions/PostImageExtended';
+import type { PostImageDraft } from '@shared/types/PostImageDraft';
+import { useEffect, useRef, useState, type ChangeEvent, type MouseEvent } from 'react';
+import { CoverImage } from './CoverImage';
 
 type PostImage = PostImageDraft | PostImageExtended;
 

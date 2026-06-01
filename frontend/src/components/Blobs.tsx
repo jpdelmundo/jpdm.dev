@@ -1,6 +1,6 @@
 import { DepthOfField, EffectComposer } from '@react-three/postprocessing';
-import { useMemo } from "react";
-import * as THREE from "three";
+import { useMemo } from 'react';
+import * as THREE from 'three';
 
 export default function Blobs({ count }: { count: number }) {
     const blobs = useMemo(() => {

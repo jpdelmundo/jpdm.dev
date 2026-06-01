@@ -1,11 +1,11 @@
-import { useConfirmStore } from "@/store/useConfirmStore";
-import { scrollbarWidthAware } from "@/utils/helper";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import { useEffect } from "react";
+import { useConfirmStore } from '@/store/useConfirmStore';
+import { scrollbarWidthAware } from '@/utils/helper';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import { useEffect } from 'react';
 
 export function ConfirmDialog() {
     const {

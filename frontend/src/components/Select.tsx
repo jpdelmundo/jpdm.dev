@@ -1,9 +1,9 @@
-import FormControl from "@mui/material/FormControl";
-import type { SelectProps } from "@mui/material/Select";
-import MuiSelect from "@mui/material/Select";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import { Controller, type Control, type FieldValues, type Path } from "react-hook-form";
+import FormControl from '@mui/material/FormControl';
+import type { SelectProps } from '@mui/material/Select';
+import MuiSelect from '@mui/material/Select';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
 
 type Props<T extends FieldValues> = Omit<SelectProps, 'name'> & {
     control: Control<T>;

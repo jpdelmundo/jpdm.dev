@@ -42,7 +42,7 @@ export const AccountPage = () => {
 
     const getData = async () => {
         if (!user) return;
-        const result = await apiGet<MeDTO>(`/users/me`);
+        const result = await apiGet<MeDTO>('/users/me');
         if (result.ok && result.data) {
             setData(result.data);
         } else {

@@ -1,11 +1,11 @@
-import { apiPost } from "@/api/apiClient";
-import { ForgotPasswordForm } from "@/components/ForgotPasswordForm";
-import { getFingerprint } from "@/utils/device";
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
-import type { ApiResult } from "@shared/types/ApiResult";
-import { jsonBase64Encode } from "@shared/utils/encoding";
-import { GoogleReCaptchaProvider, useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { apiPost } from '@/api/apiClient';
+import { ForgotPasswordForm } from '@/components/ForgotPasswordForm';
+import { getFingerprint } from '@/utils/device';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import type { ApiResult } from '@shared/types/ApiResult';
+import { jsonBase64Encode } from '@shared/utils/encoding';
+import { GoogleReCaptchaProvider, useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 type FormInput = {
     email?: string;

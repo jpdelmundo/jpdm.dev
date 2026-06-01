@@ -1,16 +1,16 @@
-import { apiPut } from "@/api/apiClient";
-import { ChangePasswordForm } from "@/components/ChangePasswordForm";
-import { useAuthStore } from "@/store/useAuthStore";
+import { apiPut } from '@/api/apiClient';
+import { ChangePasswordForm } from '@/components/ChangePasswordForm';
+import { useAuthStore } from '@/store/useAuthStore';
 import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
-import Alert from "@mui/material/Alert";
-import Box from "@mui/material/Box";
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
-import Link from "@mui/material/Link";
-import Paper from "@mui/material/Paper";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import type { ChangePasswordFormInput } from "@shared/types/ChangePasswordFormInput";
-import { Link as RouterLink } from "react-router-dom";
+import Link from '@mui/material/Link';
+import Paper from '@mui/material/Paper';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import type { ChangePasswordFormInput } from '@shared/types/ChangePasswordFormInput';
+import { Link as RouterLink } from 'react-router-dom';
 
 export const ChangePasswordPage = () => {
     const user = useAuthStore(s => s.user);

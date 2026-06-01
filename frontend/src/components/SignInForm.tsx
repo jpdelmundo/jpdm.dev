@@ -14,7 +14,7 @@ import Typography from '@mui/material/Typography';
 import type { AccessToken } from '@shared/types/AccessToken';
 import type { ApiResult } from '@shared/types/ApiResult';
 import { jsonBase64Encode } from '@shared/utils/encoding';
-import { useRef, useState, type ChangeEvent, type FocusEvent, type FormEvent } from "react";
+import { useRef, useState, type ChangeEvent, type FocusEvent, type FormEvent } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import PasswordField from './PasswordField';
 import TextField from './TextField';

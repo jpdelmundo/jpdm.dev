@@ -1,5 +1,5 @@
-import type { TooltipProps } from "@mui/material/Tooltip";
-import MuiTooltip from "@mui/material/Tooltip";
+import type { TooltipProps } from '@mui/material/Tooltip';
+import MuiTooltip from '@mui/material/Tooltip';
 
 
 export function Tooltip({ children, ...props }: TooltipProps) {

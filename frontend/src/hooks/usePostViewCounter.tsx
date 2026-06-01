@@ -1,8 +1,8 @@
-import { apiPost } from "@/api/apiClient";
-import { getFingerprint } from "@/utils/device";
-import type { PostId } from "@shared/models/generated/Post";
-import { jsonBase64Encode } from "@shared/utils/encoding";
-import { useRef } from "react";
+import { apiPost } from '@/api/apiClient';
+import { getFingerprint } from '@/utils/device';
+import type { PostId } from '@shared/models/generated/Post';
+import { jsonBase64Encode } from '@shared/utils/encoding';
+import { useRef } from 'react';
 
 export function usePostViewLogger() {
     const viewedPosts = useRef<Set<PostId>>(new Set());

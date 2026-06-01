@@ -15,7 +15,7 @@ export function ResetPasswordPage() {
     const [step, setStep] = useState<'checking_token' | 'reset_password' | 'success' | 'token_error'>('checking_token');
 
     const onSubmit = async (formInput: FormInput) => {
-        const res = await apiPost(`/users/reset-password`, { ...formInput, token_hash: token_hash! });
+        const res = await apiPost('/users/reset-password', { ...formInput, token_hash: token_hash! });
         return res; //return to show error message on form
     };
 

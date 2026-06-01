@@ -1,4 +1,4 @@
-import { UpdatesPage } from "./UpdatesPage";
+import { UpdatesPage } from './UpdatesPage';
 
 export const Home = () => {
     return (<>

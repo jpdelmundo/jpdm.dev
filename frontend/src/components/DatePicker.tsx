@@ -1,8 +1,8 @@
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import { DatePicker as MuiDatePicker, type DatePickerProps } from "@mui/x-date-pickers";
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import { DatePicker as MuiDatePicker, type DatePickerProps } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
-import { Controller, type Control, type FieldValues, type Path } from "react-hook-form";
+import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
 
 type Props<T extends FieldValues> = Omit<DatePickerProps, 'name'> & {
     control: Control<T>;

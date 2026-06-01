@@ -11,7 +11,7 @@ export function GlobalErrorHandler() {
     useEffect(() => {
         function handlePromiseRejection(event: PromiseRejectionEvent) {
             const error = event.reason;
-            console.error("Uncaught promise rejection:", error);
+            console.error('Uncaught promise rejection:', error);
             if (error instanceof ClientApiError) {
                 if (error.code == ErrorCode.TOKEN_EXPIRED) {
                     clearToken();
@@ -21,7 +21,7 @@ export function GlobalErrorHandler() {
         }
 
         function handleError(event: ErrorEvent) {
-            console.error("Uncaught error:", event.error || event.message);
+            console.error('Uncaught error:', event.error || event.message);
         }
 
         window.addEventListener('unhandledrejection', handlePromiseRejection);
