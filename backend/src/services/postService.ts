@@ -6,6 +6,7 @@ import type { KeyValue } from '@/types/KeyValue.js';
 import { moveFile } from '@/utils/helper.js';
 import { compress } from '@/utils/image.js';
 import { canModify as _canModify, isOwner } from '@/utils/permissions.js';
+import type { ToDTOOptions as DTOOptions } from '@project/shared/src/types/ToDTOOptions.js';
 import type PostDTO from '@shared/models/dto/PostDTO.js';
 import type PostImageExtended from '@shared/models/extensions/PostImageExtended.js';
 import { type File, type FileInitializer } from '@shared/models/generated/File.js';
@@ -13,7 +14,6 @@ import { PostSchema, type Post, type PostId, type PostInitializer, type PostMuta
 import type { PostImage, PostImageId } from '@shared/models/generated/PostImage.js';
 import type { UserId } from '@shared/models/generated/User.js';
 import { DateComparisonSchema } from '@shared/types/DateComparisonSchema.js';
-import type { EnrichOptions } from '@shared/types/EnrichOptions.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
 import { OrderDirection } from '@shared/types/OrderDirection.js';
 import { Visibility } from '@shared/types/Visibility.js';
@@ -43,8 +43,8 @@ export const createPostService = (ctx: ServiceContext) => {
             date_from: DateComparisonSchema,
             date_to: DateComparisonSchema,
             order_dir: z.enum(OrderDirection),
-            page_size: z.number(),
-            page_num: z.number(),
+            page_size: z.coerce.number(),
+            page_num: z.coerce.number(),
             visibility: z.enum(Visibility),
             is_published: coercedBoolean()
         }).partial();
@@ -55,7 +55,7 @@ export const createPostService = (ctx: ServiceContext) => {
         return deps.postRepo.find(params);
     };
 
-    const enrich = async (items: Post[], options: EnrichOptions = { include: ['stats', 'images'] }) => {
+    const toDTO = async (items: Post[], options: DTOOptions = { include: ['stats', 'images'] }) => {
         const { include } = options;
         const userIds = [...new Set(items.map(i => i.user_id))];
         const postIds = [...new Set(items.map(i => i.id))];
@@ -63,13 +63,13 @@ export const createPostService = (ctx: ServiceContext) => {
 
         const users = await createUserService(ctx).get({ ids: userIds });
         const userProfiles = await userProfileSvc.get({ user_ids: userIds });
-        const userProfilesEnrinched = await userProfileSvc.enrich(userProfiles);
+        const userProfilesEnrinched = await userProfileSvc.toDTO(userProfiles);
         const postLikes = actor.type == 'user' ? await createPostLikeService(ctx).get({ user_id: actor.id, post_ids: postIds }) : [];
         const postCommentsCount = include?.includes('stats') ? await getCommentsCount({ post_ids: postIds }) : [];
 
         const imageSvc = createPostImageService(ctx);
         const images = (include?.includes('images') ? await imageSvc.get({ post_ids: postIds }) : []) as PostImage[];
-        const postImages = (images ? await imageSvc.enrich(images) : []) as PostImageExtended[];
+        const postImages = (images ? await imageSvc.toDTO(images) : []) as PostImageExtended[];
 
         const userMap = new Map(users.map(u => [u.id, u]));
         const userProfileMap = new Map(userProfilesEnrinched.map(u => [u.user_id, u]));
@@ -93,7 +93,7 @@ export const createPostService = (ctx: ServiceContext) => {
         const result: PostDTO[] = [];
         for (const item of items) {
             result.push({
-                ...omit(item, ['user_id']),
+                ...omit(item, ['user_id', 'is_published']),
                 is_owner: item.user_id === actor.id,
                 display_name: getDisplayName(item.user_id),
                 avatar_url: userProfileMap.get(item.user_id)?.avatar_url || '',
@@ -126,7 +126,7 @@ export const createPostService = (ctx: ServiceContext) => {
         return result;
     };
 
-    const create = async (data: CreateInput): Promise<PostDTO> => {
+    const create = async (data: CreateInput) => {
         const { user_id, title, content, files } = data;
         if (!user_id) throw new ServiceError('Missing parameter: user_id');
         if (!content || content.trim().length == 0) throw new ServiceError('Content cannot be empty', ErrorCode.MISSING_PARAMETER, { param: 'content' });
@@ -169,7 +169,7 @@ export const createPostService = (ctx: ServiceContext) => {
             return post;
         });
 
-        const result = (await get({ id: txResult.id, include: ['images'] }) as PostDTO[])[0];
+        const result = (await get({ id: txResult.id, include: ['images'] }))[0];
         if (!result) throw new Error(`Post created but not found: ${txResult.id}`);
 
         return result;
@@ -216,7 +216,7 @@ export const createPostService = (ctx: ServiceContext) => {
         if (!await canModify(id)) throw new ServiceError('Forbidden', ErrorCode.FORBIDDEN);
 
         const post = await getById(id);
-        const [enrinched] = await enrich([post]);
+        const [enrinched] = await toDTO([post]);
         const images = enrinched?.images;
         const updated = await deps.withTransaction(async (txDeps: Deps) => {
             const newImageSet = new Set<PostImageId>();
@@ -354,7 +354,7 @@ export const createPostService = (ctx: ServiceContext) => {
 
     return {
         get,
-        enrich,
+        toDTO,
         getCommentsCount,
         getById,
         create,

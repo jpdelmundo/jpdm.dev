@@ -26,7 +26,7 @@ export const createUserProfileService = (ctx: ServiceContext) => {
         return deps.userProfileRepo.find(params);
     };
 
-    const enrich = async (items: UserProfile[]) => {
+    const toDTO = async (items: UserProfile[]) => {
         const result: UserProfile[] = [];
         const avatarFileIds = [...new Set(items.map(i => i.avatar_file_id))];
         const avatarFiles = await createFileService(ctx).get({ ids: avatarFileIds });
@@ -207,6 +207,6 @@ export const createUserProfileService = (ctx: ServiceContext) => {
         handleAvatarUpload,
         deleteAvatar,
         setImageFileToUserAvatar,
-        enrich
+        toDTO
     };
 };

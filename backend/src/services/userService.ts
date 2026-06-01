@@ -3,6 +3,7 @@ import type { ServiceContext } from '@/infra/serviceContext.js';
 import type { KeyValue } from '@/types/KeyValue.js';
 import { moderateName } from '@/utils/llm.js';
 import { canModify as _canModify } from '@/utils/permissions.js';
+import type { ToDTOOptions } from '@project/shared/src/types/ToDTOOptions.js';
 import type { MeDTO } from '@shared/models/dto/MeDTO.js';
 import type { UserDTO } from '@shared/models/dto/UserDTO.js';
 import type UserWithRoles from '@shared/models/extensions/UserWithRoles.js';
@@ -11,7 +12,6 @@ import { UserSchema, type User, type UserId, type UserInitializer, type UserMuta
 import type { UserProfile } from '@shared/models/generated/UserProfile.js';
 import type { UserRole as UserRoleModel } from '@shared/models/generated/UserRole.js';
 import { DateComparisonSchema } from '@shared/types/DateComparisonSchema.js';
-import type { EnrichOptions } from '@shared/types/EnrichOptions.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
 import type { Jwt, PayloadData } from '@shared/types/Jwt.js';
 import { OrderDirection } from '@shared/types/OrderDirection.js';
@@ -582,12 +582,12 @@ The Support Team`
         return _canModify(actor, user.id);
     };
 
-    const enrich = async (items: User[], options: EnrichOptions = { include: [] }) => {
+    const toDTO = async (items: User[], options: ToDTOOptions = { include: [] }) => {
         const { include } = options;
         const ids = [...new Set(items.map(i => i.id))];
         const userProfileSvc = createUserProfileService(ctx);
         const userProfiles = await userProfileSvc.get({ user_ids: ids });
-        const userProfilesEnrinched = await userProfileSvc.enrich(userProfiles);
+        const userProfilesEnrinched = await userProfileSvc.toDTO(userProfiles);
 
         const userProfileMap = new Map(userProfilesEnrinched.map(i => [i.user_id, i]));
 
@@ -652,7 +652,7 @@ The Support Team`
         delete: _delete,
         toMe,
         canModify,
-        enrich,
+        toDTO,
         setTempPassword,
         search
     };

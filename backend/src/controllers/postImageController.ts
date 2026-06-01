@@ -17,12 +17,12 @@ export const createPostImageController = (app: AppContext) => {
             const imageSvc = createPostImageService(makeCtx(req));
 
             const postImage = await imageSvc.getById(id) as PostImage;
-            const [post_image] = (postImage ? await imageSvc.enrich([postImage]) : []) as PostImageExtended[];
+            const [post_image] = (postImage ? await imageSvc.toDTO([postImage]) : []) as PostImageExtended[];
 
             let post_image_set: PostImageExtended[] = [];
             if (include_set && post_image?.post_id) {
                 const postImages = await imageSvc.get({ post_id: post_image.post_id });
-                post_image_set = (postImages ? await imageSvc.enrich(postImages) : []) as PostImageExtended[];
+                post_image_set = (postImages ? await imageSvc.toDTO(postImages) : []) as PostImageExtended[];
             }
 
             const result = { post_image, post_image_set };

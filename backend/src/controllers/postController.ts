@@ -1,6 +1,5 @@
 import type { AppContext } from '@/infra/appContext.js';
 import { bindContext } from '@/infra/bindContext.js';
-import { createPostCommentService } from '@/services/postCommentService.js';
 import { createPostImageService } from '@/services/postImageService.js';
 import { createPostLikeService } from '@/services/postLikeService.js';
 import { createPostService } from '@/services/postService.js';
@@ -47,10 +46,11 @@ export const createPostController = (app: AppContext) => {
                 order_by: 'created_at',
                 order_dir: 'desc'
             });
-            const enriched = await postSvc.enrich(result.page_items);
-            result.page_items = enriched;
 
-            return ok(res, result);
+            return ok(res, {
+                ...result,
+                page_items: await postSvc.toDTO(result.page_items)
+            });
         },
 
         create: async (req: Request, res: Response): Promise<Response> => {
@@ -71,7 +71,7 @@ export const createPostController = (app: AppContext) => {
             const { page_num, page_size, order_by, order_dir, post, date_from, date_to, visibility, is_published } = req.query;
 
             const postSvc = createPostService(makeCtx(req));
-            let result = await postSvc.get({
+            const result = await postSvc.get({
                 user_id: req.user?.id,
                 ...(page_num && { page_num: parseInt(String(page_num)) }),
                 ...(page_size && { page_size: parseInt(String(page_size)) }),
@@ -86,11 +86,12 @@ export const createPostController = (app: AppContext) => {
             });
 
             if ('page_items' in result)
-                result.page_items = await postSvc.enrich(result.page_items as Post[]);
+                return ok(res, {
+                    ...result,
+                    page_items: await postSvc.toDTO(result.page_items as Post[])
+                });
             else
-                result = await postSvc.enrich(result);
-
-            return ok(res, result);
+                return ok(res, await postSvc.toDTO(result));
         },
 
         getPost: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
@@ -103,7 +104,7 @@ export const createPostController = (app: AppContext) => {
                 is_published: true
             });
 
-            const [post] = await postSvc.enrich(result);
+            const [post] = await postSvc.toDTO(result);
 
             return ok(res, post);
         },
@@ -113,7 +114,7 @@ export const createPostController = (app: AppContext) => {
             const { page_num, page_size, order_by, order_dir, post, date_from, date_to, visibility, is_published } = req.query;
 
             const postSvc = createPostService(makeCtx(req));
-            let result = await postSvc.get({
+            const result = await postSvc.get({
                 user_id: req.user?.id,
                 ...(page_num && { page_num: parseInt(String(page_num)) }),
                 ...(page_size && { page_size: parseInt(String(page_size)) }),
@@ -128,31 +129,12 @@ export const createPostController = (app: AppContext) => {
             });
 
             if ('page_items' in result)
-                result.page_items = await postSvc.enrich(result.page_items as Post[]);
+                return ok(res, {
+                    ...result,
+                    page_items: await postSvc.toDTO(result.page_items as Post[])
+                });
             else
-                result = await postSvc.enrich(result);
-
-            return ok(res, result);
-        },
-
-        updateComment: async (req: Request, res: Response,): Promise<Response> => {
-            const { post_id, comment_id } = req.params;
-            const { comment } = req.body;
-            const { return_include } = req.query;
-            const postCommentSvc = createPostCommentService(makeCtx(req));
-
-            const result = await postCommentSvc.update(String(comment_id), { comment });
-            const [enriched] = await postCommentSvc.enrich([result], { ...(return_include && { include: String(return_include).split(',') }) });
-
-            return ok(res, enriched);
-        },
-
-        deleteComment: async (req: Request, res: Response,): Promise<Response> => {
-            const { comment_id } = req.params;
-            const commentSvc = createPostCommentService(makeCtx(req));
-            const deleted = await commentSvc.delete(String(comment_id));
-
-            return ok(res, deleted);
+                return ok(res, await postSvc.toDTO(result));
         },
 
         logView: async (req: Request, res: Response): Promise<Response> => {
@@ -208,9 +190,9 @@ export const createPostController = (app: AppContext) => {
             });
             if (!result.id) return fail(res);
 
-            const [enriched] = await postSvc.enrich([result]);
+            const [dto] = await postSvc.toDTO([result]);
 
-            return ok(res, enriched);
+            return ok(res, dto);
         },
 
         uploadImage: async (req: Request, res: Response): Promise<Response> => {
@@ -248,7 +230,7 @@ export const createPostController = (app: AppContext) => {
             const { post_id } = req.params;
             const postSvc = await createPostService(makeCtx(req));
             const post = await postSvc.getById(post_id!);
-            const [enriched] = await postSvc.enrich([post]);
+            const [dto] = await postSvc.toDTO([post]);
             const file = fileURLToPath(new URL('../../../frontend/dist/index.html', import.meta.url));
             const html = readFileSync(file, { encoding: 'utf-8' });
             const proto = req.headers['x-forwarded-proto'] ?? 'https';
@@ -260,7 +242,7 @@ export const createPostController = (app: AppContext) => {
 <meta name="description" content="${escapeHtml(post.content).slice(0, 200)}" />
 <meta property="og:title" content="${escapeHtml(title).slice(0, 100)}" />
 <meta property="og:description" content="${escapeHtml(post.content).slice(0, 200)}" />
-<meta property="og:image" content="${enriched?.images[0]?.url || `${proto}://${host}/ogbg.webp`}" />
+<meta property="og:image" content="${dto?.images[0]?.url || `${proto}://${host}/ogbg.webp`}" />
 <meta property="og:url" content="${proto}://${host}${path}" />
 <meta property="og:type" content="article" />
 <meta property="og:site_name" content="${host}" />`;
@@ -272,13 +254,13 @@ export const createPostController = (app: AppContext) => {
             const { post_id } = req.params;
             const imageSvc = await createPostImageService(makeCtx(req));
             const [image] = await imageSvc.get({ post_id });
-            const [enriched] = (image ? await imageSvc.enrich([image]) : []) as PostImageExtended[];
+            const [dto] = (image ? await imageSvc.toDTO([image]) : []) as PostImageExtended[];
             const proto = req.headers['x-forwarded-proto'] ?? 'https';
             const host = req.headers['host'];
             const hostBaseUrl = `${proto}://${host}`;
 
             res.setHeader('content-type', 'image/webp');
-            return res.redirect(!enriched?.url ? `${hostBaseUrl}/ogbg.webp` : enriched.url);
+            return res.redirect(!dto?.url ? `${hostBaseUrl}/ogbg.webp` : dto.url);
         }
     }
 };

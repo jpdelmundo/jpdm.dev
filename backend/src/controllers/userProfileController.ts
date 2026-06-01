@@ -14,7 +14,7 @@ export const createUserProfileController = (app: AppContext) => {
             const { id } = req.params;
             const userProfileSvc = createUserProfileService(makeCtx(req));
             const result = await userProfileSvc.get({ user_id: id });
-            const [enrinched] = await userProfileSvc.enrich(result);
+            const [enrinched] = await userProfileSvc.toDTO(result);
 
             return ok(res, enrinched);
         },

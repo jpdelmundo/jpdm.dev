@@ -1,5 +1,4 @@
 import { apiDelete, apiPut } from '@/api/apiClient';
-import { useAuthStore } from '@/store/useAuthStore';
 import { useConfirmStore } from '@/store/useConfirmStore';
 import { getErrorMessage, getRelativeTime } from '@/utils/helper';
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
@@ -42,7 +41,6 @@ export function PostComment({ comment, index, onDeleted, onUpdated }: PostCommen
     const [isSubmitting, setIsSubmitting] = useState(false);
     const confirm = useConfirmStore(s => s.confirm);
     const [isProcessing, setIsProcessing] = useState(false);
-    const user = useAuthStore(s => s.user);
 
     const submitHandler: SubmitHandler<FormInput> = async (data) => {
         if (!data.comment.trim()) return;

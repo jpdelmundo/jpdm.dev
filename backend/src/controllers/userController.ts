@@ -34,10 +34,10 @@ export const createUserController = (app: AppContext) => {
 
             let _result: unknown;
             if ('page_items' in result) {
-                result.page_items = await userSvc.enrich(result.page_items as User[]);
+                result.page_items = await userSvc.toDTO(result.page_items as User[]);
                 _result = result;
             } else
-                _result = await userSvc.enrich(result);
+                _result = await userSvc.toDTO(result);
 
             return ok(res, _result);
         },
@@ -173,7 +173,7 @@ export const createUserController = (app: AppContext) => {
             }
 
             const users = await userSvc.get({ ids: [...updated] });
-            const [result] = await userSvc.enrich(users);
+            const [result] = await userSvc.toDTO(users);
 
             return result ? ok(res, result) : fail(res);
         },

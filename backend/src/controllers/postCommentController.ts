@@ -20,9 +20,9 @@ export const createPostCommentController = (app: AppContext) => {
                 user_id: req.user!.id,
                 comment
             });
-            const [enriched] = await postCommentSvc.enrich([result]);
+            const [dto] = await postCommentSvc.toDTO([result]);
 
-            return ok(res, enriched);
+            return ok(res, dto);
         },
 
         get: async (req: Request, res: Response): Promise<Response> => {
@@ -41,10 +41,10 @@ export const createPostCommentController = (app: AppContext) => {
                 ...(date_to && { date_to: { lte: new Date(String(date_to)) } }),
             });
 
-            const enriched = await postCommentSvc.enrich(result.page_items, { include: ['post'], });
-            result.page_items = enriched;
-
-            return ok(res, result);
+            return ok(res, {
+                ...result,
+                page_items: await postCommentSvc.toDTO(result.page_items, { include: ['post'], })
+            });
         },
 
         getPostComments: async (req: Request, res: Response): Promise<Response> => {
@@ -60,10 +60,10 @@ export const createPostCommentController = (app: AppContext) => {
                 order_dir: 'asc'
             });
 
-            const enriched = await postCommentSvc.enrich(result.page_items);
-            result.page_items = enriched;
-
-            return ok(res, result);
+            return ok(res, {
+                ...result,
+                page_items: await postCommentSvc.toDTO(result.page_items)
+            });
         },
 
         getMyComments: async (req: Request, res: Response): Promise<Response> => {
@@ -82,10 +82,10 @@ export const createPostCommentController = (app: AppContext) => {
                 ...(date_to && { date_to: { lte: new Date(String(date_to)) } }),
             });
 
-            const enriched = await postCommentSvc.enrich(result.page_items, { include: ['post'], });
-            result.page_items = enriched;
-
-            return ok(res, result);
+            return ok(res, {
+                ...result,
+                page_items: await postCommentSvc.toDTO(result.page_items, { include: ['post'], })
+            });
         },
 
         update: async (req: Request<RouteParams>, res: Response,): Promise<Response> => {
@@ -95,9 +95,9 @@ export const createPostCommentController = (app: AppContext) => {
             const postCommentSvc = createPostCommentService(makeCtx(req));
 
             const result = await postCommentSvc.update(id, { comment });
-            const [enriched] = await postCommentSvc.enrich([result], { ...(return_include && { include: String(return_include).split(',') }) });
+            const [dto] = await postCommentSvc.toDTO([result], { ...(return_include && { include: String(return_include).split(',') }) });
 
-            return ok(res, enriched);
+            return ok(res, dto);
         },
 
         delete: async (req: Request<RouteParams>, res: Response,): Promise<Response> => {

@@ -5,9 +5,9 @@ import type { Deps } from "@/types/Deps.js";
 import type { KeyValue } from "@/types/KeyValue.js";
 import { sign } from "@/utils/auth.js";
 import { canModify } from "@/utils/permissions.js";
+import type { ToDTOOptions } from "@project/shared/src/types/ToDTOOptions.js";
 import type PostImageExtended from "@shared/models/extensions/PostImageExtended.js";
 import type { PostImage, PostImageId } from "@shared/models/generated/PostImage.js";
-import type { EnrichOptions } from "@shared/types/EnrichOptions.js";
 import { ErrorCode } from "@shared/types/ErrorCode.js";
 import path from 'path';
 import { createFileService } from './fileService.js';
@@ -19,7 +19,7 @@ export const createPostImageService = (ctx: ServiceContext) => {
         return deps.postImageRepo.find(params);
     };
 
-    const enrich = async (items: PostImage[], options: EnrichOptions = {}): Promise<PostImageExtended[]> => {
+    const toDTO = async (items: PostImage[], options: ToDTOOptions = {}): Promise<PostImageExtended[]> => {
         const { include } = options;
         const fileIds = [...new Set(items.map(i => i.file_id))];
         const files = fileIds ? await createFileService(ctx).get({ ids: fileIds }) : [];
@@ -70,7 +70,7 @@ export const createPostImageService = (ctx: ServiceContext) => {
 
     return {
         get,
-        enrich,
+        toDTO,
         getById,
         delete: del
     };

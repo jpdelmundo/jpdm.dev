@@ -4,6 +4,7 @@ import type { ServiceContext } from '@/infra/serviceContext.js';
 import { createUserProfileService } from '@/services/userProfileService.js';
 import { createUserService } from '@/services/userService.js';
 import { downloadImage, getUserAvatarDir } from '@/utils/helper.js';
+import { NIL_UUID } from '@shared/constants/uuid.js';
 import passport from 'passport';
 import { Strategy as FacebookStrategy, type Profile as FacebookProfile } from 'passport-facebook';
 import { Strategy as GoogleStrategy, type Profile as GoogleProfile, type VerifyCallback as GoogleVerifyCallback } from 'passport-google-oauth20';
@@ -13,7 +14,7 @@ import { USERCONTENT_DIR } from './config.js';
 // Create system context for passport strategies
 const systemContext: ServiceContext = {
     deps: makeDeps(pool),
-    actor: { type: 'system' }
+    actor: { type: 'system', id: NIL_UUID }
 };
 
 passport.use(new GoogleStrategy({

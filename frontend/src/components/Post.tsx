@@ -58,7 +58,6 @@ export const Post = memo(({ post, onDeleted, onUpdated, onImageClick }: PostProp
     const [isDeleting, setIsDeleting] = useState(false);
     const [postDialogOpen, setPostDialogOpen] = useState(false);
     const [editPost, setEditPost] = useState<PostDTO | null>(null);
-    const user = useAuthStore(s => s.user);
     const navigate = useNavigate();
 
     const orientation = useMemo(() => {

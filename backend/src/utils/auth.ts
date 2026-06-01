@@ -5,6 +5,7 @@ import { makeDeps } from '@/infra/makeDeps.js';
 import type { ServiceContext } from '@/infra/serviceContext.js';
 import { createUserService } from '@/services/userService.js';
 import type { AuthorizedRequest } from '@/types/AuthorizedRequest.js';
+import { NIL_UUID } from '@shared/constants/uuid.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
 import type { Jwt, PayloadData } from '@shared/types/Jwt.js';
 import type { UserIdentity } from '@shared/types/UserIdentity.js';
@@ -19,7 +20,7 @@ const { JsonWebTokenError } = jwt;
 // Create system context for auth middleware
 const systemContext: ServiceContext = {
     deps: makeDeps(pool),
-    actor: { type: 'system' }
+    actor: { type: 'system', id: NIL_UUID }
 };
 
 export const currentUser = async (req: Request, res: Response, next: NextFunction) => {

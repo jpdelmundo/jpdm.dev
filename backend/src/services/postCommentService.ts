@@ -68,7 +68,7 @@ export const createPostCommentService = (ctx: ServiceContext) => {
         return deps.postCommentRepo.find(params);
     };
 
-    const enrich = async (items: PostComment[], options: { include?: string[] } = {}): Promise<PostCommentDTO[]> => {
+    const toDTO = async (items: PostComment[], options: { include?: string[] } = {}): Promise<PostCommentDTO[]> => {
         const { include } = options;
         const userIds = [...new Set(items.map(i => i.user_id))];
         const postIds = [...new Set(items.map(i => i.post_id))];
@@ -76,19 +76,19 @@ export const createPostCommentService = (ctx: ServiceContext) => {
 
         const users = await createUserService(ctx).get({ ids: userIds });
         const userProfiles = await userProfileSvc.get({ user_ids: userIds });
-        const userProfilesEnrinched = await userProfileSvc.enrich(userProfiles);
+        const userProfilesEnrinched = await userProfileSvc.toDTO(userProfiles);
 
         let posts: Post[] = [];
-        let enrichedPosts: PostDTO[] = [];
+        let postDTOs: PostDTO[] = [];
         if (include?.includes('post')) {
             const postSvc = createPostService(ctx);
             posts = await postSvc.get({ ids: postIds });
-            enrichedPosts = await postSvc.enrich(posts, { include: [] });
+            postDTOs = await postSvc.toDTO(posts, { include: [] });
         }
 
         const userMap = new Map(users.map(i => [i.id, i]));
         const userProfileMap = new Map(userProfilesEnrinched.map(i => [i.user_id, i]));
-        const postMap = new Map(enrichedPosts.map(i => [i.id, i]));
+        const postMap = new Map(postDTOs.map(i => [i.id, i]));
 
         const getDisplayName = (id: UserId) => {
             const userProfile = userProfileMap.get(id);
@@ -149,7 +149,7 @@ export const createPostCommentService = (ctx: ServiceContext) => {
     return {
         create,
         get,
-        enrich,
+        toDTO,
         update,
         delete: del
     };
