@@ -39,8 +39,7 @@ export const createPostImageService = (ctx: ServiceContext) => {
                 ...item,
                 url: url.pathname + url.search,
                 width: file?.width || 0,
-                height: file?.height || 0,
-                user_id: file?.user_id || ''
+                height: file?.height || 0
             });
         }
 

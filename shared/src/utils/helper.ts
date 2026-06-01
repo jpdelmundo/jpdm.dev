@@ -39,3 +39,21 @@ export const randomString = (length: number) => {
     const bytes = crypto.getRandomValues(new Uint8Array(Math.ceil(length / 2)));
     return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, length);
 }
+
+export const pick = <T extends object, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> => {
+    const result = {} as Pick<T, K>;
+    for (const key of keys) {
+        if (key in obj) {
+            result[key] = obj[key];
+        }
+    }
+    return result;
+}
+
+export const omit = <T extends object, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> => {
+    const result = { ...obj };
+    for (const key of keys) {
+        delete obj[key];
+    }
+    return result;
+}

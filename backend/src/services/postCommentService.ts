@@ -13,6 +13,7 @@ import { PostCommentSchema, type PostComment, type PostCommentId, type PostComme
 import type { UserId } from '@shared/models/generated/User.js';
 import { CommentStatus } from '@shared/types/CommentStatus.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
+import { omit } from '@shared/utils/helper.js';
 import z from 'zod';
 
 type CreateParams = PostCommentInitializer;
@@ -100,7 +101,8 @@ export const createPostCommentService = (ctx: ServiceContext) => {
         const result: PostCommentDTO[] = [];
         for (const item of items) {
             result.push({
-                ...item,
+                ...omit(item, ['user_id']),
+                is_owner: item.user_id === actor.id,
                 display_name: getDisplayName(item.user_id),
                 avatar_url: userProfileMap.get(item.user_id)?.avatar_url || '',
                 ...(include?.includes('post') && { post: postMap.get(item.post_id) as PostDTO })

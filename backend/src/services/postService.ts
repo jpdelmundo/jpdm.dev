@@ -17,7 +17,7 @@ import type { EnrichOptions } from '@shared/types/EnrichOptions.js';
 import { ErrorCode } from '@shared/types/ErrorCode.js';
 import { OrderDirection } from '@shared/types/OrderDirection.js';
 import { Visibility } from '@shared/types/Visibility.js';
-import { coercedBoolean } from '@shared/utils/helper.js';
+import { coercedBoolean, omit } from '@shared/utils/helper.js';
 import { createHash } from 'crypto';
 import { fileTypeFromFile } from 'file-type';
 import fs from 'fs';
@@ -93,7 +93,8 @@ export const createPostService = (ctx: ServiceContext) => {
         const result: PostDTO[] = [];
         for (const item of items) {
             result.push({
-                ...item,
+                ...omit(item, ['user_id']),
+                is_owner: item.user_id === actor.id,
                 display_name: getDisplayName(item.user_id),
                 avatar_url: userProfileMap.get(item.user_id)?.avatar_url || '',
                 is_liked: !!postLikesMap.get(item.id),
