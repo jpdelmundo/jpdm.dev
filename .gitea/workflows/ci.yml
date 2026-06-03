@@ -68,6 +68,10 @@ jobs:
             docker rm -f backend-migrate 2>/dev/null || true
             docker compose run --rm --name backend-migrate backend node dist/migrate.js
 
+            echo "Running database seeding..."
+            docker rm -f backend-seed 2>/dev/null || true
+            docker compose run --rm --name backend-seed backend node dist/seed.js
+
             echo "Starting containers..."
             docker compose up -d
 

@@ -53,7 +53,7 @@ export const pick = <T extends object, K extends keyof T>(obj: T, keys: K[]): Pi
 export const omit = <T extends object, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> => {
     const result = { ...obj };
     for (const key of keys) {
-        delete obj[key];
+        delete result[key];
     }
     return result;
 }

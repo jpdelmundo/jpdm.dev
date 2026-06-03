@@ -19,10 +19,6 @@ const app = express();
 const port = process.env.BACKEND_PORT;
 
 app.set('trust proxy', 2); //for cloudflare/proxy
-// app.use(cors({
-//   origin: CORS_ORIGINS === '*' ? (origin, callback) => { console.log({ origin }); return callback(null, origin ?? '*') } : CORS_ORIGINS.split(','),
-//   credentials: true
-// }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(currentUser);
@@ -58,7 +54,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 // }
 
 const server = http.createServer(app);
-server.listen(`${process.env.BACKEND_PORT}`, () => {
+server.listen(`${port}`, () => {
   console.log(`NODE_ENV is: ${process.env.NODE_ENV}`);
-  console.log(`Server is running at http://localhost:${process.env.BACKEND_PORT}`);
+  console.log(`Server is running at http://localhost:${port}`);
 });

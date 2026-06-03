@@ -11,6 +11,7 @@ export const createUserRouter = (appCtx: AppContext) => {
     const postController = createPostController(appCtx);
 
     //public
+    router.get('/default/posts', postController.getHomePosts); //default user, HOME_PAGE_USER env var
     router.get('/:id/posts', postController.getUserPublished); //:id = id or vanity_id
     router.get('/reset-password', controller.isResetPasswordTokenHashValid);
 

@@ -22,9 +22,9 @@ import { AppRoutes } from './routes.tsx';
 import { theme } from './themes/theme';
 
 dayjs.extend(isoWeek);
-if (import.meta.env.PROD) {
-  ReactGA.initialize(import.meta.env.VITE_GA_ID);
-}
+
+const GA_ID = import.meta.env.VITE_GA_ID;
+GA_ID && ReactGA.initialize(GA_ID);
 
 const SUPPORTED_LOCALE = ['en', 'ja', 'ko', 'zh'];
 const [adapterLocale] = navigator.language.split('-');
@@ -33,7 +33,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <BrowserRouter>
         <ScrollToTop />
-        <PageViewTracker />
+        {GA_ID && <PageViewTracker />}
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={SUPPORTED_LOCALE.includes(adapterLocale) ? adapterLocale : 'en'}>
           <Snackbar />
           <CssBaseline />

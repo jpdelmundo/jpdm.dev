@@ -8,6 +8,9 @@ export const botCheck = async (captchaToken: string) => {
 }
 
 export const verifyCaptcha = async (token: string) => {
+    const captchaKey = process.env.RECAPTCHAV3_SECRET_KEY;
+    if (!captchaKey) return { success: true, score: 1 };
+
     const captchaVerifyResponse = await fetch('https://www.google.com/recaptcha/api/siteverify', {
         method: 'post',
         headers: { 'content-type': 'application/x-www-form-urlencoded' },

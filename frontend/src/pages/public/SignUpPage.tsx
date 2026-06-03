@@ -17,24 +17,21 @@ import { useState } from 'react';
 import { GoogleReCaptchaProvider, useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { Link as RLink, useNavigate } from 'react-router-dom';
 
-function SignUpContent() {
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHAV3_SITE_KEY;
+
+function SignUpContent({ executeRecaptcha }: { executeRecaptcha?: (action: string) => Promise<string> }) {
     const [step, setStep] = useState<'create_user' | 'user_created' | 'add_email' | 'signed_up'>('create_user');
-    const { executeRecaptcha } = useGoogleReCaptcha();
     const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState('');
     const [email, setEmail] = useState('');
 
     const submit = async (formInput: FormInput): Promise<ApiResult<SignUpFormSubmitResult>> => {
-        //console.log({ formInput });
-
-        if (!executeRecaptcha) {
-            //console.log('Execute recaptcha not yet available');
-            return { ok: false, error: { message: 'Execute recaptcha not yet available' } };
+        if (executeRecaptcha) {
+            const token = await executeRecaptcha('sign_up');
+            return await apiPost<SignUpFormSubmitResult>('/users', { ...formInput, fp: jsonBase64Encode(getFingerprint()), token });
         }
 
-        const token = await executeRecaptcha('sign_up');
-        const res = await apiPost<SignUpFormSubmitResult>('/users', { ...formInput, fp: jsonBase64Encode(getFingerprint()), token });
-        return res; //return to show error message on form
+        return await apiPost<SignUpFormSubmitResult>('/users', { ...formInput, fp: jsonBase64Encode(getFingerprint()) });
     };
 
     const signUpSuccess = (result: ApiResult<SignUpFormSubmitResult>) => {
@@ -103,6 +100,11 @@ function SignUpContent() {
     </Paper>
 }
 
+export function SignUpContentWithCaptcha() {
+    const { executeRecaptcha } = useGoogleReCaptcha();
+    return <SignUpContent executeRecaptcha={executeRecaptcha} />;
+}
+
 export function SignUpPage() {
     return (
         <Box
@@ -114,9 +116,13 @@ export function SignUpPage() {
             mt={'60px'}
         >
             <Box>
-                <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHAV3_SITE_KEY}>
+                {RECAPTCHA_SITE_KEY ? (
+                    <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_SITE_KEY}>
+                        <SignUpContentWithCaptcha />
+                    </GoogleReCaptchaProvider>
+                ) : (
                     <SignUpContent />
-                </GoogleReCaptchaProvider>
+                )}
             </Box>
         </Box>
     );

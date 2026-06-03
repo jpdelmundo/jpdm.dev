@@ -1,3 +1,4 @@
+import { HOME_PAGE_USER } from '@/config/config.js';
 import type { AppContext } from '@/infra/appContext.js';
 import { bindContext } from '@/infra/bindContext.js';
 import { createPostImageService } from '@/services/postImageService.js';
@@ -22,6 +23,31 @@ export const createPostController = (app: AppContext) => {
     const makeCtx = bindContext(app);
 
     return {
+        getHomePosts: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
+            const { page_num } = req.query;
+            const ctx = makeCtx(req);
+            const userSvc = createUserService(ctx);
+            const postSvc = createPostService(ctx);
+
+            const user = await userSvc.findByUsername(HOME_PAGE_USER);
+            if (!user) return fail(res);
+
+            const user_id = user.id;
+            const result = await postSvc.get({
+                user_id,
+                visibility: 'public',
+                is_published: true,
+                page_num: page_num ? parseInt(String(page_num)) : 1,
+                page_size: 5,
+                order_by: 'created_at',
+                order_dir: 'desc'
+            });
+
+            return ok(res, {
+                ...result,
+                page_items: await postSvc.toDTO(result.page_items)
+            });
+        },
 
         getUserPublished: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
             const { page_num } = req.query;

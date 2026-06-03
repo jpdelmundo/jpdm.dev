@@ -1,0 +1,27 @@
+services:
+  litellm:
+    build:
+      context: .
+      dockerfile: Dockerfile.litellm
+    container_name: litellm
+    expose:
+      - "4000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-Postgres1@}@db:${POSTGRES_PORT:-5432}/litellm
+      LITELLM_LOG: INFO
+    volumes:
+      - ./litellm-init.sh:/app/litellm-init.sh
+      - ./litellm.yml:/app/config.yml
+    entrypoint: sh
+    command: >
+      -c "docker/prod_entrypoint.sh --config /app/config.yml --port 4000 &
+          sh /app/litellm-init.sh &&
+          wait"
+    networks:
+      - app-net
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy

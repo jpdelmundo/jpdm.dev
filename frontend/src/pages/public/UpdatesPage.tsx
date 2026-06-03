@@ -32,7 +32,7 @@ export const UpdatesPage = () => {
 
     const getData = async () => {
         setIsLoading(true);
-        const result = await apiGet<Paginated<PostDTO>>('/users/jp/posts', { page_num: 1 });
+        const result = await apiGet<Paginated<PostDTO>>('/users/default/posts', { page_num: 1 });
         setIsLoading(false);
         if (result.ok && result.data) {
             const { page_num, page_items, total, page_size } = result.data;
@@ -44,7 +44,7 @@ export const UpdatesPage = () => {
 
     const loadMore = async () => {
         setIsLoadMoreLoading(true);
-        const result = await apiGet<Paginated<PostDTO>>('/users/jp/posts', { page_num: pageNum + 1 });
+        const result = await apiGet<Paginated<PostDTO>>('/users/default/posts', { page_num: pageNum + 1 });
         setIsLoadMoreLoading(false);
         if (result.ok && result.data) {
             const { page_num, page_items, total, page_size } = result.data;

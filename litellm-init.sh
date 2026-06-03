@@ -1,7 +1,7 @@
 #!/bin/sh
-KEY_VALUE="${LITELLM_VIRTUAL_KEY}"
-MASTER_KEY="${LITELLM_MASTER_KEY}"
-PROXY_URL="${LITELLM_API_BASE_URL}"
+KEY_VALUE="${LITELLM_VIRTUAL_KEY:-sk-masterkey}"
+MASTER_KEY="${LITELLM_MASTER_KEY:-sk-virtualkey}"
+PROXY_URL="${LITELLM_API_BASE_URL:-http://localhost:4000}"
 
 while ! curl -s "$PROXY_URL/health" >/dev/null 2>&1; do
   echo "Waiting for LiteLLM..."

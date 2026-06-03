@@ -2,6 +2,10 @@ import type { Moderation } from "@shared/types/Moderation.js";
 import OpenAI from "openai";
 import { compress } from "./image.js";
 
+export const isAiModerationEnabled = () => {
+    return !!process.env.LITELLM_API_BASE_URL && !!process.env.LITELLM_VIRTUAL_KEY;
+}
+
 export const createLLm = () => {
     return new OpenAI({
         apiKey: process.env.LITELLM_VIRTUAL_KEY,
@@ -10,6 +14,8 @@ export const createLLm = () => {
 }
 
 export const moderateImage = async (filePath: string): Promise<Moderation | null> => {
+    if (!isAiModerationEnabled()) return { is_allowed: true, reason: '' };
+
     const compressed = await compress(filePath, { format: 'webp' });
     const base64Image = compressed.toString('base64');
 
@@ -66,6 +72,8 @@ Rules:
 };
 
 export const moderateComment = async (comment: string): Promise<Moderation | null> => {
+    if (!isAiModerationEnabled()) return { is_allowed: true, reason: '' };
+
     const llm = createLLm();
     const result = await llm.chat.completions.create({
         model: 'moderation-model',
@@ -102,6 +110,8 @@ Rules:
 };
 
 export const moderateName = async (name: string): Promise<Moderation | null> => {
+    if (!isAiModerationEnabled()) return { is_allowed: true, reason: '' };
+
     const llm = createLLm();
     const result = await llm.chat.completions.create({
         model: 'moderation-model',
@@ -134,6 +144,5 @@ Rules:
     });
 
     const content = result.choices[0]?.message.content?.trim();
-    console.log({ name, content });
     return content ? JSON.parse(content) : null;
 };

@@ -93,7 +93,7 @@ export const createPostService = (ctx: ServiceContext) => {
         const result: PostDTO[] = [];
         for (const item of items) {
             result.push({
-                ...omit(item, ['user_id', 'is_published']),
+                ...omit(item, ['user_id']),
                 is_owner: item.user_id === actor.id,
                 display_name: getDisplayName(item.user_id),
                 avatar_url: userProfileMap.get(item.user_id)?.avatar_url || '',

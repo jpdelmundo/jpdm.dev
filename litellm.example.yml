@@ -1,0 +1,22 @@
+# Copy or rename this file to litellm.yml
+# The project requires the 2 model names: moderation-model and vision-model
+# moderation-model = ai that moderates comments, username, etc
+# vision-model = ai that moderates image upload, avatar, etc
+model_list:
+  - model_name: moderation-model
+    litellm_params:
+      model: openai/gpt-5
+      api_key: (API key here or use: os.environ/OPENAI_API_KEY) # OPENAI_API_KEY value define in .env
+  
+  # - model_name: moderation-model
+  #   litellm_params:
+  #     model: deepseek/deepseek-chat
+  #     api_key: (API key here or use: os.environ/DEEPSEEK_API_KEY) # DEEPSEEK_API_KEY value define in .env
+
+  - model_name: vision-model
+    litellm_params:
+      model: groq/meta-llama/llama-4-scout-17b-16e-instruct
+      api_key: (API key here or use: os.environ/GROQ_API_KEY) # GROQ_API_KEY value define in .env
+
+general_settings:
+  telemetry: false

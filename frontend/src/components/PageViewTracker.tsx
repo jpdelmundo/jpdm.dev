@@ -6,7 +6,7 @@ export function PageViewTracker() {
     const location = useLocation();
 
     useEffect(() => {
-        ReactGA.send({ hitType: 'pageview', page: location.pathname + location.search });
+        import.meta.env.VITE_GA_ID && ReactGA.send({ hitType: 'pageview', page: location.pathname + location.search });
     }, [location]);
 
     return null;

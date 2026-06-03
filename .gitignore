@@ -35,3 +35,4 @@ usercontent/
 *.tsbuildinfo
 *.cpuprofile
 backend/db
+litellm.yml

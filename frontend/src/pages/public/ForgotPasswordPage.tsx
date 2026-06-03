@@ -11,24 +11,27 @@ type FormInput = {
     email?: string;
 };
 
-//needed because google recaptcha is throwing an error if this is in the same FC
-function CaptchaUser() {
-    const { executeRecaptcha } = useGoogleReCaptcha();
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHAV3_SITE_KEY;
 
+//needed because google recaptcha is throwing an error if this is in the same FC
+function ForgotPasswordContent({ executeRecaptcha }: { executeRecaptcha?: (action: string) => Promise<string> }) {
     const emailSubmit = async (formInput: FormInput): Promise<ApiResult<never>> => {
-        if (!executeRecaptcha) {
-            console.error('Execute recaptcha not yet available');
-            return { ok: false, error: { message: 'Execute recaptcha not yet available' } };
+        if (executeRecaptcha) {
+            const token = await executeRecaptcha('recover_account');
+            return await apiPost<never>('/users/recover-account', { ...formInput, token, fp: jsonBase64Encode(getFingerprint()) });
         }
 
-        const token = await executeRecaptcha('recover_account');
-        const res = await apiPost<never>('/users/recover-account', { ...formInput, token, fp: jsonBase64Encode(getFingerprint()) });
-        return res;
+        return await apiPost<never>('/users/recover-account', { ...formInput, fp: jsonBase64Encode(getFingerprint()) });
     }
 
     return <Paper sx={{ p: 6, maxWidth: 400, mx: 'auto' }}>
         <ForgotPasswordForm onEmailSubmit={emailSubmit} />
     </Paper>;
+}
+
+export function ForgotPasswordContentWithCaptcha() {
+    const { executeRecaptcha } = useGoogleReCaptcha();
+    return <ForgotPasswordContent executeRecaptcha={executeRecaptcha} />;
 }
 
 export function ForgotPasswordPage() {
@@ -41,9 +44,14 @@ export function ForgotPasswordPage() {
             height={'70vh'}
             mt={'60px'}
         >
-            <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHAV3_SITE_KEY}>
-                <CaptchaUser />
-            </GoogleReCaptchaProvider>
+            {RECAPTCHA_SITE_KEY ? (
+                <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_SITE_KEY}>
+                    <ForgotPasswordContentWithCaptcha />
+                </GoogleReCaptchaProvider>
+            ) : (
+                <ForgotPasswordContent />
+            )}
+
         </Box>
     );
 }
