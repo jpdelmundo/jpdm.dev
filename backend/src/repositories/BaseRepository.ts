@@ -1,3 +1,4 @@
+import { LOG_SQL } from '@/config/config.js';
 import { pool as sharedPool } from '@/infra/db.js';
 import { getFullQuery } from '@/infra/pgHelper.js';
 import type { Db } from '@/types/Db.js';
@@ -24,7 +25,7 @@ export abstract class BaseRepository<T extends QueryResultRow> {
 
     query<R extends QueryResultRow = T>(queryText: string, values?: unknown[]) {
         console.debug({ queryText, values });
-        if (process.env.LOG_SQL == '1') console.log('[SQL]', getFullQuery(queryText, values));
+        if (LOG_SQL == '1') console.log('[SQL]', getFullQuery(queryText, values));
         return this.db.query<R>(queryText, values);
     }
 

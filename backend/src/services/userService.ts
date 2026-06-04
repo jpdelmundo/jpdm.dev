@@ -1,3 +1,4 @@
+import { APP_URL, JWT_ACCESS_SECRET } from '@/config/config.js';
 import { ServiceError } from '@/errors/ServiceError.js';
 import type { ServiceContext } from '@/infra/serviceContext.js';
 import type { KeyValue } from '@/types/KeyValue.js';
@@ -333,7 +334,7 @@ export const createUserService = (ctx: ServiceContext) => {
             subject: 'Account Recovery',
             text: `Hi - You can reset your password using this link:
 
-${process.env.FRONTEND_BASE_URL}/reset-password/${token_hash}
+${APP_URL}/reset-password/${token_hash}
 
 Please disregard if you did not make this request.`
         });
@@ -538,7 +539,7 @@ The Support Team`
                     const user = await findById(userId);
                     if (password && !await bcrypt.compare(password, user?.password || '')) throw new ServiceError('Incorrect password', ErrorCode.INVALID_CREDENTIALS);
                     if (token) {
-                        const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as Jwt;
+                        const decoded = jwt.verify(token, JWT_ACCESS_SECRET) as Jwt;
                         if (!decoded.id || decoded.scope != 'delete_account') throw new ServiceError('Invalid delete token');
                         if (decoded.id != userId) throw new ServiceError('Unauthorized request', ErrorCode.NOT_ALLOWED);
                     }

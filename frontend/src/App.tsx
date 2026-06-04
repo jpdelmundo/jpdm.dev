@@ -11,6 +11,7 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import ReactGA from 'react-ga4';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthInitializer } from './auth/AuthInitializer';
+import { VITE_GA_ID } from './config';
 import { ConfirmDialog } from './components/ConfirmDialog';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { GlobalErrorHandler } from './components/GlobalErrorHandler';
@@ -23,8 +24,7 @@ import { theme } from './themes/theme';
 
 dayjs.extend(isoWeek);
 
-const GA_ID = import.meta.env.VITE_GA_ID;
-GA_ID && ReactGA.initialize(GA_ID);
+VITE_GA_ID && ReactGA.initialize(VITE_GA_ID);
 
 const SUPPORTED_LOCALE = ['en', 'ja', 'ko', 'zh'];
 const [adapterLocale] = navigator.language.split('-');
@@ -33,7 +33,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <BrowserRouter>
         <ScrollToTop />
-        {GA_ID && <PageViewTracker />}
+        {VITE_GA_ID && <PageViewTracker />}
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={SUPPORTED_LOCALE.includes(adapterLocale) ? adapterLocale : 'en'}>
           <Snackbar />
           <CssBaseline />

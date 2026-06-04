@@ -1,11 +1,12 @@
 import './env.js';
 //
+import { SEED_USER_PASSWORD, SEED_USER_USERNAME } from '@/config/config.js';
 import * as bcrypt from 'bcrypt';
 import { pool } from "./infra/db.js";
 
 async function seed() {
-    const seedUserUsername = process.env.SEED_USER_USERNAME;
-    const seedUserPassword = process.env.SEED_USER_PASSWORD || 'password';
+    const seedUserUsername = SEED_USER_USERNAME;
+    const seedUserPassword = SEED_USER_PASSWORD;
     if (!seedUserUsername) {
         console.log('No SEED_USER_USERNAME defined. Skipping seeding.');
         return;

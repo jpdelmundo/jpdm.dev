@@ -1,4 +1,5 @@
 import { apiPost } from '@/api/apiClient';
+import { VITE_RECAPTCHAV3_SITE_KEY } from '@/config';
 import { SignUpForm, type FormInput, type FormSubmitResult as SignUpFormSubmitResult } from '@/components/SignUpForm';
 import { UpdateEmailForm } from '@/components/UpdateEmailForm';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -17,7 +18,7 @@ import { useState } from 'react';
 import { GoogleReCaptchaProvider, useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { Link as RLink, useNavigate } from 'react-router-dom';
 
-const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHAV3_SITE_KEY;
+const RECAPTCHA_SITE_KEY = VITE_RECAPTCHAV3_SITE_KEY;
 
 function SignUpContent({ executeRecaptcha }: { executeRecaptcha?: (action: string) => Promise<string> }) {
     const [step, setStep] = useState<'create_user' | 'user_created' | 'add_email' | 'signed_up'>('create_user');

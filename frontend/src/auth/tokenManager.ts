@@ -1,3 +1,4 @@
+import { VITE_API_BASE_PATH } from '@/config';
 import type { AccessToken } from '@shared/types/AccessToken';
 import type { ApiResult } from '@shared/types/ApiResult';
 import { jsonBase64Encode } from '@shared/utils/encoding';
@@ -10,7 +11,7 @@ export const getNewToken = async (): Promise<AccessToken> => {
 
     refreshPromise = (async () => {
         try {
-            const basePath = import.meta.env.VITE_API_BASE_PATH;
+            const basePath = VITE_API_BASE_PATH;
             const fp = jsonBase64Encode(getFingerprint());
 
             const res = await fetch(`${basePath}/auth/refresh-token`, {

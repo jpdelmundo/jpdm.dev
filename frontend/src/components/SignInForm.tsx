@@ -1,5 +1,6 @@
 import facebookButtonImage from '@/assets/images/signin-facebook.svg';
 import googleButtonImage from '@/assets/images/signin-google.svg';
+import { VITE_API_BASE_PATH } from '@/config';
 import { useFormValidation, type ValidationRuleFunction } from '@/hooks/useFormValidation';
 import { getFingerprint } from '@/utils/device';
 import { fieldErrorProps, getErrorMessage } from '@/utils/helper';
@@ -88,11 +89,11 @@ export function SignInForm({ onSubmit, onSignInSuccess: onSignInSuccess }: {
                 <Stack gap={2}>
                     <Stack>
                         <Link
-                            href={`${import.meta.env.VITE_API_BASE_PATH}/auth/google?fp=${encodeURIComponent(jsonBase64Encode(getFingerprint()))}`}>
+                            href={`${VITE_API_BASE_PATH}/auth/google?fp=${encodeURIComponent(jsonBase64Encode(getFingerprint()))}`}>
                             <img src={googleButtonImage} style={{ width: '100%' }} alt="Sign In with Google" />
                         </Link>
                         <Link
-                            href={`${import.meta.env.VITE_API_BASE_PATH}/auth/facebook?fp=${encodeURIComponent(jsonBase64Encode(getFingerprint()))}`}>
+                            href={`${VITE_API_BASE_PATH}/auth/facebook?fp=${encodeURIComponent(jsonBase64Encode(getFingerprint()))}`}>
                             <img src={facebookButtonImage} style={{ width: '100%' }} alt="Sign In with Facebook" />
                         </Link>
                     </Stack>

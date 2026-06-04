@@ -1,4 +1,5 @@
 import { apiPost } from '@/api/apiClient';
+import { VITE_RECAPTCHAV3_SITE_KEY } from '@/config';
 import { ForgotPasswordForm } from '@/components/ForgotPasswordForm';
 import { getFingerprint } from '@/utils/device';
 import Box from '@mui/material/Box';
@@ -11,7 +12,7 @@ type FormInput = {
     email?: string;
 };
 
-const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHAV3_SITE_KEY;
+const RECAPTCHA_SITE_KEY = VITE_RECAPTCHAV3_SITE_KEY;
 
 //needed because google recaptcha is throwing an error if this is in the same FC
 function ForgotPasswordContent({ executeRecaptcha }: { executeRecaptcha?: (action: string) => Promise<string> }) {

@@ -1,4 +1,5 @@
 import { getNewToken, waitForRefreshIfNeeded } from '@/auth/tokenManager';
+import { VITE_API_BASE_PATH } from '@/config';
 import { useAuthStore } from '@/store/useAuthStore';
 import type { ApiErrorDetail, ApiResult } from '@shared/types/ApiResult';
 import { ErrorCode } from '@shared/types/ErrorCode';
@@ -26,7 +27,7 @@ type JsonValue = JsonPrimitive | JsonObject | JsonArray;
 type ApiRequestBody = JsonObject | FormData;
 type ApiGetParams = Record<string, string | number | boolean> | URLSearchParams;
 
-const basePath = import.meta.env.VITE_API_BASE_PATH;
+const basePath = VITE_API_BASE_PATH;
 
 const handleTokenInvalid = () => {
     useAuthStore.getState().clearToken();

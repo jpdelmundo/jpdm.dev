@@ -1,5 +1,6 @@
 import { apiPost } from '@/api/apiClient';
 import { getNewToken } from '@/auth/tokenManager';
+import { VITE_AUTH_SECURE_MODE } from '@/config';
 import { getFingerprint } from '@/utils/device';
 import type { AccessToken } from '@shared/types/AccessToken';
 import type { PayloadData } from '@shared/types/Jwt';
@@ -22,7 +23,7 @@ interface AuthState {
     signOutReason: string | null;
     mustChangePassword: boolean;
 }
-const SECURE_MODE = import.meta.env.VITE_AUTH_SECURE_MODE === 'true';
+const SECURE_MODE = VITE_AUTH_SECURE_MODE;
 
 const memoryStorage = () => {
     let token: AccessToken = null;

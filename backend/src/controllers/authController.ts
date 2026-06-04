@@ -1,3 +1,5 @@
+import { APP_URL } from '@/config/config.js';
+import { UnexpectedError } from '@/errors/UnexpectedError.js';
 import type { AppContext } from '@/infra/appContext.js';
 import { bindContext } from '@/infra/bindContext.js';
 import type { AuthorizedRequest } from '@/types/AuthorizedRequest.js';
@@ -8,8 +10,6 @@ import { jsonBase64Decode, jsonBase64Encode } from '@shared/utils/encoding.js';
 import type { Request, Response } from 'express';
 import type { NextFunction } from 'express-serve-static-core';
 import passport from 'passport';
-
-import { UnexpectedError } from '@/errors/UnexpectedError.js';
 import { type AuthenticateOptions as FacebookAuthenticateOptions } from 'passport-facebook';
 import { clearRefreshTokenCookie, createRefreshTokenCookie } from '../services/authService.js';
 import { createUserService } from '../services/userService.js';
@@ -169,7 +169,7 @@ export const createAuthController = (app: AppContext) => {
 
     const googleAuthCallback = async (req: Request, res: Response, next: NextFunction) => {
         const { state } = req.query;
-        const redirectUrl = new URL(`${process.env.FRONTEND_BASE_URL}/auth/callback`);
+        const redirectUrl = new URL(`${APP_URL}/auth/callback`);
         let intent: string | undefined, customData;
         passport.authenticate('google', { session: false }, async (err: Error, user: User, info: unknown) => {
             try {
@@ -193,7 +193,7 @@ export const createAuthController = (app: AppContext) => {
                             console.log({opener: window.opener});
                             window.opener.postMessage({
                                 token: '${token}'
-                            }, '${process.env.FRONTEND_BASE_URL}');
+                            }, '${APP_URL}');
                             window.close();
                         </script>`);
                     } catch (error) {
@@ -201,7 +201,7 @@ export const createAuthController = (app: AppContext) => {
                             console.log({opener: window.opener});
                             window.opener.postMessage({
                                 error: '${(error as Error).message}'
-                            }, '${process.env.FRONTEND_BASE_URL}');
+                            }, '${APP_URL}');
                             window.close();
                         </script>`);
                     }
@@ -241,7 +241,7 @@ export const createAuthController = (app: AppContext) => {
 
     const facebookAuthCallback = async (req: Request, res: Response, next: NextFunction) => {
         const { state } = req.query;
-        const redirectUrl = new URL(`${process.env.FRONTEND_BASE_URL}/auth/callback`);
+        const redirectUrl = new URL(`${APP_URL}/auth/callback`);
         let intent: string | undefined, customData;
         passport.authenticate('facebook', { session: false }, async (err: Error, user: User, info: unknown) => {
             try {
@@ -265,7 +265,7 @@ export const createAuthController = (app: AppContext) => {
                             console.log({opener: window.opener});
                             window.opener.postMessage({
                                 token: '${token}'
-                            }, '${process.env.FRONTEND_BASE_URL}');
+                            }, '${APP_URL}');
                             window.close();
                         </script>`);
                     } catch (error) {
@@ -273,7 +273,7 @@ export const createAuthController = (app: AppContext) => {
                             console.log({opener: window.opener});
                             window.opener.postMessage({
                                 error: '${(error as Error).message}'
-                            }, '${process.env.FRONTEND_BASE_URL}');
+                            }, '${APP_URL}');
                             window.close();
                         </script>`);
                     }

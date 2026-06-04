@@ -1,4 +1,5 @@
 import { apiDelete, apiGet } from '@/api/apiClient';
+import { VITE_API_BASE_PATH } from '@/config';
 import { Error } from '@/components/Error';
 import PasswordField from '@/components/PasswordField';
 import { PageLoading } from '@/components/skeleton/PageLoading';
@@ -84,7 +85,7 @@ export const AccountPage = () => {
                 setDeleteError(getErrorMessage(result));
             }
         } else if (data?.social_login) {
-            const authUrl = `${import.meta.env.VITE_API_BASE_PATH}/auth/${data?.social_login}?fp=${jsonBase64Encode(getFingerprint())}&intent=get_delete_token`;
+            const authUrl = `${VITE_API_BASE_PATH}/auth/${data?.social_login}?fp=${jsonBase64Encode(getFingerprint())}&intent=get_delete_token`;
             window.open(authUrl, 'reauth', 'width=500,height=600');
 
             window.addEventListener('message', async (event: MessageEvent<unknown>) => {

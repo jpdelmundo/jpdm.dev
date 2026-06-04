@@ -1,14 +1,12 @@
-import dotenv from 'dotenv';
+import { DEBUG, DEBUG_TRACE, LOG_DIR, LOG_FILE } from '@/config/config.js';
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
 
-dotenv.config();
-
-const logDir = process.env.LOG_DIR || '.';
-const logFile = process.env.LOG_FILE || 'app.log';
-const trace = process.env.DEBUG_TRACE === '1';
-const debug = process.env.DEBUG === '1';
+const logDir = LOG_DIR;
+const logFile = LOG_FILE;
+const trace = DEBUG_TRACE === '1';
+const debug = DEBUG === '1';
 
 if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir, { recursive: true });

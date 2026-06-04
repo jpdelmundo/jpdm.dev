@@ -1,13 +1,9 @@
-import './env.js';
-//do not remove this comment to prevent auto organize on save (@/env should be the first import)
 import { ErrorCode } from '@shared/types/ErrorCode.js';
 import cookieParser from 'cookie-parser';
-//import cors from 'cors';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import http from 'http';
 import passport from 'passport';
-import './config/config.js';
-import { USERCONTENT_DIR } from './config/config.js';
+import { BACKEND_PORT, USERCONTENT_DIR } from './config/config.js';
 import './config/passport.js';
 import { ServiceError } from './errors/ServiceError.js';
 import router from './router.js';
@@ -16,7 +12,6 @@ import { currentUser, verifySignedUrl } from './utils/auth.js';
 import './utils/logger.js';
 
 const app = express();
-const port = process.env.BACKEND_PORT;
 
 app.set('trust proxy', 2); //for cloudflare/proxy
 app.use(express.json());
@@ -54,7 +49,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 // }
 
 const server = http.createServer(app);
-server.listen(`${port}`, () => {
+server.listen(`${BACKEND_PORT}`, () => {
   console.log(`NODE_ENV is: ${process.env.NODE_ENV}`);
-  console.log(`Server is running at http://localhost:${port}`);
+  console.log(`Backend server is running at http://localhost:${BACKEND_PORT}`);
 });

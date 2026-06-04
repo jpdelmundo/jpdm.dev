@@ -1,13 +1,14 @@
+import { SMTP_HOST, SMTP_PASS, SMTP_PORT, SMTP_SECURE, SMTP_SERVER_NAME, SMTP_USER } from '@/config/config.js';
 import nodemailer from 'nodemailer';
 
 export const mail = async ({ from, to, subject, text }: { from: string, to: string, subject: string, text: string }) => {
-    const user = process.env.SMTP_USER;
-    const pass = process.env.SMTP_PASS;
-    const servername = process.env.SMTP_SERVER_NAME;
+    const user = SMTP_USER;
+    const pass = SMTP_PASS;
+    const servername = SMTP_SERVER_NAME;
     const auth = user && pass ? {
         auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS
+            user: user,
+            pass: pass
         }
     } : {};
     const tls = {
@@ -18,12 +19,12 @@ export const mail = async ({ from, to, subject, text }: { from: string, to: stri
     }
 
     try {
-        console.log(process.env.SMTP_HOST, process.env.SMTP_PORT);
+        console.log(SMTP_HOST, SMTP_PORT);
         const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: Number(process.env.SMTP_PORT),
-            //secure: process.env.SMTP_PORT === '465',
-            secure: process.env.SMTP_SECURE === 'true', //only true only if using port 465
+            host: SMTP_HOST as string,
+            port: Number(SMTP_PORT),
+            //secure: SMTP_PORT === '465',
+            secure: SMTP_SECURE === 'true', //only true only if using port 465
             ...auth,
             ...tls
         });

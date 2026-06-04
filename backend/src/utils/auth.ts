@@ -13,6 +13,7 @@ import crypto from 'crypto';
 import type { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import path from 'path';
+import { JWT_ACCESS_SECRET, SIGNED_URL_SECRET } from '@/config/config.js';
 import { ApiError } from './apiHelper.js';
 
 const { JsonWebTokenError } = jwt;
@@ -49,7 +50,7 @@ export const currentUser = async (req: Request, res: Response, next: NextFunctio
 }
 
 export const generateJwt = (payload: PayloadData) => {
-    return jwt.sign(payload, process.env.JWT_ACCESS_SECRET!, { expiresIn: '15m' });
+    return jwt.sign(payload, JWT_ACCESS_SECRET, { expiresIn: '15m' });
 }
 
 export const authRequired = async (req: Request, res: Response, next: NextFunction) => {
@@ -88,7 +89,7 @@ export const getJwtPayload = (req: Request) => {
     const token = authHeader.split(' ')[1];
     if (!token) return null;
     try {
-        const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as Jwt;
+        const decoded = jwt.verify(token, JWT_ACCESS_SECRET) as Jwt;
         //console.log({ decoded });
         if (!decoded.id) return null;
         return decoded;
@@ -121,5 +122,5 @@ export const verifySignedUrl = (req: Request, res: Response, next: NextFunction)
 }
 
 export const sign = (data: string) => {
-    return crypto.createHmac('sha256', process.env.SIGNED_URL_SECRET!).update(data).digest('hex');
+    return crypto.createHmac('sha256', SIGNED_URL_SECRET).update(data).digest('hex');
 }

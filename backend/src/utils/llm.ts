@@ -1,15 +1,16 @@
+import { LITELLM_API_BASE_URL, LITELLM_VIRTUAL_KEY } from "@/config/config.js";
 import type { Moderation } from "@shared/types/Moderation.js";
 import OpenAI from "openai";
 import { compress } from "./image.js";
 
 export const isAiModerationEnabled = () => {
-    return !!process.env.LITELLM_API_BASE_URL && !!process.env.LITELLM_VIRTUAL_KEY;
+    return !!LITELLM_API_BASE_URL && !!LITELLM_VIRTUAL_KEY;
 }
 
 export const createLLm = () => {
     return new OpenAI({
-        apiKey: process.env.LITELLM_VIRTUAL_KEY,
-        baseURL: process.env.LITELLM_API_BASE_URL
+        apiKey: LITELLM_VIRTUAL_KEY,
+        baseURL: LITELLM_API_BASE_URL
     });
 }
 
