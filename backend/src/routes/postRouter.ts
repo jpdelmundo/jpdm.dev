@@ -9,13 +9,13 @@ export const createPostRouter = (appCtx: AppContext) => {
     const postController = createPostController(appCtx);
     const postCommentController = createPostCommentController(appCtx);
 
-    //post comments
-    router.post('/:id/comments', authRequired, postCommentController.create);
-    router.get('/:id/comments', postCommentController.getPostComments);
-
     //opengraph handler
     router.get('/og/image/:id', postController.getOGImage);
     router.get('/og/:id{/:slug}', postController.getOG);
+
+    //post comments
+    router.post('/:id/comments', authRequired, postCommentController.create);
+    router.get('/:id/comments', postCommentController.getPostComments);
 
     //misc
     router.get('/:id{/:slug}', postController.getPost);
