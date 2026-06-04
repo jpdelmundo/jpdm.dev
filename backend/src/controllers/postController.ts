@@ -253,9 +253,9 @@ export const createPostController = (app: AppContext) => {
         //             return res.status(200).send(html.replace('<!-- OG_META -->', ogMeta));
         //         },
         getOG: async (req: Request<RouteParams>, res: Response): Promise<Response> => {
-            const { post_id } = req.params;
-            const postSvc = await createPostService(makeCtx(req));
-            const post = await postSvc.getById(post_id!);
+            const { id } = req.params;
+            const postSvc = createPostService(makeCtx(req));
+            const post = await postSvc.getById(id!);
             const [dto] = await postSvc.toDTO([post]);
             const file = fileURLToPath(new URL('../../../frontend/dist/index.html', import.meta.url));
             const html = readFileSync(file, { encoding: 'utf-8' });
@@ -277,9 +277,9 @@ export const createPostController = (app: AppContext) => {
         },
 
         getOGImage: async (req: Request<RouteParams>, res: Response): Promise<void> => {
-            const { post_id } = req.params;
-            const imageSvc = await createPostImageService(makeCtx(req));
-            const [image] = await imageSvc.get({ post_id });
+            const { id } = req.params;
+            const imageSvc = createPostImageService(makeCtx(req));
+            const [image] = await imageSvc.get({ id });
             const [dto] = (image ? await imageSvc.toDTO([image]) : []) as PostImageExtended[];
             const proto = req.headers['x-forwarded-proto'] ?? 'https';
             const host = req.headers['host'];
