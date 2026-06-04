@@ -11,7 +11,7 @@ export function UserProfileInitializer() {
         if (ready && user?.id) {
             fetchProfile(user.id);
         }
-    }, [user?.id]);
+    }, [ready, user?.id, fetchProfile]);
 
     return null;
 }

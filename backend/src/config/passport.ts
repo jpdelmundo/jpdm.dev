@@ -9,7 +9,7 @@ import passport from 'passport';
 import { Strategy as FacebookStrategy, type Profile as FacebookProfile } from 'passport-facebook';
 import { Strategy as GoogleStrategy, type Profile as GoogleProfile, type VerifyCallback as GoogleVerifyCallback } from 'passport-google-oauth20';
 import path from 'path';
-import { FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, USERCONTENT_DIR } from './config.js';
+import { APP_URL, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, USERCONTENT_DIR } from './config.js';
 
 // Create system context for passport strategies
 const systemContext: ServiceContext = {
@@ -21,7 +21,7 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
     passport.use(new GoogleStrategy({
         clientID: GOOGLE_CLIENT_ID,
         clientSecret: GOOGLE_CLIENT_SECRET,
-        callbackURL: `/api/auth/google/callback`
+        callbackURL: `${APP_URL}/api/auth/google/callback`
     }, async (accessToken: string, refreshToken: string, profile: GoogleProfile, done: GoogleVerifyCallback) => {
         try {
             if (!profile || !profile.emails?.[0]?.value) {
@@ -75,7 +75,7 @@ if (FACEBOOK_APP_ID && FACEBOOK_APP_SECRET) {
     passport.use(new FacebookStrategy({
         clientID: FACEBOOK_APP_ID,
         clientSecret: FACEBOOK_APP_SECRET,
-        callbackURL: `/api/auth/facebook/callback`,
+        callbackURL: `${APP_URL}/api/auth/facebook/callback`,
         profileFields: ['id', 'email', 'name', 'picture']
     }, async (accessToken: string, refreshToken: string, profile: FacebookProfile, done) => {
         try {
