@@ -2,7 +2,7 @@ services:
   frontend:
     container_name: frontend
     build:
-      context: contextPath
+      context: .
       dockerfile: Dockerfile
       target: frontend
     env_file:
