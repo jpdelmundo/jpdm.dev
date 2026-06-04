@@ -25,6 +25,7 @@ jobs:
             REPO_URL="https://$GITEA_USERNAME:$GITEA_TOKEN@git.jpdm.dev/jp/jpdm.dev.git"
             ENV_CONTENT="${{ secrets.ENV_CONTENT_PROD }}"
             VITE_CONTENT="${{ vars.VITE_CONTENT_PROD }}"
+            LITELLMYML_CONTENT="${{ vars.LITELLMYML_CONTENT }}"
 
             echo "Starting..."
             mkdir -p "$APP_DIR"
@@ -50,7 +51,9 @@ jobs:
             
             echo "$ENV_CONTENT" > .env
             chmod 600 .env
-            chown deploy:deploy .env            
+            chown deploy:deploy .env
+
+            echo "$LITELLMYML_CONTENT" > litellm.yml
 
             echo "Building images..."
             docker compose -f docker-compose.yml -f docker-compose.ai.yml build --no-cache
