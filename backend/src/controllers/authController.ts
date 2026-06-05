@@ -82,7 +82,7 @@ export const createAuthController = (app: AppContext) => {
         const refreshToken = await userSvc.getRefreshToken(refreshTokenId);
         if (!refreshToken?.id) throw new Error('Refresh token not found');
 
-        console.log({ refreshToken });
+        console.debug({ refreshToken });
         //check if refresh token not yet used or revoked
         if (refreshToken.is_used || refreshToken.is_revoked) {
             console.log('Refresh token used/revoked', { refreshToken });

@@ -3,7 +3,7 @@ import cookieParser from 'cookie-parser';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import http from 'http';
 import passport from 'passport';
-import { BACKEND_PORT, USERCONTENT_DIR } from './config/config.js';
+import { APP_URL, BACKEND_PORT, USERCONTENT_DIR } from './config/config.js';
 import './config/passport.js';
 import { ServiceError } from './errors/ServiceError.js';
 import router from './router.js';
@@ -52,4 +52,5 @@ const server = http.createServer(app);
 server.listen(`${BACKEND_PORT}`, () => {
   console.log(`NODE_ENV is: ${process.env.NODE_ENV}`);
   console.log(`Backend server is running at http://localhost:${BACKEND_PORT}`);
+  console.log(`Frontend is at ${APP_URL}`);
 });
