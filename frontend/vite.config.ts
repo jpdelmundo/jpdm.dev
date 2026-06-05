@@ -16,6 +16,8 @@ export default defineConfig(({ command, mode }) => {
       proxy: {
         '/api': BACKEND_BASE_URL,
         '/usercontent': BACKEND_BASE_URL,
+        '/sitemap.xml': BACKEND_BASE_URL,
+        '/robots.txt': BACKEND_BASE_URL
       }
     },
     plugins: [

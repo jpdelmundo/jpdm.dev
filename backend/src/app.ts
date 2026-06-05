@@ -6,8 +6,9 @@ import http from 'http';
 import passport from 'passport';
 import { APP_URL, BACKEND_PORT, USERCONTENT_DIR } from './config/config.js';
 import './config/passport.js';
+import { createSitemapController } from './controllers/sitemapController.js';
 import { ServiceError } from './errors/ServiceError.js';
-import router from './router.js';
+import router, { appCtx } from './router.js';
 import { ApiError, error } from './utils/apiHelper.js';
 import { currentUser, verifySignedUrl } from './utils/auth.js';
 import './utils/logger.js';
@@ -21,12 +22,17 @@ app.use(cookieParser());
 app.use(currentUser);
 app.use(passport.initialize());
 app.use('/usercontent', verifySignedUrl, express.static(USERCONTENT_DIR));
+
+const sitemapCtrl = createSitemapController(appCtx);
+app.get('/sitemap.xml', sitemapCtrl.sitemap);
+app.get('/robots.txt', sitemapCtrl.robots);
+
 app.use('/api', (req, res, next: NextFunction) => (res.locals.apiBasePath = '/api', next()), router);
 //app.use('/api/v2', (req, res, next: NextFunction) => (res.locals.apiBasePath = '/api/v2', next()), router);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   if (err instanceof ApiError && err.code === ErrorCode.TOKEN_EXPIRED) {
-    // Expected auth flow — token expired, client should refresh
+    // Expected auth flow token expired, client should refresh
     return error(res, err.message, err.code, err.data, err.status);
   }
   console.error('Server Error:', err);

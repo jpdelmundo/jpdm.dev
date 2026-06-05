@@ -25,4 +25,5 @@ router.use('/profile', createUserProfileRouter(appCtx));
 
 router.use('/admin/users', createAdminUsersRouter(appCtx));
 
+export { appCtx };
 export default router;
