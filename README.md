@@ -37,9 +37,9 @@ npm run dockerdev:up   # starts db + pgAdmin in Docker
 npm run dev            # starts backend + frontend with hot-reload
 ```
 
-| URL | Service |
+| URL (default config) | Service |
 |-----|---------|
-| http://localhost:8080 | Frontend (Vite dev server) |
+| https://localhost:8080 | Frontend (Vite dev server) |
 | http://localhost:3000 | Backend API |
 | http://localhost:5050 | pgAdmin |
 
