@@ -19,7 +19,7 @@ export const uploadHandler = multer({
             cb(null, tmpUploadDir);
         },
         filename: (req: Request, file: Express.Multer.File, cb: FilenameCallback) => {
-            cb(null, file.originalname);
+            cb(null, path.basename(file.originalname));
         }
     }),
     fileFilter(req, file, callback) {
