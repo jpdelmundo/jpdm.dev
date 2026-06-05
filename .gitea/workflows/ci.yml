@@ -55,28 +55,8 @@ jobs:
 
             echo "$LITELLMYML_CONTENT" > litellm.yml
 
-            echo "Building images..."
-            docker compose -f docker-compose.yml -f docker-compose.ai.yml build --no-cache
-            echo "Build completed"
-
-            echo "Starting up db for migrations..."
-            docker compose up -d db
-
-            until docker compose exec db pg_isready -U postgres -d jpdm > /dev/null 2>&1; do
-              echo "Waiting for database..."
-              sleep 1
-            done
-
-            echo "Running database migrations..."
-            docker rm -f backend-migrate 2>/dev/null || true
-            docker compose run --rm --name backend-migrate backend node dist/migrate.js
-
-            echo "Running database seeding..."
-            docker rm -f backend-seed 2>/dev/null || true
-            docker compose run --rm --name backend-seed backend node dist/seed.js
-
             echo "Starting containers..."
-            docker compose -f docker-compose.yml -f docker-compose.ai.yml up -d
+            docker compose -f docker-compose.yml -f docker-compose.ai.yml up -d --build
 
             echo "Checking status..."
             sleep 3
