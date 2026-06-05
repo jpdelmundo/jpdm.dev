@@ -240,11 +240,22 @@ export class PostRepository extends BaseRepository<Post> {
         let join = joins.join(' and ');
         join = join ? `and ${join}` : '';
 
-        //TODO check if valid IANA timezone (check pg timezone table)
-        const tz_clause = client_tz ? `at time zone '${String(client_tz).replace(/'/g, '')}'` : '';
+        let tz_clause = '';
+        if (client_tz) {
+            const { rows } = await this.query<{ name: string }>(
+                `select * from pg_timezone_names where name = $1`,
+                [client_tz]
+            );
+
+            if (rows.length > 0) {
+                tz_clause = `at time zone $${values.length + 1}`;
+                values.push(client_tz);
+            }
+        }
+
         const sql = `select
     date_trunc('day', pv.created_at ${tz_clause})::date date,
-    count(*)::int count
+    count(*) count
 from post_views pv
 join posts p on p.id = pv.post_id ${join}
 ${filter}
