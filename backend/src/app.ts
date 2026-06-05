@@ -1,5 +1,6 @@
 import { ErrorCode } from '@shared/types/ErrorCode.js';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import http from 'http';
 import passport from 'passport';
@@ -14,6 +15,7 @@ import './utils/logger.js';
 const app = express();
 
 app.set('trust proxy', 2); //for cloudflare/proxy
+app.use(cors({ origin: APP_URL, credentials: true, }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(currentUser);
