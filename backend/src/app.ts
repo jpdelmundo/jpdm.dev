@@ -2,7 +2,6 @@ import { ErrorCode } from '@shared/types/ErrorCode.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { type NextFunction, type Request, type Response } from 'express';
-import http from 'http';
 import passport from 'passport';
 import { APP_URL, BACKEND_PORT, USERCONTENT_DIR } from './config/config.js';
 import './config/passport.js';
@@ -56,8 +55,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 //   server = http.createServer(app);
 // }
 
-const server = http.createServer(app);
-server.listen(`${BACKEND_PORT}`, () => {
+app.listen(`${BACKEND_PORT}`, () => {
   console.log(`NODE_ENV is: ${process.env.NODE_ENV}`);
   console.log(`Backend server is running at http://localhost:${BACKEND_PORT}`);
   console.log(`Frontend is at ${APP_URL}`);

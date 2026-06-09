@@ -38,7 +38,7 @@ export const createSitemapController = (app: AppContext) => {
             const urls = [
                 ...staticPages.map(loc => ({
                     loc: `${APP_URL}${loc}`,
-                    lastmod: null as string | null,
+                    lastmod: null,
                 })),
                 ...posts.map((post) => ({
                     loc: `${APP_URL}/posts/${post.id}`,
