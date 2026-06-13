@@ -3,7 +3,7 @@
     "composite": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "target": "es2020",
+    "target": "esnext",
     "declaration": true,
     "declarationMap": true,
     "outDir": "dist",

@@ -28,7 +28,8 @@
     "migrate": "npm run migrate -w backend",
     "migrate:prod": "npm run migrate:prod -w backend",
     "seed": "npm run seed -w backend",
-    "seed:prod": "npm run seed:prod -w backend"
+    "seed:prod": "npm run seed:prod -w backend",
+    "typecheck": "tsc -b"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",
