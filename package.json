@@ -18,6 +18,8 @@
     "fe:bv": "npm run bv -w frontend",
     "dockerdev:up": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build",
     "dockerdev:down": "docker compose -f docker-compose.yml -f docker-compose.dev.yml down",
+    "dockerdevai:up": "docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.ai.yml up -d --build",
+    "dockerdevai:down": "docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.ai.yml down",
     "dev": "concurrently --prefix none \"npm run be:dev\" \"npm run fe:dev\"",
     "preview": "concurrently --prefix none \"npm run be:dev\" \"npm run fe:preview\"",
     "lint": "eslint .",
