@@ -31,6 +31,7 @@ const menuItems: MenuItem[] = [
     { label: 'Projects', to: '/projects', visible: true },
     { label: 'Homelab', to: '/homelab', visible: true },
     { label: 'About', to: '/about', visible: true },
+    { label: 'Contact', to: '/contact', visible: true },
     { label: 'Hire Me', to: '/services', visible: false },
 ];
 

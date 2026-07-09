@@ -7,6 +7,7 @@ import { Posts } from './pages/dashboard/Posts.tsx';
 import { Stats } from './pages/dashboard/Stats.tsx';
 import { AboutPage } from './pages/public/AboutPage.tsx';
 import { AuthCallbackPage } from './pages/public/AuthCallback';
+import { ContactPage } from './pages/public/ContactPage.tsx';
 import { ForgotPasswordPage } from './pages/public/ForgotPasswordPage';
 import { Home } from './pages/public/Home';
 import { HomelabPage } from './pages/public/HomelabPage.tsx';
@@ -32,6 +33,7 @@ const routes = [
             { path: 'auth/callback', element: <AuthCallbackPage /> },
             { path: 'signin', element: <SignInPage /> },
             { path: 'about', element: <AboutPage /> },
+            { path: 'contact', element: <ContactPage /> },
             { path: 'projects', element: <ProjectsPage /> },
             { path: 'homelab', element: <HomelabPage /> },
             { path: 'signup', element: <SignUpPage /> },

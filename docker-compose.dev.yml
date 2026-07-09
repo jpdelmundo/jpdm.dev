@@ -9,12 +9,7 @@ services:
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
 
-  litellm:
-    ports:
-      - "4000:4000"
-
   pgadmin:
-    container_name: pgadmin
     image: dpage/pgadmin4
     ports:
       - "5050:80"

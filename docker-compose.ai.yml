@@ -3,7 +3,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.litellm
-    container_name: litellm
     expose:
       - "4000"
     env_file:
