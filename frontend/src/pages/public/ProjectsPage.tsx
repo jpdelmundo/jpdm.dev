@@ -37,7 +37,7 @@ export function ProjectsPage() {
         padding: '20px',
         '&:hover': {
             '&>.MuiBox-root': {
-                'marginTop': '0px',
+                transform: 'translateY(0px)',
                 bgcolor: '#0f0f0fb6',
                 borderRadius: '10px',
             }
@@ -52,9 +52,9 @@ export function ProjectsPage() {
                 bgcolor: '#ff0037',
                 position: 'absolute',
                 inset: 0,
-                marginTop: '270px',
                 borderRadius: '0px',
                 cursor: 'pointer',
+                transform: 'translateY(270px)',
                 transition: 'all .5s cubic-bezier(0.22, 1, 0.36, 1)' //ease-out-quint
             }}>
             <Typography color="#ffffff" fontWeight={'bold'} fontSize={'25px'} mb="10px">{project.name}</Typography>
