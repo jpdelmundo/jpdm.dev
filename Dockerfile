@@ -1,5 +1,5 @@
 #base
-FROM node:24-alpine AS base
+FROM node:24.22.1-alpine AS base
 WORKDIR /app
 COPY package*.json ./
 COPY backend/package*.json ./backend/
@@ -16,7 +16,7 @@ FROM base AS builder
 RUN npm run build
 
 #prod deps
-FROM node:24-alpine AS deps
+FROM node:24.22.1-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
 COPY backend/package*.json ./backend/
@@ -25,7 +25,7 @@ RUN npm ci --omit=dev
 RUN npm run preload -w backend
 
 #production (backend)
-FROM node:24-alpine AS production
+FROM node:24.22.1-alpine AS production
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
